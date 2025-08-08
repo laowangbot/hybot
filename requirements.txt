@@ -3,7 +3,7 @@
 
 # python-telegram-bot 是主要的庫，用來創建和管理 Telegram 機器人。
 # 版本鎖定為 20.7 以確保穩定性。
-python-telegram-bot==20.7
+python-telegram-bot==22.3
 
 # requests 是一個常用的 HTTP 庫，可用於從外部 API 獲取資料。
 # 如果你的機器人需要從網路獲取資料，建議包含它。
@@ -13,3 +13,4 @@ requests
 # 雖然 Render 會直接提供環境變數，但這個庫在本地測試時很有用。
 # 可以選擇性地包含。
 python-dotenv
+
