@@ -1,0 +1,14 @@
+# 這是你專案的依賴清單。
+# Render 將使用此檔案來安裝你的機器人所需的所有庫。
+
+# python-telegram-bot 是主要的庫，用來創建和管理 Telegram 機器人。
+python-telegram-bot==20.8
+
+# requests 是一個常用的 HTTP 庫，可用於從外部 API 獲取資料。
+# 如果你的機器人需要從網路獲取資料，建議包含它。
+requests
+
+# python-dotenv 庫用於在本地開發時從 .env 文件讀取環境變數。
+# 雖然 Render 會直接提供環境變數，但這個庫在本地測試時很有用。
+# 可以選擇性地包含。
+python-dotenv
