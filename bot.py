@@ -5,7 +5,7 @@ from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandl
 
 # 1. 设置你的 Bot Token
 # 注意：出于安全考虑，强烈建议将 Token 存储在环境变量中，而不是直接写在代码里。
-BOT_TOKEN = '8142344692:AAFPENEblmZMa-0iS9iwzFsIeyeg11tp8GE' 
+BOT_TOKEN = '8142344692:AAHgq1MQjZ50K445Vh7WhWyopNVWiY1F4PI' 
 
 # 2. 启用日志记录，方便调试
 logging.basicConfig(
@@ -576,3 +576,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
