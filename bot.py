@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 from flask import Flask, request
@@ -61,12 +62,12 @@ LANGUAGES = {
         'download_ios': "苹果下载",
         'invite_title': "❤️邀请好友注册赚取奖金",
         'invite_message': "👉邀请您的好友，联系客服专员获取您的奖金!",
-        'invite_link_heading': "邀请链接 🔗",
+        'invite_link_heading': "邀请链接 �",
         'invite_link_qu': "趣体育（大陆用户）\nhttps://www.qu32.vip:30011/entry/register/?i_code=6944642",
         'invite_link_mk': "MK体育（全球用户）\nhttps://www.mk2001.com:9081/CHS",
         'language_selection': "请选择您的语言：",
         'lang_changed': "语言已成功切换！",
-        'welcome_to_sports': "欢迎来到 qu体育！",
+        'welcome_to_sports': "欢迎来到 quSports！",
         'official_group_handle': "官方群组： @quyuyule",
         'official_channel_handle': "官方频道： @qu337",
         'customer_service_handle': "官方客服： @maoyiyule",
@@ -374,7 +375,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_data[user_id] = 'zh-CN'
 
     new_welcome_text = (
-        f"� 嗨，{user.mention_html()}！欢迎来到趣体育⚽️MKsports。我是您的专属服务助手，请在下方选择您需要的服务。\n\n"
+        f"🎉 嗨，{user.mention_html()}！欢迎来到趣体育⚽️MKsports。我是您的专属服务助手，请在下方选择您需要的服务。\n\n"
         f"📢 招商频道： <a href='https://t.me/QTY18'>https://t.me/QTY18</a>\n"
         f"📢 推单频道： <a href='https://t.me/AISOUOO'>https://t.me/AISOUOO</a>\n\n"
         f"💬 官方客服：\n"
@@ -541,7 +542,7 @@ async def handle_text_messages(update: Update, context: ContextTypes.DEFAULT_TYP
         await message.reply_text(texts['main_menu_prompt'], reply_markup=get_main_menu_keyboard(user_id))
 
 # 20. 主函数：配置和运行机器人，使用 Webhook 模式
-def main():
+async def main():
     """启动机器人"""
     # 获取 Render 提供的 PORT 和 WEBHOOK_URL
     port = int(os.environ.get('PORT', 5000))
@@ -569,8 +570,9 @@ def main():
     # 仅为语言切换保留 CallbackQueryHandler
     application.add_handler(CallbackQueryHandler(handle_language_callback, pattern='^lang_'))
 
+    # 修正：将 main 函式设为 async，并在调动时加上 await
     # 设置 M 菜单中的命令
-    application.bot.set_my_commands([
+    await application.bot.set_my_commands([
         BotCommand("start", "启动机器人"),
         BotCommand("change_language", "切换语言"),
         BotCommand("self_register", "自助注册"),
@@ -590,5 +592,5 @@ def main():
     )
 
 if __name__ == "__main__":
-    main()
-
+    # 修正：使用 asyncio.run() 来运行 async main 函式
+    asyncio.run(main())
