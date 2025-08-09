@@ -48,13 +48,31 @@ BUTTON_EMOJIS = {
     'menu_download_app': '📱',
     'menu_change_lang': '🌐',
     'menu_self_register': '📝',
-    'menu_mainland_user': '🇨🇳',
+    'menu_mainland_user': '🇨�',
     'menu_overseas_user': '🌍',
 }
 
 # 4. 准备多语言文本
 LANGUAGES = {
     'zh-CN': {
+        # 新的 /start 命令欢迎信息
+        'start_welcome_html': """🎉 嗨，{user} ！欢迎来到 趣体育⚽️MKsports
+我是您的专属注册服务助手，请选择您需要的服务👇
+ 
+🔥 限时福利活动（30天）
+ 💎 活动期间 注册并充值成功
+ 🎁 即可获赠 价值 398 元 VIP 会员
+ 
+📢 招商频道
+ 👉 <a href="https://t.me/QTY18">https://t.me/QTY18</a>
+ 
+📢 推单频道
+ 👉 <a href="https://t.me/AISOUOO">https://t.me/AISOUOO</a>
+ 
+💬 官方客服
+ 1️⃣ <a href="https://t.me/QTY01">@QTY01</a>
+ 2️⃣ <a href="https://t.me/QTY15">@QTY15</a>
+ 3️⃣ <a href="https://t.me/QTY04">@QTY04</a>""",
         'welcome': "🎉 嗨，{user}！欢迎来到趣体育⚽️MKsports。我是您的专属注册服务助手，请在下方选择您需要的服务。\n\n",
         'main_menu_prompt': "请从主菜单中选择一个选项。",
         'menu_account_info': "注册账号",
@@ -124,6 +142,24 @@ LANGUAGES = {
         'welcome_text_html': "🎉 嗨，{user} ！欢迎来到 趣体育⚽️MKsports"
     },
     'en': {
+        # New welcome message for the /start command
+        'start_welcome_html': """🎉 Hey, {user}! Welcome to quSports⚽️MKsports
+I'm your exclusive registration service assistant. Please choose the service you need below👇
+ 
+🔥 Limited-Time Offer (30 days)
+ 💎 During the event, successfully register and top up
+ 🎁 You will receive a free VIP membership worth 398 CNY
+ 
+📢 Advertising Channel
+ 👉 <a href="https://t.me/QTY18">https://t.me/QTY18</a>
+ 
+📢 Promotion Channel
+ 👉 <a href="https://t.me/AISOUOO">https://t.me/AISOUOO</a>
+ 
+💬 Official Customer Service
+ 1️⃣ <a href="https://t.me/QTY01">@QTY01</a>
+ 2️⃣ <a href="https://t.me/QTY15">@QTY15</a>
+ 3️⃣ <a href="https://t.me/QTY04">@QTY04</a>""",
         'welcome': "Welcome to quSports {user}, click on the menu below to interact.",
         'main_menu_prompt': "Please select an option from the main menu.",
         'menu_account_info': "Register Account",
@@ -146,7 +182,7 @@ LANGUAGES = {
         'download_ios': "iOS Download",
         'invite_title': "Invite friends and earn money together!",
         'invite_message': "By inviting friends to register through your exclusive link, you can get rich rewards!",
-        'invite_link_heading': "Your invitation link  ",
+        'invite_link_heading': "Your invitation link  ",
         'invite_link_qu': "quSports (Mainland China Users)\nhttps://www.qu32.vip:30011/entry/register/?i_code=6944642",
         'invite_link_mk': "MK Sports (Global Users)\nhttps://www.mk2001.com:9081/CHS",
         'language_selection': "Please select your language:",
@@ -193,6 +229,24 @@ LANGUAGES = {
         'welcome_text_html': "🎉 Hey, {user}! Welcome to quSports⚽️MKsports"
     },
     'th': {
+        # New welcome message for the /start command
+        'start_welcome_html': """🎉 สวัสดีครับ/ค่ะ {user}! ยินดีต้อนรับสู่ quSports⚽️MKsports
+ฉันคือผู้ช่วยบริการลงทะเบียนพิเศษของคุณ กรุณาเลือกบริการที่คุณต้องการด้านล่าง👇
+ 
+🔥 โปรโมชั่นพิเศษ (30 วัน)
+ 💎 ในช่วงกิจกรรม ลงทะเบียนและเติมเงินสำเร็จ
+ 🎁 คุณจะได้รับสมาชิก VIP มูลค่า 398 หยวนฟรี
+ 
+📢 ช่องทางการโฆษณา
+ 👉 <a href="https://t.me/QTY18">https://t.me/QTY18</a>
+ 
+📢 ช่องทางโปรโมชั่น
+ 👉 <a href="https://t.me/AISOUOO">https://t.me/AISOUOO</a>
+ 
+💬 บริการลูกค้าอย่างเป็นทางการ
+ 1️⃣ <a href="https://t.me/QTY01">@QTY01</a>
+ 2️⃣ <a href="https://t.me/QTY15">@QTY15</a>
+ 3️⃣ <a href="https://t.me/QTY04">@QTY04</a>""",
         'welcome': "ยินดีต้อนรับสู่ quSports {user} คลิกที่เมนูด้านล่างเพื่อโต้ตอบ",
         'main_menu_prompt': "กรุณาเลือกตัวเลือกจากเมนูหลัก",
         'menu_account_info': "ลงทะเบียนบัญชี",
@@ -262,6 +316,24 @@ LANGUAGES = {
         'welcome_text_html': "🎉 สวัสดีครับ {user}! ยินดีต้อนรับสู่ quSports⚽️MKsports"
     },
     'vi': {
+        # New welcome message for the /start command
+        'start_welcome_html': """🎉 Chào mừng {user}! Chào mừng đến với quSports⚽️MKsports
+Tôi là trợ lý dịch vụ đăng ký độc quyền của bạn. Vui lòng chọn dịch vụ bạn cần dưới đây👇
+ 
+🔥 Ưu đãi có hạn (30 ngày)
+ 💎 Trong thời gian diễn ra sự kiện, đăng ký và nạp tiền thành công
+ 🎁 Bạn sẽ nhận được tư cách thành viên VIP trị giá 398 CNY miễn phí
+ 
+📢 Kênh quảng cáo
+ 👉 <a href="https://t.me/QTY18">https://t.me/QTY18</a>
+ 
+📢 Kênh khuyến mãi
+ 👉 <a href="https://t.me/AISOUOO">https://t.me/AISOUOO</a>
+ 
+💬 Dịch vụ khách hàng chính thức
+ 1️⃣ <a href="https://t.me/QTY01">@QTY01</a>
+ 2️⃣ <a href="https://t.me/QTY15">@QTY15</a>
+ 3️⃣ <a href="https://t.me/QTY04">@QTY04</a>""",
         'welcome': "Chào mừng đến với quSports {user}, nhấp vào menu bên dưới để tương tác.",
         'main_menu_prompt': "Vui lòng chọn một tùy chọn từ menu chính.",
         'menu_account_info': "Đăng ký tài khoản",
@@ -284,7 +356,7 @@ LANGUAGES = {
         'download_ios': "Tải iOS",
         'invite_title': "Mời bạn bè và kiếm tiền cùng nhau!",
         'invite_message': "Bằng cách mời bạn bè đăng ký thông qua liên kết độc quyền của bạn, bạn có thể nhận được phần thưởng phong phú!",
-        'invite_link_heading': "Liên kết mời  ",
+        'invite_link_heading': "Liên kết mời  ",
         'invite_link_qu': "quSports (người dùng Trung Quốc)\nhttps://www.qu32.vip:30011/entry/register/?i_code=6944642",
         'invite_link_mk': "MK Sports (người dùng toàn cầu)\nhttps://www.mk2001.com:9081/CHS",
         'language_selection': "Vui lòng chọn ngôn ngữ của bạn:",
@@ -343,7 +415,7 @@ def get_text(user_id: int, key: str) -> str:
 def get_language_keyboard() -> InlineKeyboardMarkup:
     """返回语言选择的内嵌键盘"""
     keyboard = [
-        [InlineKeyboardButton("简体中文�🇳", callback_data='lang_zh-CN')],
+        [InlineKeyboardButton("简体中文🇨🇳", callback_data='lang_zh-CN')],
         [InlineKeyboardButton("English 🇺🇸", callback_data='lang_en')],
         [InlineKeyboardButton("ไทย 🇹🇭", callback_data='lang_th')],
         [InlineKeyboardButton("Tiếng Việt 🇻🇳", callback_data='lang_vi')]
@@ -371,8 +443,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if user_id not in user_data:
         user_data[user_id] = 'zh-CN'
     
-    # 使用多语言字典中的 HTML 欢迎文本
-    welcome_text = get_text(user_id, 'welcome_text_html').format(user=user.mention_html())
+    # 使用更新后的多语言 HTML 欢迎文本
+    welcome_text = get_text(user_id, 'start_welcome_html').format(user=user.mention_html())
     
     # 移除回复键盘，因为现在主要通过蓝色菜单按钮进行交互
     await message.reply_html(
@@ -577,4 +649,3 @@ if __name__ == "__main__":
         print("未侦测到 WEBHOOK_URL 环境变量，将使用范例值进行本地测试。")
         os.environ['WEBHOOK_URL'] = 'http://localhost:5000'
     uvicorn.run(app, host="0.0.0.0", port=PORT)
-�
