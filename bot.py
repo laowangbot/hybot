@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 # 3. 定義遊戲的 URL 和客服句柄
 GAME_URL_QU = "https://www.qu32.vip:30011/entry/register/?i_code=6944642"
 GAME_URL_MK = "https://www.mk2001.com:9081/CHS"
-CS_HANDLE = "@maoyiyule"
+CS_HANDLE = "@QTY18"
 
 # 定義按鈕的表情符號
 BUTTON_EMOJIS = {
@@ -43,7 +43,7 @@ BUTTON_EMOJIS = {
 # 4. 準備多語言文本 (此處省略部分內容，與您提供的保持一致)
 LANGUAGES = {
     'zh-CN': {
-        'welcome': "欢迎来到 qu体育 {user}，点击下方菜单开始互动。",
+        'welcome': "欢迎来到 趣体育 {user}，点击下方菜单开始互动。",
         'main_menu_prompt': "请从主菜单中选择一个选项。",
         'menu_account_info': "注册账号",
         'menu_play_game': f"{BUTTON_EMOJIS['menu_play_game']}进入游戏",
