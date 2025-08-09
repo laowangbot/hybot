@@ -83,9 +83,9 @@ LANGUAGES = {
         'language_selection': "请选择您的语言：",
         'lang_changed': "语言已成功切换！",
         'welcome_to_sports': "欢迎来到 quSports！",
-        'official_group_handle': "官方群组： @quyuyule",
-        'official_channel_handle': "官方频道： @qu337",
-        'customer_service_handle': "官方客服： @maoyiyule",
+        'official_group_handle': "官方群组： @QTY18",
+        'official_channel_handle': "官方频道： @QTY18 ",
+        'customer_service_handle': "官方客服： @QTY01",
         'account_info_title': "我的账户",
         'member_id': "会员 ID： {user_id}",
         'member_account': "会员账号： {username}",
@@ -122,12 +122,12 @@ LANGUAGES = {
         'game_qu_name': "趣体育",
         'game_mk_name': "MK体育",
         'welcome_text_html': "🎉 嗨，{user}！欢迎来到趣体育⚽️MKsports。我是您的专属服务助手，请在下方选择您需要的服务。\n\n"
-                                 "📢 招商频道： <a href='https://t.me/QTY18'>https://t.me/QTY18</a>\n"
-                                 "📢 推单频道： <a href='https://t.me/AISOUOO'>https://t.me/AISOUOO</a>\n\n"
-                                 "💬 官方客服：\n"
-                                 "1️⃣ <a href='https://t.me/QTY01'>@QTY01</a>\n"
-                                 "2️⃣ <a href='https://t.me/QTY15'>@QTY15</a>\n"
-                                 "3️⃣ <a href='https://t.me/dongba222'>@dongba222</a>"
+                                     "📢 招商频道： <a href='https://t.me/QTY18'>https://t.me/QTY18</a>\n"
+                                     "📢 推单频道： <a href='https://t.me/AISOUOO'>https://t.me/AISOUOO</a>\n\n"
+                                     "💬 官方客服：\n"
+                                     "1️⃣ <a href='https://t.me/QTY01'>@QTY01</a>\n"
+                                     "2️⃣ <a href='https://t.me/QTY15'>@QTY15</a>\n"
+                                     "3️⃣ <a href='https://t.me/QTY04'>@QTY04</a>"
     },
     'en': {
         'welcome': "Welcome to quSports {user}, click on the menu below to interact.",
@@ -197,12 +197,12 @@ LANGUAGES = {
         'game_qu_name': "quSports",
         'game_mk_name': "MK Sports",
         'welcome_text_html': "🎉 Hey, {user}! Welcome to quSports⚽️MKsports. I'm your dedicated service assistant, please select the service you need below.\n\n"
-                                 "📢 Advertising Channel: <a href='https://t.me/QTY18'>https://t.me/QTY18</a>\n"
-                                 "📢 Promotion Channel: <a href='https://t.me/AISOUOO'>https://t.me/AISOUOO</a>\n\n"
-                                 "💬 Official Customer Service:\n"
-                                 "1️⃣ <a href='https://t.me/QTY01'>@QTY01</a>\n"
-                                 "2️⃣ <a href='https://t.me/QTY15'>@QTY15</a>\n"
-                                 "3️⃣ <a href='https://t.me/dongba222'>@dongba222</a>"
+                                     "📢 Advertising Channel: <a href='https://t.me/QTY18'>https://t.me/QTY18</a>\n"
+                                     "📢 Promotion Channel: <a href='https://t.me/AISOUOO'>https://t.me/AISOUOO</a>\n\n"
+                                     "💬 Official Customer Service:\n"
+                                     "1️⃣ <a href='https://t.me/QTY01'>@QTY01</a>\n"
+                                     "2️⃣ <a href='https://t.me/QTY15'>@QTY15</a>\n"
+                                     "3️⃣ <a href='https://t.me/QTY04'>@QTY04</a>"
     },
     'th': {
         'welcome': "ยินดีต้อนรับสู่ quSports {user} คลิกที่เมนูด้านล่างเพื่อโต้ตอบ",
@@ -272,12 +272,12 @@ LANGUAGES = {
         'game_qu_name': "quSports",
         'game_mk_name': "MK Sports",
         'welcome_text_html': "🎉 สวัสดีครับ {user}! ยินดีต้อนรับสู่ quSports⚽️MKsports. ผมคือผู้ช่วยบริการพิเศษของคุณ, กรุณาเลือกบริการที่คุณต้องการด้านล่าง\n\n"
-                                 "📢 ช่องทางการโฆษณา: <a href='https://t.me/QTY18'>https://t.me/QTY18</a>\n"
-                                 "📢 ช่องทางโปรโมชั่น: <a href='https://t.me/AISOUOO'>https://t.me/AISOUOO</a>\n\n"
-                                 "💬 บริการลูกค้าอย่างเป็นทางการ:\n"
-                                 "1️⃣ <a href='https://t.me/QTY01'>@QTY01</a>\n"
-                                 "2️⃣ <a href='https://t.me/QTY15'>@QTY15</a>\n"
-                                 "3️⃣ <a href='https://t.me/dongba222'>@dongba222</a>"
+                                     "📢 ช่องทางการโฆษณา: <a href='https://t.me/QTY18'>https://t.me/QTY18</a>\n"
+                                     "📢 ช่องทางโปรโมชั่น: <a href='https://t.me/AISOUOO'>https://t.me/AISOUOO</a>\n\n"
+                                     "💬 บริการลูกค้าอย่างเป็นทางการ:\n"
+                                     "1️⃣ <a href='https://t.me/QTY01'>@QTY01</a>\n"
+                                     "2️⃣ <a href='https://t.me/QTY15'>@QTY15</a>\n"
+                                     "3️⃣ <a href='https://t.me/QTY04'>@QTY04</a>"
     },
     'vi': {
         'welcome': "Chào mừng đến với quSports {user}, nhấp vào menu bên dưới để tương tác.",
@@ -347,12 +347,12 @@ LANGUAGES = {
         'game_qu_name': "quSports",
         'game_mk_name': "MK Sports",
         'welcome_text_html': "🎉 Chào mừng {user}！Chào mừng đến với quSports⚽️MKsports. Tôi là trợ lý dịch vụ độc quyền của bạn, vui lòng chọn dịch vụ bạn cần bên dưới.\n\n"
-                                 "📢 Kênh quảng cáo: <a href='https://t.me/QTY18'>https://t.me/QTY18</a>\n"
-                                 "📢 Kênh khuyến mãi: <a href='https://t.me/AISOUOO'>https://t.me/AISOUOO</a>\n\n"
-                                 "💬 Dịch vụ khách hàng chính thức:\n"
-                                 "1️⃣ <a href='https://t.me/QTY01'>@QTY01</a>\n"
-                                 "2️⃣ <a href='https://t.me/QTY15'>@QTY15</a>\n"
-                                 "3️⃣ <a href='https://t.me/dongba222'>@dongba222</a>"
+                                     "📢 Kênh quảng cáo: <a href='https://t.me/QTY18'>https://t.me/QTY18</a>\n"
+                                     "📢 Kênh khuyến mãi: <a href='https://t.me/AISOUOO'>https://t.me/AISOUOO</a>\n"
+                                     "💬 Dịch vụ khách hàng chính thức:\n"
+                                     "1️⃣ <a href='https://t.me/QTY01'>@QTY01</a>\n"
+                                     "2️⃣ <a href='https://t.me/QTY15'>@QTY15</a>\n"
+                                     "3️⃣ <a href='https://t.me/QTY04'>@QTY04</a>"
     }
 }
 
@@ -458,7 +458,7 @@ async def customer_service(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [InlineKeyboardButton(get_text(user_id, 'customer_specialist_1'), url='https://t.me/QTY01')],
         [InlineKeyboardButton(get_text(user_id, 'customer_specialist_2'), url='https://t.me/QTY15')],
-        [InlineKeyboardButton(get_text(user_id, 'customer_specialist_3'), url='https://t.me/dongba222')],
+        [InlineKeyboardButton(get_text(user_id, 'customer_specialist_3'), url='https://t.me/QTY04')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await message.reply_html(text=live_cs_title, reply_markup=reply_markup)
