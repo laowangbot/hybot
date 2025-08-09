@@ -7,8 +7,8 @@ import os
 from contextlib import asynccontextmanager
 from typing import Dict, Optional
 from fastapi import FastAPI, Request, Response
-from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton, BotCommand
-from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters, CallbackQueryHandler
+from telegram import Update, ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton, BotCommand
+from telegram.ext import Application, CommandHandler, ContextTypes, CallbackQueryHandler
 
 # 1. 设置 Bot Token 和 Webhook URL
 # 建议将这些值储存在环境变量中
@@ -55,7 +55,7 @@ BUTTON_EMOJIS = {
 # 4. 准备多语言文本
 LANGUAGES = {
     'zh-CN': {
-        'welcome': "🎉 嗨，{user}！欢迎来到趣体育⚽️MKsports。我是您的专属服务助手，请在下方选择您需要的服务。\n\n",
+        'welcome': "🎉 嗨，{user}！欢迎来到趣体育⚽️MKsports。我是您的专属注册服务助手，请在下方选择您需要的服务。\n\n",
         'main_menu_prompt': "请从主菜单中选择一个选项。",
         'menu_account_info': "注册账号",
         'menu_play_game': f"{BUTTON_EMOJIS['menu_play_game']}进入游戏",
@@ -121,7 +121,7 @@ LANGUAGES = {
         'download_app_mk_title': "MK体育",
         'game_qu_name': "趣体育",
         'game_mk_name': "MK体育",
-        'welcome_text_html': "🎉 嗨，{user}！欢迎来到趣体育⚽️MKsports。我是您的专属服务助手，请在下方选择您需要的服务。\n\n"
+        'welcome_text_html': "🎉 嗨，{user}！欢迎来到趣体育⚽️MKsports。我是您的专属注册服务助手，请在下方选择您需要的服务。\n\n"
                                      "📢 招商频道： <a href='https://t.me/QTY18'>https://t.me/QTY18</a>\n"
                                      "📢 推单频道： <a href='https://t.me/AISOUOO'>https://t.me/AISOUOO</a>\n\n"
                                      "💬 官方客服：\n"
@@ -273,7 +273,7 @@ LANGUAGES = {
         'game_mk_name': "MK Sports",
         'welcome_text_html': "🎉 สวัสดีครับ {user}! ยินดีต้อนรับสู่ quSports⚽️MKsports. ผมคือผู้ช่วยบริการพิเศษของคุณ, กรุณาเลือกบริการที่คุณต้องการด้านล่าง\n\n"
                                      "📢 ช่องทางการโฆษณา: <a href='https://t.me/QTY18'>https://t.me/QTY18</a>\n"
-                                     "📢 ช่องทางโปรโมชั่น: <a href='https://t.me/AISOUOO'>https://t.me/AISOUOO</a>\n\n"
+                                     "📢 ช่องทางโปรโมชั่น: <a href='https://t.me/AISOUOO'>https://t.me/AISOUOO</a>\n"
                                      "💬 บริการลูกค้าอย่างเป็นทางการ:\n"
                                      "1️⃣ <a href='https://t.me/QTY01'>@QTY01</a>\n"
                                      "2️⃣ <a href='https://t.me/QTY15'>@QTY15</a>\n"
@@ -356,34 +356,13 @@ LANGUAGES = {
     }
 }
 
-# 5. 储存用户语言设置的字典，并使用 Optional 进行类型提示
+# 5. 储存用户语言设置的字典
 user_data: Dict[int, str] = {}
 
 def get_text(user_id: int, key: str) -> str:
     """根据用户的语言设置获取相应的文本，如果找不到则使用默认中文"""
     lang_code = user_data.get(user_id, 'zh-CN')
     return LANGUAGES.get(lang_code, LANGUAGES['zh-CN']).get(key, key)
-
-def get_main_menu_keyboard(user_id: int) -> ReplyKeyboardMarkup:
-    """返回主菜单的键盘布局"""
-    keyboard = [
-        [
-            KeyboardButton(get_text(user_id, 'menu_change_lang')),
-            KeyboardButton(get_text(user_id, 'menu_self_register'))
-        ],
-        [
-            KeyboardButton(get_text(user_id, 'menu_mainland_user')),
-            KeyboardButton(get_text(user_id, 'menu_overseas_user'))
-        ],
-        [
-            KeyboardButton(get_text(user_id, 'menu_withdraw')), # 推单频道
-            KeyboardButton(get_text(user_id, 'menu_recharge')) # 招商频道
-        ],
-        [
-            KeyboardButton(get_text(user_id, 'menu_customer_service'))
-        ]
-    ]
-    return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=False)
 
 def get_language_keyboard() -> InlineKeyboardMarkup:
     """返回语言选择的内嵌键盘"""
@@ -419,14 +398,15 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # 使用多语言字典中的 HTML 欢迎文本
     welcome_text = get_text(user_id, 'welcome_text_html').format(user=user.mention_html())
     
+    # 移除回复键盘，因为现在主要通过蓝色菜单按钮进行交互
     await message.reply_html(
         welcome_text,
-        reply_markup=get_main_menu_keyboard(user_id)
+        reply_markup=ReplyKeyboardRemove()
     )
     logger.info(f"User {user.first_name} started the bot with language {user_data[user_id]}.")
 
 async def advertising_channel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """当用户点击“招商频道”按钮时调用"""
+    """当用户点击“招商频道”命令时调用"""
     message, user = get_message_and_user(update)
     if not message or not user: return
     user_id = user.id
@@ -438,7 +418,7 @@ async def advertising_channel_handler(update: Update, context: ContextTypes.DEFA
     await message.reply_text(text=prompt_text, reply_markup=reply_markup)
 
 async def promotion_channel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """当用户点击“推单频道”按钮时调用"""
+    """当用户点击“推单频道”命令时调用"""
     message, user = get_message_and_user(update)
     if not message or not user: return
     user_id = user.id
@@ -450,7 +430,7 @@ async def promotion_channel_handler(update: Update, context: ContextTypes.DEFAUL
     await message.reply_text(text=prompt_text, reply_markup=reply_markup)
 
 async def customer_service(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """当用户点击“人工客服”按钮时调用"""
+    """当用户点击“人工客服”命令时调用"""
     message, user = get_message_and_user(update)
     if not message or not user: return
     user_id = user.id
@@ -464,7 +444,7 @@ async def customer_service(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await message.reply_html(text=live_cs_title, reply_markup=reply_markup)
 
 async def change_language(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """当用户点击“切换语言”按钮或发送 /change_language 命令时调用"""
+    """当用户点击“切换语言”命令时调用"""
     message, user = get_message_and_user(update)
     if not message or not user: return
     user_id = user.id
@@ -474,7 +454,7 @@ async def change_language(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 async def self_register_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """当用户点击“自助注册”按钮时调用"""
+    """当用户点击“自助注册”命令时调用"""
     message, user = get_message_and_user(update)
     if not message or not user: return
     user_id = user.id
@@ -483,10 +463,10 @@ async def self_register_handler(update: Update, context: ContextTypes.DEFAULT_TY
     notice_text = get_text(user_id, 'register_info_download_notice')
     
     full_message = f"{welcome_text_html}\n{notice_text}"
-    await message.reply_html(text=full_message, reply_markup=get_main_menu_keyboard(user_id))
+    await message.reply_html(text=full_message)
 
 async def mainland_user_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """当用户点击“大陆用户”按钮时，发送注册链接"""
+    """当用户点击“大陆用户”命令时，发送注册链接"""
     message, user = get_message_and_user(update)
     if not message or not user: return
     user_id = user.id
@@ -498,7 +478,7 @@ async def mainland_user_handler(update: Update, context: ContextTypes.DEFAULT_TY
     await message.reply_text(text=get_text(user_id, 'register_info_notice_prompt'), reply_markup=reply_markup)
 
 async def overseas_user_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """当用户点击“海外用户”按钮时，发送注册链接"""
+    """当用户点击“海外用户”命令时，发送注册链接"""
     message, user = get_message_and_user(update)
     if not message or not user: return
     user_id = user.id
@@ -520,42 +500,15 @@ async def handle_language_callback(update: Update, context: ContextTypes.DEFAULT
     user_id = user.id
     language_code = query.data.split('_')[1]
     user_data[user_id] = language_code
+    # 语言切换成功后，移除回复键盘
     await query.message.reply_text(
         get_text(user_id, 'lang_changed'),
-        reply_markup=get_main_menu_keyboard(user_id)
+        reply_markup=ReplyKeyboardRemove()
     )
+    # 还可以再次发送欢迎消息，引导用户使用命令菜单
+    await start(update, context)
 
-async def handle_text_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """一个通用的消息处理器，根据按钮文本触发对应的处理器"""
-    message = update.message
-    if message is None or message.from_user is None or message.text is None:
-        logger.warning("接收到无效消息或无用户信息。")
-        return
-
-    user_id = message.from_user.id
-    text = message.text
-    lang_code = user_data.get(user_id, 'zh-CN')
-    texts = LANGUAGES[lang_code]
-    
-    # 根据用户点击的按钮文本来呼叫对应的处理器
-    if text == texts['menu_change_lang']:
-        await change_language(update, context)
-    elif text == texts['menu_self_register']:
-        await self_register_handler(update, context)
-    elif text == texts['menu_mainland_user']:
-        await mainland_user_handler(update, context)
-    elif text == texts['menu_overseas_user']:
-        await overseas_user_handler(update, context)
-    elif text == texts['menu_withdraw']:
-        await promotion_channel_handler(update, context)
-    elif text == texts['menu_recharge']:
-        await advertising_channel_handler(update, context)
-    elif text == texts['menu_customer_service']:
-        await customer_service(update, context)
-    else:
-        # 如果不是上面任何一个按钮，则返回主菜单
-        await message.reply_text(texts['main_menu_prompt'], reply_markup=get_main_menu_keyboard(user_id))
-
+# 删除了 handle_text_messages 函数，因为所有功能现在都由命令处理
 
 # --- FastAPI 和 Telegram.ext 整合的核心修改部分 ---
 
@@ -573,11 +526,16 @@ async def lifespan(app: FastAPI):
     # 建立 Telegram Application 实例
     application = Application.builder().token(BOT_TOKEN).build()
     
-    # 设置所有的处理器
-    # 避免重复注册，将所有按钮点击都统一由 MessageHandler 处理
+    # 设置所有的处理器，现在主要使用 CommandHandler
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("change_language", change_language))
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text_messages))
+    application.add_handler(CommandHandler("self_register", self_register_handler))
+    application.add_handler(CommandHandler("mainland_user", mainland_user_handler))
+    application.add_handler(CommandHandler("overseas_user", overseas_user_handler))
+    application.add_handler(CommandHandler("advertising_channel", advertising_channel_handler))
+    application.add_handler(CommandHandler("promotion_channel", promotion_channel_handler))
+    application.add_handler(CommandHandler("customer_service", customer_service))
+    # CallbackQueryHandler 不变，用于处理内嵌键盘
     application.add_handler(CallbackQueryHandler(handle_language_callback, pattern='^lang_'))
     logger.info("所有处理器已加载。")
 
@@ -585,6 +543,12 @@ async def lifespan(app: FastAPI):
     await application.bot.set_my_commands([
         BotCommand("start", "启动机器人"),
         BotCommand("change_language", "切换语言"),
+        BotCommand("self_register", "自助注册"),
+        BotCommand("mainland_user", "大陆用户注册"),
+        BotCommand("overseas_user", "海外用户注册"),
+        BotCommand("advertising_channel", "招商频道"),
+        BotCommand("promotion_channel", "推单频道"),
+        BotCommand("customer_service", "人工客服")
     ])
     logger.info("机器人命令已设置。")
 
