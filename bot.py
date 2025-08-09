@@ -1,13 +1,16 @@
-# bot.py - 修正後的 Telegram 機器人程式碼
+# bot.py - 修正後的 Telegram 機器人程式碼，使用 FastAPI 框架
 
 import asyncio
 import logging
 import os
+from fastapi import FastAPI, Request, Response
+import uvicorn
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton, BotCommand
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters, CallbackQueryHandler
 
 # 1. 設定 Bot Token 和 Webhook URL
 # 建議將這些值儲存在環境變數中
+# 這裡使用 os.environ.get 來安全地獲取變數
 BOT_TOKEN = os.environ.get('BOT_TOKEN', '8142344692:AAHgq1MQjZ50K445Vh7WhWyopNVWiY1F4PI')
 WEBHOOK_URL = os.environ.get('WEBHOOK_URL')
 
@@ -511,7 +514,15 @@ async def handle_text_messages(update: Update, context: ContextTypes.DEFAULT_TYP
     else:
         await message.reply_text(texts['main_menu_prompt'], reply_markup=get_main_menu_keyboard(user_id))
 
-# 修正後的 bot_setup 函式，用於在啟動前設定機器人命令
+# --- FastAPI 和 Telegram.ext 整合的核心修改部分 ---
+
+# 建立 FastAPI 應用程式
+app = FastAPI()
+
+# 建立 Telegram Application 實例
+application = Application.builder().token(BOT_TOKEN).build()
+
+# 設置 bot 命令
 async def bot_setup(application: Application):
     """執行一次性非同步任務，例如設定機器人命令"""
     await application.bot.set_my_commands([
@@ -526,40 +537,73 @@ async def bot_setup(application: Application):
     ])
     logger.info("機器人命令已設定。")
 
-# 修正後的主函數，使用同步方式啟動 Webhook
-def main() -> None:
-    """主程式入口，負責配置和啟動 Webhook 服務"""
+# 設置所有的處理器
+def setup_handlers(app: Application):
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("change_language", change_language))
+    app.add_handler(CommandHandler("self_register", self_register_handler))
+    app.add_handler(CommandHandler("mainland_user", mainland_user_handler))
+    app.add_handler(CommandHandler("overseas_user", overseas_user_handler))
+    app.add_handler(CommandHandler("advertising_channel", advertising_channel_handler))
+    app.add_handler(CommandHandler("promotion_channel", promotion_channel_handler))
+    app.add_handler(CommandHandler("customer_service", customer_service))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text_messages))
+    app.add_handler(CallbackQueryHandler(handle_language_callback, pattern='^lang_'))
+    logger.info("所有處理器已加載。")
+
+
+# Webhook 處理端點 (同時處理 GET 和 POST 請求)
+# 這就是解決 405 錯誤的關鍵！
+@app.get(f"/{BOT_TOKEN}")
+async def webhook_get():
+    """
+    處理來自 Keep-Alive 服務 (如 cron-job.org) 的 GET 請求。
+    簡單地返回 200 OK 狀態碼，讓服務知道伺服器正在運行。
+    """
+    return Response(status_code=200, content="Bot is running!")
+
+@app.post(f"/{BOT_TOKEN}")
+async def webhook_post(request: Request):
+    """
+    處理來自 Telegram 的 POST 請求。
+    接收 JSON 訊息並傳遞給 bot 應用程式處理。
+    """
+    try:
+        # 從 POST 請求中獲取 JSON 數據
+        update_json = await request.json()
+        update = Update.de_json(update_json, application.bot)
+        
+        # 將更新放入應用程式的處理隊列
+        await application.process_update(update)
+        
+        # 返回 200 OK，通知 Telegram API 訊息已成功接收
+        return Response(status_code=200)
+    except Exception as e:
+        logger.error(f"Error processing webhook request: {e}")
+        return Response(status_code=500)
+
+
+# 主程式入口，用於啟動服務
+if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
     url_path = BOT_TOKEN
-    
+
     if not WEBHOOK_URL:
-        logger.error("WEBHOOK_URL environment variable is not set. The bot cannot run in webhook mode.")
-        return
+        logger.error("WEBHOOK_URL 環境變數未設定。無法以 Webhook 模式運行。")
+        exit(1)
 
-    application = Application.builder().token(BOT_TOKEN).build()
+    # 在應用程式啟動前，初始化所有處理器
+    setup_handlers(application)
     
-    # 在啟動 Webhook 服務前，執行一次性設定任務
-    asyncio.run(bot_setup(application))
-
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler("change_language", change_language))
-    application.add_handler(CommandHandler("self_register", self_register_handler))
-    application.add_handler(CommandHandler("mainland_user", mainland_user_handler))
-    application.add_handler(CommandHandler("overseas_user", overseas_user_handler))
-    application.add_handler(CommandHandler("advertising_channel", advertising_channel_handler))
-    application.add_handler(CommandHandler("promotion_channel", promotion_channel_handler))
-    application.add_handler(CommandHandler("customer_service", customer_service))
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text_messages))
-    application.add_handler(CallbackQueryHandler(handle_language_callback, pattern='^lang_'))
-
-    # 使用 Webhook 模式運行機器人
-    # 注意：這個函式是阻塞的，它會一直運行 Webhook 服務
-    application.run_webhook(
-        listen="0.0.0.0",
-        port=port,
-        url_path=url_path,
-        webhook_url=f"{WEBHOOK_URL}/{url_path}"
-    )
-
-if __name__ == "__main__":
-    main()
+    # 設置 Webhook URL，這是一個必要的步驟
+    # 這裡使用一個非同步函數來執行一次性任務
+    async def set_webhook_url():
+        webhook_full_url = f"{WEBHOOK_URL}/{url_path}"
+        await application.bot.set_webhook(url=webhook_full_url)
+        logger.info(f"Webhook URL 已成功設定為: {webhook_full_url}")
+    
+    asyncio.run(set_webhook_url())
+    
+    # 啟動 FastAPI 服務
+    # 我們使用 uvicorn 來運行非同步的 FastAPI 應用程式
+    uvicorn.run(app, host="0.0.0.0", port=port)
