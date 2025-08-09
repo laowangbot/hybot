@@ -7,8 +7,8 @@ import os
 from contextlib import asynccontextmanager
 from typing import Dict, Optional
 from fastapi import FastAPI, Request, Response
-from telegram import Update, ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton, BotCommand
-from telegram.ext import Application, CommandHandler, ContextTypes, CallbackQueryHandler
+from telegram import Update, ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton, BotCommand, ReplyKeyboardMarkup, KeyboardButton
+from telegram.ext import Application, CommandHandler, ContextTypes, CallbackQueryHandler, MessageHandler, filters
 
 # 1. 设置 Bot Token 和 Webhook URL
 # 建议将这些值储存在环境变量中
@@ -48,7 +48,7 @@ BUTTON_EMOJIS = {
     'menu_download_app': '📱',
     'menu_change_lang': '🌐',
     'menu_self_register': '📝',
-    'menu_mainland_user': '🇨�',
+    'menu_mainland_user': '🇨🇳',
     'menu_overseas_user': '🌍',
 }
 
@@ -422,6 +422,24 @@ def get_language_keyboard() -> InlineKeyboardMarkup:
     ]
     return InlineKeyboardMarkup(keyboard)
 
+# 新增: 创建主菜单回复键盘
+def get_main_menu_keyboard(user_id: int) -> ReplyKeyboardMarkup:
+    """
+    根据用户的语言设置，创建并返回一个自定义的回复键盘。
+    """
+    lang_code = user_data.get(user_id, 'zh-CN')
+    texts = LANGUAGES.get(lang_code, LANGUAGES['zh-CN'])
+    
+    keyboard = [
+        [KeyboardButton(texts['menu_change_lang']), KeyboardButton(texts['menu_self_register'])],
+        [KeyboardButton(texts['menu_mainland_user']), KeyboardButton(texts['menu_overseas_user'])],
+        [KeyboardButton(texts['menu_recharge']), KeyboardButton(texts['menu_withdraw'])],
+        [KeyboardButton(texts['menu_customer_service'])]
+    ]
+    
+    return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=False)
+
+
 def get_message_and_user(update: Update):
     """从更新对象中提取消息和用户对象，并进行空值检查"""
     message = update.message
@@ -446,10 +464,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # 使用更新后的多语言 HTML 欢迎文本
     welcome_text = get_text(user_id, 'start_welcome_html').format(user=user.mention_html())
     
-    # 移除回复键盘，因为现在主要通过蓝色菜单按钮进行交互
+    # 修复: 移除 ReplyKeyboardRemove()，并发送自定义的回复键盘
     await message.reply_html(
         welcome_text,
-        reply_markup=ReplyKeyboardRemove()
+        reply_markup=get_main_menu_keyboard(user_id)
     )
     logger.info(f"User {user.first_name} started the bot with language {user_data[user_id]}.")
 
@@ -548,14 +566,43 @@ async def handle_language_callback(update: Update, context: ContextTypes.DEFAULT
     user_id = user.id
     language_code = query.data.split('_')[1]
     user_data[user_id] = language_code
-    # 语言切换成功后，移除回复键盘
+    # 修复: 移除 ReplyKeyboardRemove()，并再次发送欢迎消息，此时会带上新语言的回复键盘
     await query.message.reply_text(
-        get_text(user_id, 'lang_changed'),
-        reply_markup=ReplyKeyboardRemove()
+        get_text(user_id, 'lang_changed')
     )
-    # 还可以再次发送欢迎消息，引导用户使用命令菜单
     await start(update, context)
 
+# 新增: 处理来自回复键盘的文本消息
+async def handle_button_press(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    处理用户点击回复键盘按钮时发送的文本消息。
+    """
+    message, user = get_message_and_user(update)
+    if not message or not user: return
+
+    user_id = user.id
+    lang_code = user_data.get(user_id, 'zh-CN')
+    texts = LANGUAGES.get(lang_code, LANGUAGES['zh-CN'])
+    user_text = message.text
+
+    if user_text == texts['menu_change_lang']:
+        await change_language(update, context)
+    elif user_text == texts['menu_self_register']:
+        await self_register_handler(update, context)
+    elif user_text == texts['menu_mainland_user']:
+        await mainland_user_handler(update, context)
+    elif user_text == texts['menu_overseas_user']:
+        await overseas_user_handler(update, context)
+    elif user_text == texts['menu_recharge']: # "招商频道"
+        await advertising_channel_handler(update, context)
+    elif user_text == texts['menu_withdraw']: # "推单频道"
+        await promotion_channel_handler(update, context)
+    elif user_text == texts['menu_customer_service']:
+        await customer_service(update, context)
+    else:
+        # 如果不是按钮文本，可以回复一个通用消息或忽略
+        pass
+    
 # 删除了 handle_text_messages 函数，因为所有功能现在都由命令处理
 
 # --- FastAPI 和 Telegram.ext 整合的核心修改部分 ---
@@ -585,6 +632,9 @@ async def lifespan(app: FastAPI):
     application.add_handler(CommandHandler("customer_service", customer_service))
     # CallbackQueryHandler 不变，用于处理内嵌键盘
     application.add_handler(CallbackQueryHandler(handle_language_callback, pattern='^lang_'))
+    # 新增: 处理来自回复键盘的文本消息
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_button_press))
+
     logger.info("所有处理器已加载。")
 
     # 设置 bot 命令，用户可以在聊天界面中直接点击这些命令
