@@ -121,13 +121,7 @@ LANGUAGES = {
         'download_app_mk_title': "MK体育",
         'game_qu_name': "趣体育",
         'game_mk_name': "MK体育",
-        'welcome_text_html': "🎉 嗨，{user}！欢迎来到趣体育⚽️MKsports。我是您的专属注册服务助手，请在下方选择您需要的服务。\n\n"
-                                     "📢 招商频道： <a href='https://t.me/QTY18'>https://t.me/QTY18</a>\n"
-                                     "📢 推单频道： <a href='https://t.me/AISOUOO'>https://t.me/AISOUOO</a>\n\n"
-                                     "💬 官方客服：\n"
-                                     "1️⃣ <a href='https://t.me/QTY01'>@QTY01</a>\n"
-                                     "2️⃣ <a href='https://t.me/QTY15'>@QTY15</a>\n"
-                                     "3️⃣ <a href='https://t.me/QTY04'>@QTY04</a>"
+        'welcome_text_html': "🎉 嗨，{user} ！欢迎来到 趣体育⚽️MKsports"
     },
     'en': {
         'welcome': "Welcome to quSports {user}, click on the menu below to interact.",
@@ -152,7 +146,7 @@ LANGUAGES = {
         'download_ios': "iOS Download",
         'invite_title': "Invite friends and earn money together!",
         'invite_message': "By inviting friends to register through your exclusive link, you can get rich rewards!",
-        'invite_link_heading': "Your invitation link  ",
+        'invite_link_heading': "Your invitation link  ",
         'invite_link_qu': "quSports (Mainland China Users)\nhttps://www.qu32.vip:30011/entry/register/?i_code=6944642",
         'invite_link_mk': "MK Sports (Global Users)\nhttps://www.mk2001.com:9081/CHS",
         'language_selection': "Please select your language:",
@@ -196,13 +190,7 @@ LANGUAGES = {
         'download_app_mk_title': "MK Sports",
         'game_qu_name': "quSports",
         'game_mk_name': "MK Sports",
-        'welcome_text_html': "🎉 Hey, {user}! Welcome to quSports⚽️MKsports. I'm your dedicated service assistant, please select the service you need below.\n\n"
-                                     "📢 Advertising Channel: <a href='https://t.me/QTY18'>https://t.me/QTY18</a>\n"
-                                     "📢 Promotion Channel: <a href='https://t.me/AISOUOO'>https://t.me/AISOUOO</a>\n\n"
-                                     "💬 Official Customer Service:\n"
-                                     "1️⃣ <a href='https://t.me/QTY01'>@QTY01</a>\n"
-                                     "2️⃣ <a href='https://t.me/QTY15'>@QTY15</a>\n"
-                                     "3️⃣ <a href='https://t.me/QTY04'>@QTY04</a>"
+        'welcome_text_html': "🎉 Hey, {user}! Welcome to quSports⚽️MKsports"
     },
     'th': {
         'welcome': "ยินดีต้อนรับสู่ quSports {user} คลิกที่เมนูด้านล่างเพื่อโต้ตอบ",
@@ -271,13 +259,7 @@ LANGUAGES = {
         'download_app_mk_title': "MK Sports",
         'game_qu_name': "quSports",
         'game_mk_name': "MK Sports",
-        'welcome_text_html': "🎉 สวัสดีครับ {user}! ยินดีต้อนรับสู่ quSports⚽️MKsports. ผมคือผู้ช่วยบริการพิเศษของคุณ, กรุณาเลือกบริการที่คุณต้องการด้านล่าง\n\n"
-                                     "📢 ช่องทางการโฆษณา: <a href='https://t.me/QTY18'>https://t.me/QTY18</a>\n"
-                                     "📢 ช่องทางโปรโมชั่น: <a href='https://t.me/AISOUOO'>https://t.me/AISOUOO</a>\n"
-                                     "💬 บริการลูกค้าอย่างเป็นทางการ:\n"
-                                     "1️⃣ <a href='https://t.me/QTY01'>@QTY01</a>\n"
-                                     "2️⃣ <a href='https://t.me/QTY15'>@QTY15</a>\n"
-                                     "3️⃣ <a href='https://t.me/QTY04'>@QTY04</a>"
+        'welcome_text_html': "🎉 สวัสดีครับ {user}! ยินดีต้อนรับสู่ quSports⚽️MKsports"
     },
     'vi': {
         'welcome': "Chào mừng đến với quSports {user}, nhấp vào menu bên dưới để tương tác.",
@@ -302,7 +284,7 @@ LANGUAGES = {
         'download_ios': "Tải iOS",
         'invite_title': "Mời bạn bè và kiếm tiền cùng nhau!",
         'invite_message': "Bằng cách mời bạn bè đăng ký thông qua liên kết độc quyền của bạn, bạn có thể nhận được phần thưởng phong phú!",
-        'invite_link_heading': "Liên kết mời  ",
+        'invite_link_heading': "Liên kết mời  ",
         'invite_link_qu': "quSports (người dùng Trung Quốc)\nhttps://www.qu32.vip:30011/entry/register/?i_code=6944642",
         'invite_link_mk': "MK Sports (người dùng toàn cầu)\nhttps://www.mk2001.com:9081/CHS",
         'language_selection': "Vui lòng chọn ngôn ngữ của bạn:",
@@ -346,13 +328,7 @@ LANGUAGES = {
         'download_app_mk_title': "MK Sports",
         'game_qu_name': "quSports",
         'game_mk_name': "MK Sports",
-        'welcome_text_html': "🎉 Chào mừng {user}！Chào mừng đến với quSports⚽️MKsports. Tôi là trợ lý dịch vụ độc quyền của bạn, vui lòng chọn dịch vụ bạn cần bên dưới.\n\n"
-                                     "📢 Kênh quảng cáo: <a href='https://t.me/QTY18'>https://t.me/QTY18</a>\n"
-                                     "📢 Kênh khuyến mãi: <a href='https://t.me/AISOUOO'>https://t.me/AISOUOO</a>\n"
-                                     "💬 Dịch vụ khách hàng chính thức:\n"
-                                     "1️⃣ <a href='https://t.me/QTY01'>@QTY01</a>\n"
-                                     "2️⃣ <a href='https://t.me/QTY15'>@QTY15</a>\n"
-                                     "3️⃣ <a href='https://t.me/QTY04'>@QTY04</a>"
+        'welcome_text_html': "🎉 Chào mừng {user}！Chào mừng đến với quSports⚽️MKsports"
     }
 }
 
@@ -367,7 +343,7 @@ def get_text(user_id: int, key: str) -> str:
 def get_language_keyboard() -> InlineKeyboardMarkup:
     """返回语言选择的内嵌键盘"""
     keyboard = [
-        [InlineKeyboardButton("简体中文🇨🇳", callback_data='lang_zh-CN')],
+        [InlineKeyboardButton("简体中文�🇳", callback_data='lang_zh-CN')],
         [InlineKeyboardButton("English 🇺🇸", callback_data='lang_en')],
         [InlineKeyboardButton("ไทย 🇹🇭", callback_data='lang_th')],
         [InlineKeyboardButton("Tiếng Việt 🇻🇳", callback_data='lang_vi')]
@@ -601,3 +577,4 @@ if __name__ == "__main__":
         print("未侦测到 WEBHOOK_URL 环境变量，将使用范例值进行本地测试。")
         os.environ['WEBHOOK_URL'] = 'http://localhost:5000'
     uvicorn.run(app, host="0.0.0.0", port=PORT)
+�
