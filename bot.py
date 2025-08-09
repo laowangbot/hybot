@@ -1,34 +1,35 @@
-# bot.py - 修正後的 Telegram 機器人程式碼，使用 FastAPI 框架
+# bot.py - 修正後的 Telegram 機器人程式碼
 
 import asyncio
 import logging
 import os
-from fastapi import FastAPI, Request, Response
-import uvicorn
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton, BotCommand
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters, CallbackQueryHandler
 
-# 1. 設定 Bot Token 和 Webhook URL
-# 建議將這些值儲存在環境變數中
-BOT_TOKEN = os.environ.get('BOT_TOKEN', '8142344692:AAHgq1MQjZ50K445Vh7WhWyopNVWiY1F4PI')
-WEBHOOK_URL = os.environ.get('WEBHOOK_URL')
+# ==================== 1. 設定與配置 ====================
+# 建議將 BOT_TOKEN 和 WEBHOOK_URL 儲存在環境變數中，以確保安全性。
+# 在部署環境中，請務必設定這些環境變數。
+BOT_TOKEN = os.environ.get('BOT_TOKEN', 'YOUR_BOT_TOKEN_HERE') # 請替換為您的 Bot Token
+WEBHOOK_URL = os.environ.get('WEBHOOK_URL', 'YOUR_WEBHOOK_URL_HERE') # 請替換為您的 Webhook URL
 
-# 2. 啟用日誌記錄
+# 啟用日誌記錄
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
 logger = logging.getLogger(__name__)
 
-# 3. 定義遊戲的 URL 和客服句柄
+# 定義遊戲的 URL 和客服句柄
 GAME_URL_QU = "https://www.qu32.vip:30011/entry/register/?i_code=6944642"
 GAME_URL_MK = "https://www.mk2001.com:9081/CHS"
-CS_HANDLE = "@QTY18"
+CS_HANDLE = "@maoyiyule"
+AD_CHANNEL_URL = "https://t.me/QTY18"
+PROMO_CHANNEL_URL = "https://t.me/AISOUOO"
 
 # 定義按鈕的表情符號
 BUTTON_EMOJIS = {
     'menu_account_info': '🏠',
     'menu_play_game': '▶️',
-    'menu_advertising_channel': '👋',
+    'menu_advertising_channel': '📈',  # 為招商頻道新增表情符號
     'menu_promotion_channel': '📢',
     'menu_invite_friend': '🎁',
     'menu_customer_service': '👥',
@@ -39,79 +40,91 @@ BUTTON_EMOJIS = {
     'menu_overseas_user': '🌍',
 }
 
-# 4. 準備多語言文本 (此處省略部分內容，與您提供的保持一致)
+# ==================== 2. 多語言文本支援 ====================
+# 準備多語言文本字典
 LANGUAGES = {
     'zh-CN': {
-        'welcome': "欢迎来到 趣体育 {user}，点击下方菜单开始互动。",
-        'main_menu_prompt': "请从主菜单中选择一个选项。",
-        'menu_account_info': "注册账号",
-        'menu_play_game': f"{BUTTON_EMOJIS['menu_play_game']}进入游戏",
-        'menu_recharge': f"{BUTTON_EMOJIS['menu_advertising_channel']}招商频道",
-        'menu_withdraw': f"{BUTTON_EMOJIS['menu_promotion_channel']}推单频道",
-        'menu_invite_friend': f"{BUTTON_EMOJIS['menu_invite_friend']}邀请好友",
+        'welcome': "🎉 嗨，{user}！歡迎來到趣體育⚽️MKsports。我是您的專屬服務助手，請在下方選擇您需要的服務。\n\n"
+                   "📢 招商頻道： <a href='{ad_channel_url}'>{ad_channel_url}</a>\n"
+                   "📢 推單頻道： <a href='{promo_channel_url}'>{promo_channel_url}</a>\n\n"
+                   "💬 官方客服：\n"
+                   "1️⃣ <a href='https://t.me/QTY01'>@QTY01</a>\n"
+                   "2️⃣ <a href='https://t.me/QTY15'>@QTY15</a>\n"
+                   "3️⃣ <a href='https://t.me/dongba222'>@dongba222</a>",
+        'main_menu_prompt': "請從主菜單中選擇一個選項。",
+        'menu_account_info': "註冊帳號",
+        'menu_play_game': f"{BUTTON_EMOJIS['menu_play_game']}進入遊戲",
+        'menu_recharge': f"{BUTTON_EMOJIS['menu_advertising_channel']}招商頻道",
+        'menu_withdraw': f"{BUTTON_EMOJIS['menu_promotion_channel']}推單頻道",
+        'menu_invite_friend': f"{BUTTON_EMOJIS['menu_invite_friend']}邀請好友",
         'menu_customer_service': f"{BUTTON_EMOJIS['menu_customer_service']}人工客服",
-        'menu_download_app': f"{BUTTON_EMOJIS['menu_download_app']}下载APP",
+        'menu_download_app': f"{BUTTON_EMOJIS['menu_download_app']}下載APP",
         'menu_change_lang': f"{BUTTON_EMOJIS['menu_change_lang']}Language",
-        'menu_self_register': f"{BUTTON_EMOJIS['menu_self_register']}自助注册",
-        'menu_mainland_user': f"{BUTTON_EMOJIS['menu_mainland_user']}大陆用户",
-        'menu_overseas_user': f"{BUTTON_EMOJIS['menu_overseas_user']}海外用户",
-        'live_customer_service_title': "请点击以下客服专员联系：",
-        'customer_specialist_1': "客服专员一",
-        'customer_specialist_2': "客服专员二",
-        'customer_specialist_3': "客服专员三",
-        'download_app_info': "点击下方按钮下载应用程序：",
-        'download_android': "安卓下载",
-        'download_ios': "苹果下载",
-        'invite_title': "❤️邀请好友注册赚取奖金",
-        'invite_message': "👉邀请您的好友，联系客服专员获取您的奖金!",
-        'invite_link_heading': "邀请链接 🔗",
-        'invite_link_qu': "趣体育（大陆用户）\nhttps://www.qu32.vip:30011/entry/register/?i_code=6944642",
-        'invite_link_mk': "MK体育（全球用户）\nhttps://www.mk2001.com:9081/CHS",
-        'language_selection': "请选择您的语言：",
-        'lang_changed': "语言已成功切换！",
-        'welcome_to_sports': "欢迎来到 quSports！",
-        'official_group_handle': "官方群组： @quyuyule",
-        'official_channel_handle': "官方频道： @qu337",
+        'menu_self_register': f"{BUTTON_EMOJIS['menu_self_register']}自助註冊",
+        'menu_mainland_user': f"{BUTTON_EMOJIS['menu_mainland_user']}大陸用戶",
+        'menu_overseas_user': f"{BUTTON_EMOJIS['menu_overseas_user']}海外用戶",
+        'live_customer_service_title': "請點擊以下客服專員聯繫：",
+        'customer_specialist_1': "客服專員一",
+        'customer_specialist_2': "客服專員二",
+        'customer_specialist_3': "客服專員三",
+        'download_app_info': "點擊下方按鈕下載應用程式：",
+        'download_android': "安卓下載",
+        'download_ios': "蘋果下載",
+        'invite_title': "❤️邀請好友註冊賺取獎金",
+        'invite_message': "👉邀請您的好友，聯繫客服專員獲取您的獎金!",
+        'invite_link_heading': "邀請連結 🔗",
+        'invite_link_qu': "趣體育（大陸用戶）\nhttps://www.qu32.vip:30011/entry/register/?i_code=6944642",
+        'invite_link_mk': "MK體育（全球用戶）\nhttps://www.mk2001.com:9081/CHS",
+        'language_selection': "請選擇您的語言：",
+        'lang_changed': "語言已成功切換！",
+        'welcome_to_sports': "歡迎來到 quSports！",
+        'official_group_handle': "官方群組： @quyuyule",
+        'official_channel_handle': "官方頻道： @qu337",
         'customer_service_handle': "官方客服： @maoyiyule",
-        'account_info_title': "我的账户",
-        'member_id': "会员 ID： {user_id}",
-        'member_account': "会员账号： {username}",
-        'balance': "账户余额： {balance:.2f}CNY",
-        'vip_level': "会员等级： VIP{vip}",
-        'advertising_channel_prompt': "点击下方按钮进入招商频道：",
-        'promotion_channel_prompt': "点击下方按钮进入推单频道：",
-        'play_game_choice_prompt': "请选择您要进入的游戏：",
-        'register_info_title': "欢迎来到 趣体育⚽️MKsports",
-        'register_info_channel1': "招商频道",
-        'register_info_channel2': "推单频道",
+        'account_info_title': "我的帳戶",
+        'member_id': "會員 ID： {user_id}",
+        'member_account': "會員帳號： {username}",
+        'balance': "帳戶餘額： {balance:.2f}CNY",
+        'vip_level': "會員等級： VIP{vip}",
+        'advertising_channel_prompt': "點擊下方按鈕進入招商頻道：",
+        'promotion_channel_prompt': "點擊下方按鈕進入推單頻道：",
+        'play_game_choice_prompt': "請選擇您要進入的遊戲：",
+        'register_info_title': "歡迎來到 趣體育⚽️MKsports",
+        'register_info_channel1': "招商頻道",
+        'register_info_channel2': "推單頻道",
         'register_info_cs1': "官方客服1",
         'register_info_cs2': "官方客服2",
         'register_info_cs3': "官方客服3",
-        'register_info_qu_link_text': "趣体育（大陆用户注册）",
-        'register_info_mk_link_text': "MK体育（全球用户）",
-        'register_info_notice_prompt': "请点击下方按钮前往注册：",
+        'register_info_qu_link_text': "趣體育（大陸用戶註冊）",
+        'register_info_mk_link_text': "MK體育（全球用戶）",
+        'register_info_notice_prompt': "請點擊下方按鈕前往註冊：",
         'register_info_download_notice': """
-        📝 <b>注册注意事项</b>
-        1️⃣ <b>请勿直接下载APP</b>
-        ‼<b>★ 重要提醒 ★</b>‼ 请先完成账号注册 → 由专员登记福利 → 再下载APP
+        📝 <b>註冊注意事項</b>
+        1️⃣ <b>請勿直接下載APP</b>
+        ‼<b>★ 重要提醒 ★</b>‼ 請先完成帳號註冊 → 由專員登記福利 → 再下載APP
 
-        2️⃣ <b>注册需使用实名信息</b>
-        我们是正规平台，为确保顺利提现，请务必使用真实姓名注册。
+        2️⃣ <b>註冊需使用實名信息</b>
+        我們是正規平台，為確保順利提現，請務必使用真實姓名註冊。
 
-        3️⃣ <b>手机号与实名一致</b>
-        注册手机号必须与实名信息相符。
+        3️⃣ <b>手機號與實名一致</b>
+        註冊手機號必須與實名信息相符。
 
-        4️⃣ <b>安卓APP无法打开</b>
-        如遇问题，请联系专员协助处理。
+        4️⃣ <b>安卓APP無法打開</b>
+        如遇問題，請聯繫專員協助處理。
         """,
-        'download_app_qu_title': "趣体育",
-        'download_app_mk_title': "MK体育",
-        'game_qu_name': "趣体育",
-        'game_mk_name': "MK体育",
+        'download_app_qu_title': "趣體育",
+        'download_app_mk_title': "MK體育",
+        'game_qu_name': "趣體育",
+        'game_mk_name': "MK體育",
     },
     'en': {
-        # 英文文本...
-        'welcome': "Welcome to quSports {user}, click on the menu below to interact.",
+        'welcome': "Welcome to quSports⚽️MKsports {user}!\n\n"
+                   "📢 Advertising Channel: <a href='{ad_channel_url}'>{ad_channel_url}</a>\n"
+                   "📢 Promotion Channel: <a href='{promo_channel_url}'>{promo_channel_url}</a>\n\n"
+                   "💬 Official Customer Service:\n"
+                   "1️⃣ <a href='https://t.me/QTY01'>@QTY01</a>\n"
+                   "2️⃣ <a href='https://t.me/QTY15'>@QTY15</a>\n"
+                   "3️⃣ <a href='https://t.me/dongba222'>@dongba222</a>",
         'main_menu_prompt': "Please select an option from the main menu.",
         'menu_account_info': "Register Account",
         'menu_play_game': f"{BUTTON_EMOJIS['menu_play_game']}Play Game",
@@ -133,7 +146,7 @@ LANGUAGES = {
         'download_ios': "iOS Download",
         'invite_title': "Invite friends and earn money together!",
         'invite_message': "By inviting friends to register through your exclusive link, you can get rich rewards!",
-        'invite_link_heading': "Your invitation link  ",
+        'invite_link_heading': "Your invitation link  ",
         'invite_link_qu': "quSports (Mainland China Users)\nhttps://www.qu32.vip:30011/entry/register/?i_code=6944642",
         'invite_link_mk': "MK Sports (Global Users)\nhttps://www.mk2001.com:9081/CHS",
         'language_selection': "Please select your language:",
@@ -179,8 +192,13 @@ LANGUAGES = {
         'game_mk_name': "MK Sports",
     },
     'th': {
-        # 泰文文本...
-        'welcome': "ยินดีต้อนรับสู่ quSports {user} คลิกที่เมนูด้านล่างเพื่อโต้ตอบ",
+        'welcome': "ยินดีต้อนรับสู่ quSports⚽️MKsports {user}!\n\n"
+                   "📢 ช่องทางการโฆษณา: <a href='{ad_channel_url}'>{ad_channel_url}</a>\n"
+                   "📢 ช่องทางโปรโมชั่น: <a href='{promo_channel_url}'>{promo_channel_url}</a>\n\n"
+                   "💬 บริการลูกค้าทางการ:\n"
+                   "1️⃣ <a href='https://t.me/QTY01'>@QTY01</a>\n"
+                   "2️⃣ <a href='https://t.me/QTY15'>@QTY15</a>\n"
+                   "3️⃣ <a href='https://t.me/dongba222'>@dongba222</a>",
         'main_menu_prompt': "กรุณาเลือกตัวเลือกจากเมนูหลัก",
         'menu_account_info': "ลงทะเบียนบัญชี",
         'menu_play_game': f"{BUTTON_EMOJIS['menu_play_game']}เข้าสู่เกม",
@@ -248,8 +266,13 @@ LANGUAGES = {
         'game_mk_name': "MK Sports",
     },
     'vi': {
-        # 越南文文本...
-        'welcome': "Chào mừng đến với quSports {user}, nhấp vào menu bên dưới để tương tác.",
+        'welcome': "Chào mừng đến với quSports⚽️MKsports {user}!\n\n"
+                   "📢 Kênh quảng cáo: <a href='{ad_channel_url}'>{ad_channel_url}</a>\n"
+                   "📢 Kênh khuyến mãi: <a href='{promo_channel_url}'>{promo_channel_url}</a>\n\n"
+                   "💬 Dịch vụ khách hàng chính thức:\n"
+                   "1️⃣ <a href='https://t.me/QTY01'>@QTY01</a>\n"
+                   "2️⃣ <a href='https://t.me/QTY15'>@QTY15</a>\n"
+                   "3️⃣ <a href='https://t.me/dongba222'>@dongba222</a>",
         'main_menu_prompt': "Vui lòng chọn một tùy chọn từ menu chính.",
         'menu_account_info': "Đăng ký tài khoản",
         'menu_play_game': f"{BUTTON_EMOJIS['menu_play_game']}Vào trò chơi",
@@ -271,7 +294,7 @@ LANGUAGES = {
         'download_ios': "Tải iOS",
         'invite_title': "Mời bạn bè và kiếm tiền cùng nhau!",
         'invite_message': "Bằng cách mời bạn bè đăng ký thông qua liên kết độc quyền của bạn, bạn có thể nhận được phần thưởng phong phú!",
-        'invite_link_heading': "Liên kết mời  ",
+        'invite_link_heading': "Liên kết mời  ",
         'invite_link_qu': "quSports (người dùng Trung Quốc)\nhttps://www.qu32.vip:30011/entry/register/?i_code=6944642",
         'invite_link_mk': "MK Sports (người dùng toàn cầu)\nhttps://www.mk2001.com:9081/CHS",
         'language_selection': "Vui lòng chọn ngôn ngữ của bạn:",
@@ -318,9 +341,10 @@ LANGUAGES = {
     }
 }
 
-# 5. 儲存用戶語言設定的字典
+# 儲存用戶語言設定的字典
 user_data = {}
 
+# ==================== 3. 輔助函數 ====================
 def get_text(user_id, key):
     """根據用戶的語言設定獲取相應的文本"""
     lang_code = user_data.get(user_id, 'zh-CN')
@@ -350,10 +374,10 @@ def get_main_menu_keyboard(user_id):
 def get_language_keyboard():
     """返回語言選擇的內嵌鍵盤"""
     keyboard = [
-        [InlineKeyboardButton("简体中文🇨🇳", callback_data='lang_zh-CN')],
+        [InlineKeyboardButton("简体中文�🇳", callback_data='lang_zh-CN')],
         [InlineKeyboardButton("English 🇺🇸", callback_data='lang_en')],
         [InlineKeyboardButton("ไทย 🇹🇭", callback_data='lang_th')],
-        [InlineKeyboardButton("Tiếng Việt 🇻 ", callback_data='lang_vi')]
+        [InlineKeyboardButton("Tiếng Việt 🇻🇳", callback_data='lang_vi')]
     ]
     return InlineKeyboardMarkup(keyboard)
 
@@ -365,24 +389,25 @@ def get_message_and_user(update: Update):
         return update.callback_query.message, update.effective_user
     return None, None
 
+# ==================== 4. 指令處理函數 ====================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """當用戶發送 /start 命令時調用"""
+    """當用戶發送 /start 命令時調用，初始化機器人並發送歡迎訊息"""
     user = update.effective_user
     logger.info(f"User {user.first_name} started the bot.")
     user_id = user.id
+    # 初始化用戶語言為中文 (zh-CN)
     if user_id not in user_data:
         user_data[user_id] = 'zh-CN'
-    new_welcome_text = (
-        f"🎉 嗨，{user.mention_html()}！歡迎來到趣體育⚽️MKsports。我是您的專屬服務助手，請在下方選擇您需要的服務。\n\n"
-        f"📢 招商頻道： <a href='https://t.me/QTY18'>https://t.me/QTY18</a>\n"
-        f"📢 推單頻道： <a href='https://t.me/AISOUOO'>https://t.me/AISOUOO</a>\n\n"
-        f"💬 官方客服：\n"
-        f"1️⃣ <a href='https://t.me/QTY01'>@QTY01</a>\n"
-        f"2️⃣ <a href='https://t.me/QTY15'>@QTY15</a>\n"
-        f"3️⃣ <a href='https://t.me/dongba222'>@dongba222</a>"
+    
+    # 修正：使用 get_text 函數來處理多語言歡迎訊息
+    welcome_message_text = get_text(user_id, 'welcome').format(
+        user=user.mention_html(),
+        ad_channel_url=AD_CHANNEL_URL,
+        promo_channel_url=PROMO_CHANNEL_URL
     )
+
     await update.message.reply_html(
-        new_welcome_text,
+        welcome_message_text,
         reply_markup=get_main_menu_keyboard(user_id)
     )
 
@@ -393,7 +418,7 @@ async def advertising_channel_handler(update: Update, context: ContextTypes.DEFA
     user_id = user.id
     prompt_text = get_text(user_id, 'advertising_channel_prompt')
     keyboard = [
-        [InlineKeyboardButton(get_text(user_id, 'menu_recharge'), url='https://t.me/QTY18')]
+        [InlineKeyboardButton(get_text(user_id, 'menu_recharge'), url=AD_CHANNEL_URL)]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await message.reply_text(text=prompt_text, reply_markup=reply_markup)
@@ -405,7 +430,7 @@ async def promotion_channel_handler(update: Update, context: ContextTypes.DEFAUL
     user_id = user.id
     prompt_text = get_text(user_id, 'promotion_channel_prompt')
     keyboard = [
-        [InlineKeyboardButton(get_text(user_id, 'menu_withdraw'), url='https://t.me/AISOUOO')]
+        [InlineKeyboardButton(get_text(user_id, 'menu_withdraw'), url=PROMO_CHANNEL_URL)]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await message.reply_text(text=prompt_text, reply_markup=reply_markup)
@@ -435,15 +460,15 @@ async def change_language(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 async def self_register_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """當用戶點擊「自助註冊」按鈕時調用"""
+    """當用戶點擊「自助註冊」按鈕時調用，發送註冊資訊和注意事項"""
     message, user = get_message_and_user(update)
     if not message or not user: return
     user_id = user.id
     message_text = get_text(user_id, 'register_info_download_notice')
     welcome_message = (
         f"🎉 <b>{get_text(user_id, 'register_info_title')}</b>\n\n"
-        f"📢 {get_text(user_id, 'register_info_channel1')}： <a href='https://t.me/QTY18'>https://t.me/QTY18</a>\n"
-        f"📢 {get_text(user_id, 'register_info_channel2')}： <a href='https://t.me/AISOUOO'>https://t.me/AISOUOO</a>\n\n"
+        f"📢 {get_text(user_id, 'register_info_channel1')}： <a href='{AD_CHANNEL_URL}'>{AD_CHANNEL_URL}</a>\n"
+        f"📢 {get_text(user_id, 'register_info_channel2')}： <a href='{PROMO_CHANNEL_URL}'>{PROMO_CHANNEL_URL}</a>\n\n"
         f"💬 <b>{get_text(user_id, 'menu_customer_service')}</b>：\n"
         f"1️⃣ <a href='https://t.me/QTY01'>@QTY01</a>\n"
         f"2️⃣ <a href='https://t.me/QTY15'>@QTY15</a>\n"
@@ -497,6 +522,7 @@ async def handle_text_messages(update: Update, context: ContextTypes.DEFAULT_TYP
     lang_code = user_data.get(user_id, 'zh-CN')
     texts = LANGUAGES[lang_code]
     
+    # 處理來自鍵盤的文字按鈕點擊
     if text == texts['menu_self_register']:
         await self_register_handler(update, context)
     elif text == texts['menu_mainland_user']:
@@ -512,36 +538,13 @@ async def handle_text_messages(update: Update, context: ContextTypes.DEFAULT_TYP
     elif text == texts['menu_change_lang']:
         await change_language(update, context)
     else:
+        # 如果不是預期的按鈕文本，則回覆主菜單提示
         await message.reply_text(texts['main_menu_prompt'], reply_markup=get_main_menu_keyboard(user_id))
 
-# --- FastAPI 和 Telegram.ext 整合的核心修改部分 ---
-
-# 建立 FastAPI 應用程式
-app = FastAPI()
-
-async def main():
-    """主非同步函數，負責設定和啟動機器人"""
-    if not WEBHOOK_URL:
-        logger.error("WEBHOOK_URL 環境變數未設定。無法以 Webhook 模式運行。")
-        return
-
-    # 建立 Telegram Application 實例
-    application = Application.builder().token(BOT_TOKEN).build()
-    
-    # 設置所有的處理器
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler("change_language", change_language))
-    application.add_handler(CommandHandler("self_register", self_register_handler))
-    application.add_handler(CommandHandler("mainland_user", mainland_user_handler))
-    application.add_handler(CommandHandler("overseas_user", overseas_user_handler))
-    application.add_handler(CommandHandler("advertising_channel", advertising_channel_handler))
-    application.add_handler(CommandHandler("promotion_channel", promotion_channel_handler))
-    application.add_handler(CommandHandler("customer_service", customer_service))
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text_messages))
-    application.add_handler(CallbackQueryHandler(handle_language_callback, pattern='^lang_'))
-    logger.info("所有處理器已加載。")
-
-    # 設定 bot 命令
+# ==================== 5. 啟動與主函數 ====================
+async def bot_setup(application: Application):
+    """執行一次性非同步任務，例如設定機器人命令"""
+    # 設定機器人在 Telegram 介面中的命令列表
     await application.bot.set_my_commands([
         BotCommand("start", "啟動機器人"),
         BotCommand("change_language", "切換語言"),
@@ -554,19 +557,45 @@ async def main():
     ])
     logger.info("機器人命令已設定。")
 
-    # 使用 ptb 內建的 run_webhook 方法，讓它來管理 FastAPI
+def main() -> None:
+    """主程式入口，負責配置和啟動 Webhook 服務"""
     port = int(os.environ.get('PORT', 5000))
-    await application.run_webhook(
+    url_path = BOT_TOKEN
+    
+    # 檢查是否已設定 WEBHOOK_URL
+    if not WEBHOOK_URL or WEBHOOK_URL == 'YOUR_WEBHOOK_URL_HERE':
+        logger.error("WEBHOOK_URL 環境變數未設定。機器人無法以 Webhook 模式運行。")
+        # 您可以在這裡選擇運行 polling 模式作為後備
+        # application.run_polling(drop_pending_updates=True)
+        return
+
+    application = Application.builder().token(BOT_TOKEN).build()
+    
+    # 在啟動 Webhook 服務前，執行一次性設定任務
+    asyncio.run(bot_setup(application))
+
+    # 新增處理程序
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("change_language", change_language))
+    application.add_handler(CommandHandler("self_register", self_register_handler))
+    application.add_handler(CommandHandler("mainland_user", mainland_user_handler))
+    application.add_handler(CommandHandler("overseas_user", overseas_user_handler))
+    application.add_handler(CommandHandler("advertising_channel", advertising_channel_handler))
+    application.add_handler(CommandHandler("promotion_channel", promotion_channel_handler))
+    application.add_handler(CommandHandler("customer_service", customer_service))
+    # 處理所有非命令的文字訊息，這主要用於處理鍵盤按鈕的點擊
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text_messages))
+    # 處理所有來自內嵌鍵盤的點擊，並根據 callback_data 觸發
+    application.add_handler(CallbackQueryHandler(handle_language_callback, pattern='^lang_'))
+
+    # 使用 Webhook 模式運行機器人
+    logger.info(f"啟動 Webhook 服務，監聽 port {port}...")
+    application.run_webhook(
         listen="0.0.0.0",
         port=port,
-        url_path=BOT_TOKEN,
-        webhook_url=f"{WEBHOOK_URL}/{BOT_TOKEN}",
-        on_startup=None, # on_startup 參數會在這裡被呼叫
-        on_shutdown=None, # on_shutdown 參數會在這裡被呼叫
-        webhook_uri=f"/{BOT_TOKEN}"
+        url_path=url_path,
+        webhook_url=f"{WEBHOOK_URL}/{url_path}"
     )
 
-# 主程式入口
 if __name__ == "__main__":
-    # 使用 asyncio.run 啟動主非同步函數
-    asyncio.run(main())
+    main()
