@@ -1,32 +1,32 @@
+# bot.py - 修正後的 Telegram 機器人程式碼
+
 import asyncio
 import logging
 import os
-from flask import Flask, request
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton, BotCommand
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters, CallbackQueryHandler
 
-# 1. 设置你的 Bot Token
-# 注意：强烈建议将 Token 存储在环境变量中，而不是直接写在代码里。
-# 如果你已经设置了环境变量，代码会优先使用它。
+# 1. 設定 Bot Token 和 Webhook URL
+# 建議將這些值儲存在環境變數中
 BOT_TOKEN = os.environ.get('BOT_TOKEN', '8142344692:AAHgq1MQjZ50K445Vh7WhWyopNVWiY1F4PI')
+WEBHOOK_URL = os.environ.get('WEBHOOK_URL')
 
-# 2. 启用日志记录，方便调试
+# 2. 啟用日誌記錄
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
 logger = logging.getLogger(__name__)
 
-# 3. 定义游戏的 URL
+# 3. 定義遊戲的 URL 和客服句柄
 GAME_URL_QU = "https://www.qu32.vip:30011/entry/register/?i_code=6944642"
 GAME_URL_MK = "https://www.mk2001.com:9081/CHS"
-# 定义官方客服的 Telegram 句柄
 CS_HANDLE = "@maoyiyule"
 
-# 定义按钮的表情符号
+# 定義按鈕的表情符號
 BUTTON_EMOJIS = {
     'menu_account_info': '🏠',
     'menu_play_game': '▶️',
-    'menu_advertising_channel': '📣',
+    'menu_advertising_channel': ' ',
     'menu_promotion_channel': '📢',
     'menu_invite_friend': '🎁',
     'menu_customer_service': '👥',
@@ -37,7 +37,7 @@ BUTTON_EMOJIS = {
     'menu_overseas_user': '🌍',
 }
 
-# 4. 准备多语言文本
+# 4. 準備多語言文本 (此處省略部分內容，與您提供的保持一致)
 LANGUAGES = {
     'zh-CN': {
         'welcome': "欢迎来到 qu体育 {user}，点击下方菜单开始互动。",
@@ -62,7 +62,7 @@ LANGUAGES = {
         'download_ios': "苹果下载",
         'invite_title': "❤️邀请好友注册赚取奖金",
         'invite_message': "👉邀请您的好友，联系客服专员获取您的奖金!",
-        'invite_link_heading': "邀请链接 �",
+        'invite_link_heading': "邀请链接 🔗",
         'invite_link_qu': "趣体育（大陆用户）\nhttps://www.qu32.vip:30011/entry/register/?i_code=6944642",
         'invite_link_mk': "MK体育（全球用户）\nhttps://www.mk2001.com:9081/CHS",
         'language_selection': "请选择您的语言：",
@@ -108,6 +108,7 @@ LANGUAGES = {
         'game_mk_name': "MK体育",
     },
     'en': {
+        # 英文文本...
         'welcome': "Welcome to quSports {user}, click on the menu below to interact.",
         'main_menu_prompt': "Please select an option from the main menu.",
         'menu_account_info': "Register Account",
@@ -176,6 +177,7 @@ LANGUAGES = {
         'game_mk_name': "MK Sports",
     },
     'th': {
+        # 泰文文本...
         'welcome': "ยินดีต้อนรับสู่ quSports {user} คลิกที่เมนูด้านล่างเพื่อโต้ตอบ",
         'main_menu_prompt': "กรุณาเลือกตัวเลือกจากเมนูหลัก",
         'menu_account_info': "ลงทะเบียนบัญชี",
@@ -244,6 +246,7 @@ LANGUAGES = {
         'game_mk_name': "MK Sports",
     },
     'vi': {
+        # 越南文文本...
         'welcome': "Chào mừng đến với quSports {user}, nhấp vào menu bên dưới để tương tác.",
         'main_menu_prompt': "Vui lòng chọn một tùy chọn từ menu chính.",
         'menu_account_info': "Đăng ký tài khoản",
@@ -313,18 +316,16 @@ LANGUAGES = {
     }
 }
 
-# 5. 建立一个字典来存储用户语言设置（这只是一个简单的示例，实际应用中应使用数据库）
+# 5. 儲存用戶語言設定的字典
 user_data = {}
 
-# 6. 根据用户的语言获取文本
 def get_text(user_id, key):
-    """根据用户的语言设置获取相应的文本"""
+    """根據用戶的語言設定獲取相應的文本"""
     lang_code = user_data.get(user_id, 'zh-CN')
     return LANGUAGES.get(lang_code, LANGUAGES['zh-CN']).get(key, key)
 
-# 7. 定义主菜单按钮 (常规键盘)
 def get_main_menu_keyboard(user_id):
-    """返回主菜单的键盘布局，根据用户的语言设置生成"""
+    """返回主選單的鍵盤佈局"""
     keyboard = [
         [
             KeyboardButton(get_text(user_id, 'menu_change_lang')),
@@ -335,8 +336,8 @@ def get_main_menu_keyboard(user_id):
             KeyboardButton(get_text(user_id, 'menu_overseas_user'))
         ],
         [
-            KeyboardButton(get_text(user_id, 'menu_recharge')), # 招商频道
-            KeyboardButton(get_text(user_id, 'menu_withdraw')) # 推单频道
+            KeyboardButton(get_text(user_id, 'menu_recharge')),
+            KeyboardButton(get_text(user_id, 'menu_withdraw'))
         ],
         [
             KeyboardButton(get_text(user_id, 'menu_customer_service'))
@@ -344,9 +345,8 @@ def get_main_menu_keyboard(user_id):
     ]
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=False)
 
-# 8. 定义语言选择菜单按钮 (内嵌键盘)
 def get_language_keyboard():
-    """返回语言选择的内嵌键盘"""
+    """返回語言選擇的內嵌鍵盤"""
     keyboard = [
         [InlineKeyboardButton("简体中文🇨🇳", callback_data='lang_zh-CN')],
         [InlineKeyboardButton("English 🇺🇸", callback_data='lang_en')],
@@ -355,43 +355,37 @@ def get_language_keyboard():
     ]
     return InlineKeyboardMarkup(keyboard)
 
-# 9. 辅助函数：处理不同类型的更新，获取消息和用户对象
 def get_message_and_user(update: Update):
-    """从更新对象中提取消息和用户对象，无论是来自消息还是回调查询"""
+    """從更新對象中提取消息和用戶對象"""
     if update.message:
         return update.message, update.effective_user
     elif update.callback_query and update.callback_query.message:
         return update.callback_query.message, update.effective_user
     return None, None
 
-# 10. 定义 /start 命令的处理器
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """当用户发送 /start 命令时调用"""
+    """當用戶發送 /start 命令時調用"""
     user = update.effective_user
     logger.info(f"User {user.first_name} started the bot.")
     user_id = user.id
-
     if user_id not in user_data:
         user_data[user_id] = 'zh-CN'
-
     new_welcome_text = (
-        f"🎉 嗨，{user.mention_html()}！欢迎来到趣体育⚽️MKsports。我是您的专属服务助手，请在下方选择您需要的服务。\n\n"
-        f"📢 招商频道： <a href='https://t.me/QTY18'>https://t.me/QTY18</a>\n"
-        f"📢 推单频道： <a href='https://t.me/AISOUOO'>https://t.me/AISOUOO</a>\n\n"
+        f"🎉 嗨，{user.mention_html()}！歡迎來到趣體育⚽️MKsports。我是您的專屬服務助手，請在下方選擇您需要的服務。\n\n"
+        f"📢 招商頻道： <a href='https://t.me/QTY18'>https://t.me/QTY18</a>\n"
+        f"📢 推單頻道： <a href='https://t.me/AISOUOO'>https://t.me/AISOUOO</a>\n\n"
         f"💬 官方客服：\n"
         f"1️⃣ <a href='https://t.me/QTY01'>@QTY01</a>\n"
         f"2️⃣ <a href='https://t.me/QTY15'>@QTY15</a>\n"
         f"3️⃣ <a href='https://t.me/dongba222'>@dongba222</a>"
     )
-
     await update.message.reply_html(
         new_welcome_text,
         reply_markup=get_main_menu_keyboard(user_id)
     )
 
-# 11. 定义「招商频道」按钮的处理器
 async def advertising_channel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """当用户点击「招商频道」按钮时调用"""
+    """當用戶點擊「招商頻道」按鈕時調用"""
     message, user = get_message_and_user(update)
     if not message or not user: return
     user_id = user.id
@@ -402,9 +396,8 @@ async def advertising_channel_handler(update: Update, context: ContextTypes.DEFA
     reply_markup = InlineKeyboardMarkup(keyboard)
     await message.reply_text(text=prompt_text, reply_markup=reply_markup)
 
-# 12. 定义「推单频道」按钮的处理器
 async def promotion_channel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """当用户点击「推单频道」按钮时调用"""
+    """當用戶點擊「推單頻道」按鈕時調用"""
     message, user = get_message_and_user(update)
     if not message or not user: return
     user_id = user.id
@@ -415,9 +408,8 @@ async def promotion_channel_handler(update: Update, context: ContextTypes.DEFAUL
     reply_markup = InlineKeyboardMarkup(keyboard)
     await message.reply_text(text=prompt_text, reply_markup=reply_markup)
 
-# 13. 定义「人工客服」按钮的处理器
 async def customer_service(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """当用户点击「人工客服」按钮时调用"""
+    """當用戶點擊「人工客服」按鈕時調用"""
     message, user = get_message_and_user(update)
     if not message or not user: return
     user_id = user.id
@@ -430,27 +422,22 @@ async def customer_service(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     await message.reply_html(text=live_cs_title, reply_markup=reply_markup)
 
-# 14. 定义「切换语言」按钮的处理器
 async def change_language(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """当用户点击「切换语言」按钮时调用"""
+    """當用戶點擊「切換語言」按鈕或發送 /change_language 命令時調用"""
     message, user = get_message_and_user(update)
     if not message or not user: return
     user_id = user.id
-
     await message.reply_text(
         get_text(user_id, 'language_selection'),
         reply_markup=get_language_keyboard()
     )
 
-# 15. 定义「自助注册」按钮的处理器
 async def self_register_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """当用户点击「自助注册」按钮时调用，发送新的注册信息"""
+    """當用戶點擊「自助註冊」按鈕時調用"""
     message, user = get_message_and_user(update)
     if not message or not user: return
     user_id = user.id
-
     message_text = get_text(user_id, 'register_info_download_notice')
-
     welcome_message = (
         f"🎉 <b>{get_text(user_id, 'register_info_title')}</b>\n\n"
         f"📢 {get_text(user_id, 'register_info_channel1')}： <a href='https://t.me/QTY18'>https://t.me/QTY18</a>\n"
@@ -460,46 +447,35 @@ async def self_register_handler(update: Update, context: ContextTypes.DEFAULT_TY
         f"2️⃣ <a href='https://t.me/QTY15'>@QTY15</a>\n"
         f"3️⃣ <a href='https://t.me/dongba222'>@dongba222</a>"
     )
-
     full_message = f"{welcome_message}\n{message_text}"
-
     await message.reply_html(text=full_message, reply_markup=get_main_menu_keyboard(user_id))
 
-# 16. 定义「大陆用户」按钮的处理器
 async def mainland_user_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """当用户点击「大陆用户」按钮时，发送一个可直接跳转趣体育注册页面的按钮"""
+    """當用戶點擊「大陸用戶」按鈕時，發送註冊連結"""
     message, user = get_message_and_user(update)
     if not message or not user: return
     user_id = user.id
-
     qu_link_text = get_text(user_id, 'register_info_qu_link_text')
-
     keyboard = [
         [InlineKeyboardButton(qu_link_text, url=GAME_URL_QU)]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-
     await message.reply_text(text=get_text(user_id, 'register_info_notice_prompt'), reply_markup=reply_markup)
 
-# 17. 定义「海外用户」按钮的处理器
 async def overseas_user_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """当用户点击「海外用户」按钮时，发送一个可直接跳转MK体育注册页面的按钮"""
+    """當用戶點擊「海外用戶」按鈕時，發送註冊連結"""
     message, user = get_message_and_user(update)
     if not message or not user: return
     user_id = user.id
-
     mk_link_text = get_text(user_id, 'register_info_mk_link_text')
-
     keyboard = [
         [InlineKeyboardButton(mk_link_text, url=GAME_URL_MK)]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-
     await message.reply_text(text=get_text(user_id, 'register_info_notice_prompt'), reply_markup=reply_markup)
 
-# 18. 定义内嵌按钮回调的处理器
 async def handle_language_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """处理内嵌键盘按钮点击事件"""
+    """處理語言選擇內嵌按鈕的點擊事件"""
     query = update.callback_query
     await query.answer()
     user = query.from_user
@@ -511,18 +487,13 @@ async def handle_language_callback(update: Update, context: ContextTypes.DEFAULT
         reply_markup=get_main_menu_keyboard(user_id)
     )
 
-# 19. 新增一个通用的文本消息处理器来处理所有主菜单按钮
 async def handle_text_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """一个通用的消息处理器，根据当前语言动态匹配按钮文本"""
+    """一個通用的消息處理器，根據按鈕文本觸發對應的處理器"""
     message = update.message
     user_id = message.from_user.id
     text = message.text
-
-    # 获取当前用户的语言代码
     lang_code = user_data.get(user_id, 'zh-CN')
     texts = LANGUAGES[lang_code]
-
-    # 根据消息文本调用相应的处理器
     if text == texts['menu_self_register']:
         await self_register_handler(update, context)
     elif text == texts['menu_mainland_user']:
@@ -538,23 +509,38 @@ async def handle_text_messages(update: Update, context: ContextTypes.DEFAULT_TYP
     elif text == texts['menu_change_lang']:
         await change_language(update, context)
     else:
-        # 如果消息不是预期的按钮文本，提供主菜单作为回复
         await message.reply_text(texts['main_menu_prompt'], reply_markup=get_main_menu_keyboard(user_id))
 
-# 20. 主函数：配置和运行机器人，使用 Webhook 模式
-async def main():
-    """启动机器人"""
-    # 获取 Render 提供的 PORT 和 WEBHOOK_URL
-    port = int(os.environ.get('PORT', 5000))
-    webhook_url = os.environ.get('WEBHOOK_URL')
+# 修正後的 bot_setup 函式，用於在啟動前設定機器人命令
+async def bot_setup(application: Application):
+    """執行一次性非同步任務，例如設定機器人命令"""
+    await application.bot.set_my_commands([
+        BotCommand("start", "啟動機器人"),
+        BotCommand("change_language", "切換語言"),
+        BotCommand("self_register", "自助註冊"),
+        BotCommand("mainland_user", "大陸用戶"),
+        BotCommand("overseas_user", "海外用戶"),
+        BotCommand("advertising_channel", "招商頻道"),
+        BotCommand("promotion_channel", "推單頻道"),
+        BotCommand("customer_service", "人工客服"),
+    ])
+    logger.info("機器人命令已設定。")
 
-    if not webhook_url:
+# 修正後的主函數，使用同步方式啟動 Webhook
+def main() -> None:
+    """主程式入口，負責配置和啟動 Webhook 服務"""
+    port = int(os.environ.get('PORT', 5000))
+    url_path = BOT_TOKEN
+    
+    if not WEBHOOK_URL:
         logger.error("WEBHOOK_URL environment variable is not set. The bot cannot run in webhook mode.")
         return
 
     application = Application.builder().token(BOT_TOKEN).build()
+    
+    # 在啟動 Webhook 服務前，執行一次性設定任務
+    asyncio.run(bot_setup(application))
 
-    # 注册命令处理器
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("change_language", change_language))
     application.add_handler(CommandHandler("self_register", self_register_handler))
@@ -563,34 +549,17 @@ async def main():
     application.add_handler(CommandHandler("advertising_channel", advertising_channel_handler))
     application.add_handler(CommandHandler("promotion_channel", promotion_channel_handler))
     application.add_handler(CommandHandler("customer_service", customer_service))
-
-    # 注册一个通用的文本消息处理器
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text_messages))
-
-    # 仅为语言切换保留 CallbackQueryHandler
     application.add_handler(CallbackQueryHandler(handle_language_callback, pattern='^lang_'))
 
-    # 修正：将 main 函式设为 async，并在调动时加上 await
-    # 设置 M 菜单中的命令
-    await application.bot.set_my_commands([
-        BotCommand("start", "启动机器人"),
-        BotCommand("change_language", "切换语言"),
-        BotCommand("self_register", "自助注册"),
-        BotCommand("mainland_user", "大陆用户"),
-        BotCommand("overseas_user", "海外用户"),
-        BotCommand("advertising_channel", "招商频道"),
-        BotCommand("promotion_channel", "推单频道"),
-        BotCommand("customer_service", "人工客服"),
-    ])
-
-    # 使用 Webhook 模式运行机器人
+    # 使用 Webhook 模式運行機器人
+    # 注意：這個函式是阻塞的，它會一直運行 Webhook 服務
     application.run_webhook(
         listen="0.0.0.0",
         port=port,
-        url_path="",
-        webhook_url=webhook_url
+        url_path=url_path,
+        webhook_url=f"{WEBHOOK_URL}/{url_path}"
     )
 
 if __name__ == "__main__":
-    # 修正：使用 asyncio.run() 来运行 async main 函式
-    asyncio.run(main())
+    main()
