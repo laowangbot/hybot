@@ -139,7 +139,40 @@ LANGUAGES = {
         'download_app_mk_title': "MK体育",
         'game_qu_name': "趣体育",
         'game_mk_name': "MK体育",
-        'welcome_text_html': "🎉 嗨，{user} ！欢迎来到 趣体育⚽️MKsports"
+        'welcome_text_html': "🎉 嗨，{user} ！欢迎来到 趣体育⚽️MKsports",
+        
+        # 新增: 自助注册的完整信息
+        'self_register_info_html': """🎉 嗨，{user} ！欢迎来到 趣体育⚽️MKsports
+我是您的专属注册服务助手，请选择您需要的服务👇
+ 
+🔥 限时福利活动（30天）
+ 💎 活动期间 注册并充值成功
+ 🎁 即可获赠 价值 398 元 VIP 会员
+ 
+📢 招商频道
+ 👉 <a href="https://t.me/QTY18">https://t.me/QTY18</a>
+ 
+📢 推单频道
+ 👉 <a href="https://t.me/AISOUOO">https://t.me/AISOUOO</a>
+ 
+💬 官方客服
+ 1️⃣ <a href="https://t.me/QTY01">@QTY01</a>
+ 2️⃣ <a href="https://t.me/QTY15">@QTY15</a>
+ 3️⃣ <a href="https://t.me/QTY04">@QTY04</a>
+
+📝 <b>注册注意事项</b>
+ 1️⃣ <b>请勿直接下载APP</b>
+ ‼<b>★ 重要提醒 ★</b>‼ 请先完成账号注册 → 由专员登记福利 → 再下载APP
+
+ 2️⃣ <b>注册需使用实名信息</b>
+ 我们是正规平台，为确保顺利提现，请务必使用真实姓名注册。
+
+ 3️⃣ <b>手机号与实名一致</b>
+ 注册手机号必须与实名信息相符。
+
+ 4️⃣ <b>安卓APP无法打开</b>
+ 如遇问题，请联系专员协助处理。
+"""
     },
     'en': {
         # New welcome message for the /start command
@@ -226,7 +259,40 @@ I'm your exclusive registration service assistant. Please choose the service you
         'download_app_mk_title': "MK Sports",
         'game_qu_name': "quSports",
         'game_mk_name': "MK Sports",
-        'welcome_text_html': "🎉 Hey, {user}! Welcome to quSports⚽️MKsports"
+        'welcome_text_html': "🎉 Hey, {user}! Welcome to quSports⚽️MKsports",
+        
+        # 新增: 自助注册的完整信息
+        'self_register_info_html': """🎉 Hey, {user}! Welcome to quSports⚽️MKsports
+I'm your exclusive registration service assistant. Please choose the service you need below👇
+ 
+🔥 Limited-Time Offer (30 days)
+ 💎 During the event, successfully register and top up
+ 🎁 You will receive a free VIP membership worth 398 CNY
+ 
+📢 Advertising Channel
+ 👉 <a href="https://t.me/QTY18">https://t.me/QTY18</a>
+ 
+📢 Promotion Channel
+ 👉 <a href="https://t.me/AISOUOO">https://t.me/AISOUOO</a>
+ 
+💬 Official Customer Service
+ 1️⃣ <a href="https://t.me/QTY01">@QTY01</a>
+ 2️⃣ <a href="https://t.me/QTY15">@QTY15</a>
+ 3️⃣ <a href="https://t.me/QTY04">@QTY04</a>
+
+📝 <b>Registration Notes</b>
+ 1️⃣ <b>Do Not Download the APP Directly</b>
+ ‼<b>★ Important Reminder ★</b>‼ Please complete account registration first → Register for benefits with a specialist → Then download the APP
+
+ 2️⃣ <b>Registration Requires Real Name Information</b>
+ We are a legitimate platform. To ensure smooth withdrawals, please use your real name for registration.
+
+ 3️⃣ <b>Mobile Number and Name Must Match</b>
+ The registered mobile number must match the real name information.
+
+ 4️⃣ <b>Android APP cannot be opened</b>
+ If you encounter problems, please contact a specialist for assistance.
+"""
     },
     'th': {
         # New welcome message for the /start command
@@ -313,7 +379,40 @@ I'm your exclusive registration service assistant. Please choose the service you
         'download_app_mk_title': "MK Sports",
         'game_qu_name': "quSports",
         'game_mk_name': "MK Sports",
-        'welcome_text_html': "🎉 สวัสดีครับ {user}! ยินดีต้อนรับสู่ quSports⚽️MKsports"
+        'welcome_text_html': "🎉 สวัสดีครับ {user}! ยินดีต้อนรับสู่ quSports⚽️MKsports",
+        
+        # 新增: 自助注册的完整信息
+        'self_register_info_html': """🎉 สวัสดีครับ/ค่ะ {user}! ยินดีต้อนรับสู่ quSports⚽️MKsports
+ฉันคือผู้ช่วยบริการลงทะเบียนพิเศษของคุณ กรุณาเลือกบริการที่คุณต้องการด้านล่าง👇
+ 
+🔥 โปรโมชั่นพิเศษ (30 วัน)
+ 💎 ในช่วงกิจกรรม ลงทะเบียนและเติมเงินสำเร็จ
+ 🎁 คุณจะได้รับสมาชิก VIP มูลค่า 398 หยวนฟรี
+ 
+📢 ช่องทางการโฆษณา
+ 👉 <a href="https://t.me/QTY18">https://t.me/QTY18</a>
+ 
+📢 ช่องทางโปรโมชั่น
+ 👉 <a href="https://t.me/AISOUOO">https://t.me/AISOUOO</a>
+ 
+💬 บริการลูกค้าอย่างเป็นทางการ
+ 1️⃣ <a href="https://t.me/QTY01">@QTY01</a>
+ 2️⃣ <a href="https://t.me/QTY15">@QTY15</a>
+ 3️⃣ <a href="https://t.me/QTY04">@QTY04</a>
+
+📝 <b>ข้อควรทราบเกี่ยวกับการลงทะเบียน</b>
+ 1️⃣ <b>ห้ามดาวน์โหลดแอปโดยตรง</b>
+ ‼<b>★ ข้อควรจำที่สำคัญ ★</b>‼ โปรดลงทะเบียนบัญชีให้เรียบร้อยก่อน → ลงทะเบียนรับสิทธิประโยชน์กับผู้เชี่ยวชาญ → จากนั้นจึงดาวน์โหลดแอป
+
+ 2️⃣ <b>การลงทะเบียนต้องใช้ชื่อจริง</b>
+ เราเป็นแพลตฟอร์มที่ถูกต้องตามกฎหมาย เพื่อให้การถอนเงินเป็นไปอย่างราบรื่น โปรดใช้ชื่อจริงในการลงทะเบียน.
+
+ 3️⃣ <b>หมายเลขโทรศัพท์และชื่อจริงต้องตรงกัน</b>
+ หมายเลขโทรศัพท์ที่ลงทะเบียนจะต้องตรงกับข้อมูลชื่อจริง.
+
+ 4️⃣ <b>ไม่สามารถเปิดแอป Android ได้</b>
+ หากพบปัญหา โปรดติดต่อผู้เชี่ยวชาญเพื่อขอความช่วยเหลือ.
+"""
     },
     'vi': {
         # New welcome message for the /start command
@@ -400,7 +499,40 @@ Tôi là trợ lý dịch vụ đăng ký độc quyền của bạn. Vui lòng 
         'download_app_mk_title': "MK Sports",
         'game_qu_name': "quSports",
         'game_mk_name': "MK Sports",
-        'welcome_text_html': "🎉 Chào mừng {user}！Chào mừng đến với quSports⚽️MKsports"
+        'welcome_text_html': "🎉 Chào mừng {user}！Chào mừng đến với quSports⚽️MKsports",
+        
+        # 新增: 自助注册的完整信息
+        'self_register_info_html': """🎉 Chào mừng {user}! Chào mừng đến với quSports⚽️MKsports
+Tôi là trợ lý dịch vụ đăng ký độc quyền của bạn. Vui lòng chọn dịch vụ bạn cần dưới đây👇
+ 
+🔥 Ưu đãi có hạn (30 ngày)
+ 💎 Trong thời gian diễn ra sự kiện, đăng ký và nạp tiền thành công
+ 🎁 Bạn sẽ nhận được tư cách thành viên VIP trị giá 398 CNY miễn phí
+ 
+📢 Kênh quảng cáo
+ 👉 <a href="https://t.me/QTY18">https://t.me/QTY18</a>
+ 
+📢 Kênh khuyến mãi
+ 👉 <a href="https://t.me/AISOUOO">https://t.me/AISOUOO</a>
+ 
+💬 Dịch vụ khách hàng chính thức
+ 1️⃣ <a href="https://t.me/QTY01">@QTY01</a>
+ 2️⃣ <a href="https://t.me/QTY15">@QTY15</a>
+ 3️⃣ <a href="https://t.me/QTY04">@QTY04</a>
+
+📝 <b>Lưu ý khi đăng ký</b>
+ 1️⃣ <b>Không được tải ứng dụng trực tiếp</b>
+ ‼<b>★ Lưu ý quan trọng ★</b>‼ Vui lòng hoàn thành đăng ký tài khoản trước → Đăng ký nhận ưu đãi với chuyên viên → Sau đó mới tải ứng dụng
+
+ 2️⃣ <b>Đăng ký yêu cầu thông tin tên thật</b>
+ Chúng tôi là nền tảng hợp pháp. Để đảm bảo việc rút tiền diễn ra suôn sẻ, vui lòng sử dụng tên thật khi đăng ký.
+
+ 3️⃣ <b>Số điện thoại và tên thật phải khớp nhau</b>
+ Số điện thoại đăng ký phải khớp với thông tin tên thật.
+
+ 4️⃣ <b>Không thể mở ứng dụng Android</b>
+ Nếu gặp sự cố, vui lòng liên hệ với chuyên viên để được hỗ trợ.
+"""
     }
 }
 
@@ -524,11 +656,8 @@ async def self_register_handler(update: Update, context: ContextTypes.DEFAULT_TY
     message, user = get_message_and_user(update)
     if not message or not user: return
     user_id = user.id
-    # 使用一个专门的键来获取完整的 HTML 欢迎文本
-    welcome_text_html = get_text(user_id, 'welcome_text_html').format(user=user.mention_html())
-    notice_text = get_text(user_id, 'register_info_download_notice')
-    
-    full_message = f"{welcome_text_html}\n{notice_text}"
+    # 使用新增的键来获取完整的消息
+    full_message = get_text(user_id, 'self_register_info_html').format(user=user.mention_html())
     await message.reply_html(text=full_message)
 
 async def mainland_user_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
