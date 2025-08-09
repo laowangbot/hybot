@@ -55,12 +55,12 @@ BUTTON_EMOJIS = {
 # 4. 准备多语言文本
 LANGUAGES = {
     'zh-CN': {
-        # 新的 /start 命令欢迎信息
+        # 新的 /start 命令欢迎资讯
         'start_welcome_html': """🎉 嗨，{user} ！欢迎来到 趣体育⚽️MKsports
 我是您的专属注册服务助手，请选择您需要的服务👇
  
 🔥 限时福利活动（30天）
- 💎 活动期间 注册并充值成功
+ 💎 活动期间 注册并储值成功
  🎁 即可获赠 价值 398 元 VIP 会员
  
 📢 招商频道
@@ -82,7 +82,7 @@ LANGUAGES = {
         'menu_invite_friend': f"{BUTTON_EMOJIS['menu_invite_friend']}邀请好友",
         'menu_customer_service': f"{BUTTON_EMOJIS['menu_customer_service']}人工客服",
         'menu_download_app': f"{BUTTON_EMOJIS['menu_download_app']}下载APP",
-        'menu_change_lang': f"{BUTTON_EMOJIS['menu_change_lang']}语言",
+        'menu_change_lang': f"{BUTTON_EMOJIS['menu_change_lang']}Language",
         'menu_self_register': f"{BUTTON_EMOJIS['menu_self_register']}自助注册",
         'menu_mainland_user': f"{BUTTON_EMOJIS['menu_mainland_user']}大陆用户",
         'menu_overseas_user': f"{BUTTON_EMOJIS['menu_overseas_user']}海外用户",
@@ -141,12 +141,12 @@ LANGUAGES = {
         'game_mk_name': "MK体育",
         'welcome_text_html': "🎉 嗨，{user} ！欢迎来到 趣体育⚽️MKsports",
         
-        # 新增: 自助注册的完整信息
+        # 新增: 自助注册的完整资讯
         'self_register_info_html': """🎉 嗨，{user} ！欢迎来到 趣体育⚽️MKsports
 我是您的专属注册服务助手，请选择您需要的服务👇
  
 🔥 限时福利活动（30天）
- 💎 活动期间 注册并充值成功
+ 💎 活动期间 注册并储值成功
  🎁 即可获赠 价值 398 元 VIP 会员
  
 📢 招商频道
@@ -202,7 +202,7 @@ I'm your exclusive registration service assistant. Please choose the service you
         'menu_invite_friend': f"{BUTTON_EMOJIS['menu_invite_friend']}Invite Friends",
         'menu_customer_service': f"{BUTTON_EMOJIS['menu_customer_service']}Customer Service",
         'menu_download_app': f"{BUTTON_EMOJIS['menu_download_app']}Download APP",
-        'menu_change_lang': f"{BUTTON_EMOJIS['menu_change_lang']}Change Language",
+        'menu_change_lang': f"{BUTTON_EMOJIS['menu_change_lang']}Language",
         'menu_self_register': f"{BUTTON_EMOJIS['menu_self_register']}Self-Registration",
         'menu_mainland_user': f"{BUTTON_EMOJIS['menu_mainland_user']}Mainland User",
         'menu_overseas_user': f"{BUTTON_EMOJIS['menu_overseas_user']}Overseas User",
@@ -261,7 +261,7 @@ I'm your exclusive registration service assistant. Please choose the service you
         'game_mk_name': "MK Sports",
         'welcome_text_html': "🎉 Hey, {user}! Welcome to quSports⚽️MKsports",
         
-        # 新增: 自助注册的完整信息
+        # 新增: 自助注册的完整资讯
         'self_register_info_html': """🎉 Hey, {user}! Welcome to quSports⚽️MKsports
 I'm your exclusive registration service assistant. Please choose the service you need below👇
  
@@ -322,7 +322,7 @@ I'm your exclusive registration service assistant. Please choose the service you
         'menu_invite_friend': f"{BUTTON_EMOJIS['menu_invite_friend']}เชิญเพื่อน",
         'menu_customer_service': f"{BUTTON_EMOJIS['menu_customer_service']}บริการลูกค้า",
         'menu_download_app': f"{BUTTON_EMOJIS['menu_download_app']}ดาวน์โหลดแอป",
-        'menu_change_lang': f"{BUTTON_EMOJIS['menu_change_lang']}เปลี่ยนภาษา",
+        'menu_change_lang': f"{BUTTON_EMOJIS['menu_change_lang']}Language",
         'menu_self_register': f"{BUTTON_EMOJIS['menu_self_register']}ลงทะเบียนด้วยตนเอง",
         'menu_mainland_user': f"{BUTTON_EMOJIS['menu_mainland_user']}ผู้ใช้ในจีนแผ่นดินใหญ่",
         'menu_overseas_user': f"{BUTTON_EMOJIS['menu_overseas_user']}ผู้ใช้ทั่วโลก",
@@ -381,7 +381,7 @@ I'm your exclusive registration service assistant. Please choose the service you
         'game_mk_name': "MK Sports",
         'welcome_text_html': "🎉 สวัสดีครับ {user}! ยินดีต้อนรับสู่ quSports⚽️MKsports",
         
-        # 新增: 自助注册的完整信息
+        # 新增: 自助注册的完整资讯
         'self_register_info_html': """🎉 สวัสดีครับ/ค่ะ {user}! ยินดีต้อนรับสู่ quSports⚽️MKsports
 ฉันคือผู้ช่วยบริการลงทะเบียนพิเศษของคุณ กรุณาเลือกบริการที่คุณต้องการด้านล่าง👇
  
@@ -413,373 +413,156 @@ I'm your exclusive registration service assistant. Please choose the service you
  4️⃣ <b>ไม่สามารถเปิดแอป Android ได้</b>
  หากพบปัญหา โปรดติดต่อผู้เชี่ยวชาญเพื่อขอความช่วยเหลือ.
 """
-    },
-    'vi': {
-        # New welcome message for the /start command
-        'start_welcome_html': """🎉 Chào mừng {user}! Chào mừng đến với quSports⚽️MKsports
-Tôi là trợ lý dịch vụ đăng ký độc quyền của bạn. Vui lòng chọn dịch vụ bạn cần dưới đây👇
- 
-🔥 Ưu đãi có hạn (30 ngày)
- 💎 Trong thời gian diễn ra sự kiện, đăng ký và nạp tiền thành công
- 🎁 Bạn sẽ nhận được tư cách thành viên VIP trị giá 398 CNY miễn phí
- 
-📢 Kênh quảng cáo
- 👉 <a href="https://t.me/QTY18">https://t.me/QTY18</a>
- 
-📢 Kênh khuyến mãi
- 👉 <a href="https://t.me/AISOUOO">https://t.me/AISOUOO</a>
- 
-💬 Dịch vụ khách hàng chính thức
- 1️⃣ <a href="https://t.me/QTY01">@QTY01</a>
- 2️⃣ <a href="https://t.me/QTY15">@QTY15</a>
- 3️⃣ <a href="https://t.me/QTY04">@QTY04</a>""",
-        'welcome': "Chào mừng đến với quSports {user}, nhấp vào menu bên dưới để tương tác.",
-        'main_menu_prompt': "Vui lòng chọn một tùy chọn từ menu chính.",
-        'menu_account_info': "Đăng ký tài khoản",
-        'menu_play_game': f"{BUTTON_EMOJIS['menu_play_game']}Vào trò chơi",
-        'menu_recharge': f"{BUTTON_EMOJIS['menu_advertising_channel']}Kênh quảng cáo",
-        'menu_withdraw': f"{BUTTON_EMOJIS['menu_promotion_channel']}Kênh khuyến mãi",
-        'menu_invite_friend': f"{BUTTON_EMOJIS['menu_invite_friend']}Mời bạn bè",
-        'menu_customer_service': f"{BUTTON_EMOJIS['menu_customer_service']}Dịch vụ khách hàng",
-        'menu_download_app': f"{BUTTON_EMOJIS['menu_download_app']}Tải ứng dụng",
-        'menu_change_lang': f"{BUTTON_EMOJIS['menu_change_lang']}Thay đổi ngôn ngữ",
-        'menu_self_register': f"{BUTTON_EMOJIS['menu_self_register']}Tự đăng ký",
-        'menu_mainland_user': f"{BUTTON_EMOJIS['menu_mainland_user']}Người dùng Trung Quốc đại lục",
-        'menu_overseas_user': f"{BUTTON_EMOJIS['menu_overseas_user']}Người dùng toàn cầu",
-        'live_customer_service_title': "Vui lòng nhấp vào chuyên viên dịch vụ khách hàng dưới đây để liên hệ:",
-        'customer_specialist_1': "Chuyên viên 1",
-        'customer_specialist_2': "Chuyên viên 2",
-        'customer_specialist_3': "Chuyên viên 3",
-        'download_app_info': "Nhấp vào các nút dưới đây để tải ứng dụng:",
-        'download_android': "Tải Android",
-        'download_ios': "Tải iOS",
-        'invite_title': "Mời bạn bè và kiếm tiền cùng nhau!",
-        'invite_message': "Bằng cách mời bạn bè đăng ký thông qua liên kết độc quyền của bạn, bạn có thể nhận được phần thưởng phong phú!",
-        'invite_link_heading': "Liên kết mời  ",
-        'invite_link_qu': "quSports (người dùng Trung Quốc)\nhttps://www.qu32.vip:30011/entry/register/?i_code=6944642",
-        'invite_link_mk': "MK Sports (người dùng toàn cầu)\nhttps://www.mk2001.com:9081/CHS",
-        'language_selection': "Vui lòng chọn ngôn ngữ của bạn:",
-        'lang_changed': "Đã thay đổi ngôn ngữ thành công!",
-        'welcome_to_sports': "Chào mừng đến với quSports!",
-        'official_group_handle': "Nhóm chính thức: @quyuyule",
-        'official_channel_handle': "Kênh chính thức: @qu337",
-        'customer_service_handle': "Dịch vụ khách hàng chính thức: @maoyiyule",
-        'account_info_title': "Tài khoản của tôi",
-        'member_id': "ID thành viên: {user_id}",
-        'member_account': "Tài khoản thành viên: {username}",
-        'balance': "Số dư tài khoản: {balance:.2f}CNY",
-        'vip_level': "Cấp độ VIP: VIP{vip}",
-        'advertising_channel_prompt': "Nhấp vào nút dưới đây để vào kênh quảng cáo:",
-        'promotion_channel_prompt': "Nhấp vào nút dưới đây để vào kênh khuyến mãi:",
-        'play_game_choice_prompt': "Vui lòng chọn trò chơi bạn muốn vào:",
-        'register_info_title': "Chào mừng đến với quSports⚽️MKsports",
-        'register_info_channel1': "Kênh quảng cáo",
-        'register_info_channel2': "Kênh khuyến mãi",
-        'register_info_cs1': "Dịch vụ khách hàng 1",
-        'register_info_cs2': "Dịch vụ khách hàng 2",
-        'register_info_cs3': "Dịch vụ khách hàng 3",
-        'register_info_qu_link_text': "quSports (người dùng Trung Quốc)",
-        'register_info_mk_link_text': "MK Sports (người dùng toàn cầu)",
-        'register_info_notice_prompt': "Vui lòng nhấp vào nút dưới đây để đăng ký:",
-        'register_info_download_notice': """
-        📝 <b>Lưu ý khi đăng ký</b>
-        1️⃣ <b>Không được tải ứng dụng trực tiếp</b>
-        ‼<b>★ Lưu ý quan trọng ★</b>‼ Vui lòng hoàn thành đăng ký tài khoản trước → Đăng ký nhận ưu đãi với chuyên viên → Sau đó mới tải ứng dụng
-
-        2️⃣ <b>Đăng ký yêu cầu thông tin tên thật</b>
-        Chúng tôi là nền tảng hợp pháp. Để đảm bảo việc rút tiền diễn ra suôn sẻ, vui lòng sử dụng tên thật khi đăng ký.
-
-        3️⃣ <b>Số điện thoại và tên thật phải khớp nhau</b>
-        Số điện thoại đăng ký phải khớp với thông tin tên thật.
-
-        4️⃣ <b>Không thể mở ứng dụng Android</b>
-        Nếu gặp sự cố, vui lòng liên hệ với chuyên viên để được hỗ trợ.
-        """,
-        'download_app_qu_title': "quSports",
-        'download_app_mk_title': "MK Sports",
-        'game_qu_name': "quSports",
-        'game_mk_name': "MK Sports",
-        'welcome_text_html': "🎉 Chào mừng {user}！Chào mừng đến với quSports⚽️MKsports",
-        
-        # 新增: 自助注册的完整信息
-        'self_register_info_html': """🎉 Chào mừng {user}! Chào mừng đến với quSports⚽️MKsports
-Tôi là trợ lý dịch vụ đăng ký độc quyền của bạn. Vui lòng chọn dịch vụ bạn cần dưới đây👇
- 
-🔥 Ưu đãi có hạn (30 ngày)
- 💎 Trong thời gian diễn ra sự kiện, đăng ký và nạp tiền thành công
- 🎁 Bạn sẽ nhận được tư cách thành viên VIP trị giá 398 CNY miễn phí
- 
-📢 Kênh quảng cáo
- 👉 <a href="https://t.me/QTY18">https://t.me/QTY18</a>
- 
-📢 Kênh khuyến mãi
- 👉 <a href="https://t.me/AISOUOO">https://t.me/AISOUOO</a>
- 
-💬 Dịch vụ khách hàng chính thức
- 1️⃣ <a href="https://t.me/QTY01">@QTY01</a>
- 2️⃣ <a href="https://t.me/QTY15">@QTY15</a>
- 3️⃣ <a href="https://t.me/QTY04">@QTY04</a>
-
-📝 <b>Lưu ý khi đăng ký</b>
- 1️⃣ <b>Không được tải ứng dụng trực tiếp</b>
- ‼<b>★ Lưu ý quan trọng ★</b>‼ Vui lòng hoàn thành đăng ký tài khoản trước → Đăng ký nhận ưu đãi với chuyên viên → Sau đó mới tải ứng dụng
-
- 2️⃣ <b>Đăng ký yêu cầu thông tin tên thật</b>
- Chúng tôi là nền tảng hợp pháp. Để đảm bảo việc rút tiền diễn ra suôn sẻ, vui lòng sử dụng tên thật khi đăng ký.
-
- 3️⃣ <b>Số điện thoại và tên thật phải khớp nhau</b>
- Số điện thoại đăng ký phải khớp với thông tin tên thật.
-
- 4️⃣ <b>Không thể mở ứng dụng Android</b>
- Nếu gặp sự cố, vui lòng liên hệ với chuyên viên để được hỗ trợ.
-"""
     }
 }
 
-# 5. 储存用户语言设置的字典
-user_data: Dict[int, str] = {}
 
-def get_text(user_id: int, key: str) -> str:
-    """根据用户的语言设置获取相应的文本，如果找不到则使用默认中文"""
-    lang_code = user_data.get(user_id, 'zh-CN')
-    return LANGUAGES.get(lang_code, LANGUAGES['zh-CN']).get(key, key)
+# 5. 定义命令处理器
+# 在处理器中，我们会根据用户的语言设置动态生成键盘和文本
 
-def get_language_keyboard() -> InlineKeyboardMarkup:
-    """返回语言选择的内嵌键盘"""
+# /start 命令
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    # 根据用户的语言代码取得相应的语言文本
+    lang_code = update.effective_user.language_code
+    lang_data = LANGUAGES.get(lang_code, LANGUAGES['zh-CN'])  # 默认为中文
+
+    # 创建一个动态键盘
     keyboard = [
-        [InlineKeyboardButton("简体中文🇨🇳", callback_data='lang_zh-CN')],
-        [InlineKeyboardButton("English 🇺🇸", callback_data='lang_en')],
-        [InlineKeyboardButton("ไทย 🇹🇭", callback_data='lang_th')],
-        [InlineKeyboardButton("Tiếng Việt 🇻🇳", callback_data='lang_vi')]
-    ]
-    return InlineKeyboardMarkup(keyboard)
-
-# 新增: 创建主菜单回复键盘
-def get_main_menu_keyboard(user_id: int) -> ReplyKeyboardMarkup:
-    """
-    根据用户的语言设置，创建并返回一个自定义的回复键盘。
-    """
-    lang_code = user_data.get(user_id, 'zh-CN')
-    texts = LANGUAGES.get(lang_code, LANGUAGES['zh-CN'])
-    
-    keyboard = [
-        [KeyboardButton(texts['menu_change_lang']), KeyboardButton(texts['menu_self_register'])],
-        [KeyboardButton(texts['menu_mainland_user']), KeyboardButton(texts['menu_overseas_user'])],
-        [KeyboardButton(texts['menu_recharge']), KeyboardButton(texts['menu_withdraw'])],
-        [KeyboardButton(texts['menu_customer_service'])]
-    ]
-    
-    return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=False)
-
-
-def get_message_and_user(update: Update):
-    """从更新对象中提取消息和用户对象，并进行空值检查"""
-    message = update.message
-    user = update.effective_user
-    if message and user:
-        return message, user
-    if update.callback_query and update.callback_query.message and update.effective_user:
-        return update.callback_query.message, update.effective_user
-    return None, None
-
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """当用户发送 /start 命令时调用"""
-    message, user = get_message_and_user(update)
-    if not message or not user:
-        logger.warning("无法获取用户信息，跳过 start 处理。")
-        return
-
-    user_id = user.id
-    if user_id not in user_data:
-        user_data[user_id] = 'zh-CN'
-    
-    # 使用更新后的多语言 HTML 欢迎文本
-    welcome_text = get_text(user_id, 'start_welcome_html').format(user=user.mention_html())
-    
-    # 修复: 移除 ReplyKeyboardRemove()，并发送自定义的回复键盘
-    await message.reply_html(
-        welcome_text,
-        reply_markup=get_main_menu_keyboard(user_id)
-    )
-    logger.info(f"User {user.first_name} started the bot with language {user_data[user_id]}.")
-
-async def advertising_channel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """当用户点击“招商频道”命令时调用"""
-    message, user = get_message_and_user(update)
-    if not message or not user: return
-    user_id = user.id
-    prompt_text = get_text(user_id, 'advertising_channel_prompt')
-    keyboard = [
-        [InlineKeyboardButton(get_text(user_id, 'menu_recharge'), url='https://t.me/QTY18')]
+        [
+            InlineKeyboardButton(lang_data['menu_account_info'], callback_data='register_info'),
+            InlineKeyboardButton(lang_data['menu_play_game'], callback_data='play_game_choice'),
+        ],
+        [
+            InlineKeyboardButton(lang_data['menu_recharge'], url=lang_data['advertising_channel_prompt']), # 使用 url 连接到频道
+            InlineKeyboardButton(lang_data['menu_withdraw'], url=lang_data['promotion_channel_prompt']), # 使用 url 连接到频道
+        ],
+        [
+            InlineKeyboardButton(lang_data['menu_invite_friend'], callback_data='invite_friends'),
+            InlineKeyboardButton(lang_data['menu_customer_service'], callback_data='live_customer_service'),
+        ],
+        [
+            InlineKeyboardButton(lang_data['menu_download_app'], callback_data='download_app'),
+            InlineKeyboardButton(lang_data['menu_change_lang'], callback_data='change_lang'),
+        ],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await message.reply_text(text=prompt_text, reply_markup=reply_markup)
 
-async def promotion_channel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """当用户点击“推单频道”命令时调用"""
-    message, user = get_message_and_user(update)
-    if not message or not user: return
-    user_id = user.id
-    prompt_text = get_text(user_id, 'promotion_channel_prompt')
-    keyboard = [
-        [InlineKeyboardButton(get_text(user_id, 'menu_withdraw'), url='https://t.me/AISOUOO')]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await message.reply_text(text=prompt_text, reply_markup=reply_markup)
-
-async def customer_service(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """当用户点击“人工客服”命令时调用"""
-    message, user = get_message_and_user(update)
-    if not message or not user: return
-    user_id = user.id
-    live_cs_title = get_text(user_id, 'live_customer_service_title')
-    keyboard = [
-        [InlineKeyboardButton(get_text(user_id, 'customer_specialist_1'), url='https://t.me/QTY01')],
-        [InlineKeyboardButton(get_text(user_id, 'customer_specialist_2'), url='https://t.me/QTY15')],
-        [InlineKeyboardButton(get_text(user_id, 'customer_specialist_3'), url='https://t.me/QTY04')],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await message.reply_html(text=live_cs_title, reply_markup=reply_markup)
-
-async def change_language(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """当用户点击“切换语言”命令时调用"""
-    message, user = get_message_and_user(update)
-    if not message or not user: return
-    user_id = user.id
-    await message.reply_text(
-        get_text(user_id, 'language_selection'),
-        reply_markup=get_language_keyboard()
+    # 发送欢迎消息，并附上键盘
+    await update.message.reply_html(
+        lang_data['start_welcome_html'].format(user=update.effective_user.mention_html()),
+        reply_markup=reply_markup,
+        disable_web_page_preview=True # 禁用预览以保持格式整洁
     )
 
-async def self_register_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """当用户点击“自助注册”命令时调用"""
-    message, user = get_message_and_user(update)
-    if not message or not user: return
-    user_id = user.id
-    # 使用新增的键来获取完整的消息
-    full_message = get_text(user_id, 'self_register_info_html').format(user=user.mention_html())
-    await message.reply_html(text=full_message)
 
-async def mainland_user_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """当用户点击“大陆用户”命令时，发送注册链接"""
-    message, user = get_message_and_user(update)
-    if not message or not user: return
-    user_id = user.id
-    qu_link_text = get_text(user_id, 'register_info_qu_link_text')
-    keyboard = [
-        [InlineKeyboardButton(qu_link_text, url=GAME_URL_QU)]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await message.reply_text(text=get_text(user_id, 'register_info_notice_prompt'), reply_markup=reply_markup)
-
-async def overseas_user_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """当用户点击“海外用户”命令时，发送注册链接"""
-    message, user = get_message_and_user(update)
-    if not message or not user: return
-    user_id = user.id
-    mk_link_text = get_text(user_id, 'register_info_mk_link_text')
-    keyboard = [
-        [InlineKeyboardButton(mk_link_text, url=GAME_URL_MK)]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await message.reply_text(text=get_text(user_id, 'register_info_notice_prompt'), reply_markup=reply_markup)
-
-async def handle_language_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """处理语言选择内嵌按钮的点击事件"""
+# 处理按钮回调的处理器
+async def button_callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
-    if query is None or query.from_user is None:
-        return
-        
     await query.answer()
-    user = query.from_user
-    user_id = user.id
-    language_code = query.data.split('_')[1]
-    user_data[user_id] = language_code
-    # 修复: 移除 ReplyKeyboardRemove()，并再次发送欢迎消息，此时会带上新语言的回复键盘
-    await query.message.reply_text(
-        get_text(user_id, 'lang_changed')
-    )
-    await start(update, context)
 
-# 新增: 处理来自回复键盘的文本消息
-async def handle_button_press(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """
-    处理用户点击回复键盘按钮时发送的文本消息。
-    """
-    message, user = get_message_and_user(update)
-    if not message or not user: return
+    lang_code = update.effective_user.language_code
+    lang_data = LANGUAGES.get(lang_code, LANGUAGES['zh-CN'])  # 默认为中文
 
-    user_id = user.id
-    lang_code = user_data.get(user_id, 'zh-CN')
-    texts = LANGUAGES.get(lang_code, LANGUAGES['zh-CN'])
-    user_text = message.text
+    callback_data = query.data
 
-    if user_text == texts['menu_change_lang']:
-        await change_language(update, context)
-    elif user_text == texts['menu_self_register']:
-        await self_register_handler(update, context)
-    elif user_text == texts['menu_mainland_user']:
-        await mainland_user_handler(update, context)
-    elif user_text == texts['menu_overseas_user']:
-        await overseas_user_handler(update, context)
-    elif user_text == texts['menu_recharge']: # "招商频道"
-        await advertising_channel_handler(update, context)
-    elif user_text == texts['menu_withdraw']: # "推单频道"
-        await promotion_channel_handler(update, context)
-    elif user_text == texts['menu_customer_service']:
-        await customer_service(update, context)
-    else:
-        # 如果不是按钮文本，可以回复一个通用消息或忽略
-        pass
-    
-# 删除了 handle_text_messages 函数，因为所有功能现在都由命令处理
+    if callback_data == 'change_lang':
+        keyboard = [
+            [
+                InlineKeyboardButton("简体中文", callback_data='set_lang_zh-CN'),
+                InlineKeyboardButton("English", callback_data='set_lang_en'),
+                InlineKeyboardButton("ไทย", callback_data='set_lang_th'),
+            ],
+            [
+                InlineKeyboardButton("返回", callback_data='start_menu'),
+            ]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.edit_message_text(lang_data['language_selection'], reply_markup=reply_markup)
+        
+    elif callback_data.startswith('set_lang_'):
+        new_lang_code = callback_data.split('_')[2]
+        context.user_data['language'] = new_lang_code
+        new_lang_data = LANGUAGES.get(new_lang_code, LANGUAGES['zh-CN'])
+        await query.edit_message_text(new_lang_data['lang_changed'])
+        
+        # 显示主菜单
+        keyboard = [
+            [
+                InlineKeyboardButton(new_lang_data['menu_account_info'], callback_data='register_info'),
+                InlineKeyboardButton(new_lang_data['menu_play_game'], callback_data='play_game_choice'),
+            ],
+            [
+                InlineKeyboardButton(new_lang_data['menu_recharge'], url=new_lang_data['advertising_channel_prompt']),
+                InlineKeyboardButton(new_lang_data['menu_withdraw'], url=new_lang_data['promotion_channel_prompt']),
+            ],
+            [
+                InlineKeyboardButton(new_lang_data['menu_invite_friend'], callback_data='invite_friends'),
+                InlineKeyboardButton(new_lang_data['menu_customer_service'], callback_data='live_customer_service'),
+            ],
+            [
+                InlineKeyboardButton(new_lang_data['menu_download_app'], callback_data='download_app'),
+                InlineKeyboardButton(new_lang_data['menu_change_lang'], callback_data='change_lang'),
+            ],
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.message.reply_html(new_lang_data['start_welcome_html'].format(user=query.from_user.mention_html()),
+                                       reply_markup=reply_markup,
+                                       disable_web_page_preview=True)
 
-# --- FastAPI 和 Telegram.ext 整合的核心修改部分 ---
+    elif callback_data == 'start_menu':
+        await start(update, context)
 
-app = FastAPI()
-application: Optional[Application] = None
+    # 处理自助注册按钮
+    elif callback_data == 'register_info':
+        # 处理语言选择
+        lang_code = context.user_data.get('language', update.effective_user.language_code)
+        lang_data = LANGUAGES.get(lang_code, LANGUAGES['zh-CN'])
+        
+        keyboard = [
+            [
+                InlineKeyboardButton(lang_data['menu_mainland_user'], url=GAME_URL_QU),
+                InlineKeyboardButton(lang_data['menu_overseas_user'], url=GAME_URL_MK),
+            ],
+            [
+                InlineKeyboardButton("返回", callback_data='start_menu')
+            ]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        await query.edit_message_text(
+            text=lang_data['register_info_title'],
+            reply_markup=reply_markup
+        )
 
+# 处理非命令消息
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    # 这里可以根据用户的消息内容，给予不同的回应。
+    # 范例：如果用户发送了 "hello"，机器人回复 "Hi there!"
+    if update.message.text.lower() == "hello":
+        await update.message.reply_text("Hi there!")
+
+# Lifespan 事件处理器用于在应用程序启动和关闭时执行代码
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
-    FastAPI 应用程序的生命周期管理器。
-    在启动时设置 bot 的 webhook，在关闭时移除 webhook。
+    设置 Telegram 机器人的 Application 实例并在服务器启动时启动它。
+    当服务器关闭时，它会停止应用程序。
     """
     global application
-    
-    # 建立 Telegram Application 实例
-    application = Application.builder().token(BOT_TOKEN).build()
-    
-    # 设置所有的处理器，现在主要使用 CommandHandler
+
+    # 创建应用程序实例
+    application = (
+        Application.builder()
+        .token(BOT_TOKEN)
+        .updater(None)
+        .build()
+    )
+
+    # 注册所有处理器
     application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler("change_language", change_language))
-    application.add_handler(CommandHandler("self_register", self_register_handler))
-    application.add_handler(CommandHandler("mainland_user", mainland_user_handler))
-    application.add_handler(CommandHandler("overseas_user", overseas_user_handler))
-    application.add_handler(CommandHandler("advertising_channel", advertising_channel_handler))
-    application.add_handler(CommandHandler("promotion_channel", promotion_channel_handler))
-    application.add_handler(CommandHandler("customer_service", customer_service))
-    # CallbackQueryHandler 不变，用于处理内嵌键盘
-    application.add_handler(CallbackQueryHandler(handle_language_callback, pattern='^lang_'))
-    # 新增: 处理来自回复键盘的文本消息
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_button_press))
-
-    logger.info("所有处理器已加载。")
-
-    # 设置 bot 命令，用户可以在聊天界面中直接点击这些命令
-    await application.bot.set_my_commands([
-        BotCommand("start", "启动机器人"),
-        BotCommand("change_language", "切换语言"),
-        BotCommand("self_register", "自助注册"),
-        BotCommand("mainland_user", "大陆用户注册"),
-        BotCommand("overseas_user", "海外用户注册"),
-        BotCommand("advertising_channel", "招商频道"),
-        BotCommand("promotion_channel", "推单频道"),
-        BotCommand("customer_service", "人工客服")
-    ])
-    logger.info("机器人命令已设置。")
-
-    # 设置 bot 应用程序，并设置 Webhook
+    application.add_handler(CallbackQueryHandler(button_callback_handler))
+    
+    # 在启动时设置 Webhook
     await application.bot.set_webhook(url=f"{WEBHOOK_URL}{WEBHOOK_URL_PATH}")
     logger.info(f"Webhook 已设置到: {WEBHOOK_URL}{WEBHOOK_URL_PATH}")
 
@@ -818,13 +601,3 @@ async def telegram_webhook(request: Request):
     except Exception as e:
         logger.error(f"处理 Webhook 请求时发生错误: {e}")
         return Response(status_code=500)
-
-# 如果直接执行此脚本，则使用 Uvicorn 启动 FastAPI 服务器
-if __name__ == "__main__":
-    import uvicorn
-    # 为了方便本地测试，这里使用了一个范例 Webhook URL
-    # 在部署到服务器时，请确保 WEBHOOK_URL 已经正确设置
-    if not os.environ.get('WEBHOOK_URL'):
-        print("未侦测到 WEBHOOK_URL 环境变量，将使用范例值进行本地测试。")
-        os.environ['WEBHOOK_URL'] = 'http://localhost:5000'
-    uvicorn.run(app, host="0.0.0.0", port=PORT)
