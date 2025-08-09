@@ -1,4 +1,5 @@
 # bot.py - 修正后的 Telegram 机器人代码，使用 FastAPI 框架
+# This file has been updated to ensure all language welcome messages are consistent.
 
 import asyncio
 import logging
@@ -195,7 +196,13 @@ LANGUAGES = {
         'download_app_mk_title': "MK Sports",
         'game_qu_name': "quSports",
         'game_mk_name': "MK Sports",
-        'welcome_text_html': "Welcome to quSports {user}, click on the menu below to interact."
+        'welcome_text_html': "🎉 Hey, {user}! Welcome to quSports⚽️MKsports. I'm your dedicated service assistant, please select the service you need below.\n\n"
+                                 "📢 Advertising Channel: <a href='https://t.me/QTY18'>https://t.me/QTY18</a>\n"
+                                 "📢 Promotion Channel: <a href='https://t.me/AISOUOO'>https://t.me/AISOUOO</a>\n\n"
+                                 "💬 Official Customer Service:\n"
+                                 "1️⃣ <a href='https://t.me/QTY01'>@QTY01</a>\n"
+                                 "2️⃣ <a href='https://t.me/QTY15'>@QTY15</a>\n"
+                                 "3️⃣ <a href='https://t.me/dongba222'>@dongba222</a>"
     },
     'th': {
         'welcome': "ยินดีต้อนรับสู่ quSports {user} คลิกที่เมนูด้านล่างเพื่อโต้ตอบ",
@@ -264,7 +271,13 @@ LANGUAGES = {
         'download_app_mk_title': "MK Sports",
         'game_qu_name': "quSports",
         'game_mk_name': "MK Sports",
-        'welcome_text_html': "ยินดีต้อนรับสู่ quSports {user} คลิกที่เมนูด้านล่างเพื่อโต้ตอบ."
+        'welcome_text_html': "🎉 สวัสดีครับ {user}! ยินดีต้อนรับสู่ quSports⚽️MKsports. ผมคือผู้ช่วยบริการพิเศษของคุณ, กรุณาเลือกบริการที่คุณต้องการด้านล่าง\n\n"
+                                 "📢 ช่องทางการโฆษณา: <a href='https://t.me/QTY18'>https://t.me/QTY18</a>\n"
+                                 "📢 ช่องทางโปรโมชั่น: <a href='https://t.me/AISOUOO'>https://t.me/AISOUOO</a>\n\n"
+                                 "💬 บริการลูกค้าอย่างเป็นทางการ:\n"
+                                 "1️⃣ <a href='https://t.me/QTY01'>@QTY01</a>\n"
+                                 "2️⃣ <a href='https://t.me/QTY15'>@QTY15</a>\n"
+                                 "3️⃣ <a href='https://t.me/dongba222'>@dongba222</a>"
     },
     'vi': {
         'welcome': "Chào mừng đến với quSports {user}, nhấp vào menu bên dưới để tương tác.",
@@ -333,7 +346,13 @@ LANGUAGES = {
         'download_app_mk_title': "MK Sports",
         'game_qu_name': "quSports",
         'game_mk_name': "MK Sports",
-        'welcome_text_html': "Chào mừng đến với quSports {user}, nhấp vào menu bên dưới để tương tác."
+        'welcome_text_html': "🎉 Chào mừng {user}！Chào mừng đến với quSports⚽️MKsports. Tôi là trợ lý dịch vụ độc quyền của bạn, vui lòng chọn dịch vụ bạn cần bên dưới.\n\n"
+                                 "📢 Kênh quảng cáo: <a href='https://t.me/QTY18'>https://t.me/QTY18</a>\n"
+                                 "📢 Kênh khuyến mãi: <a href='https://t.me/AISOUOO'>https://t.me/AISOUOO</a>\n\n"
+                                 "💬 Dịch vụ khách hàng chính thức:\n"
+                                 "1️⃣ <a href='https://t.me/QTY01'>@QTY01</a>\n"
+                                 "2️⃣ <a href='https://t.me/QTY15'>@QTY15</a>\n"
+                                 "3️⃣ <a href='https://t.me/dongba222'>@dongba222</a>"
     }
 }
 
@@ -569,7 +588,7 @@ async def lifespan(app: FastAPI):
     ])
     logger.info("机器人命令已设置。")
 
-    # 启动 bot 应用程序，并设置 Webhook
+    # 设置 bot 应用程序，并设置 Webhook
     await application.bot.set_webhook(url=f"{WEBHOOK_URL}{WEBHOOK_URL_PATH}")
     logger.info(f"Webhook 已设置到: {WEBHOOK_URL}{WEBHOOK_URL_PATH}")
 
