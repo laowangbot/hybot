@@ -11,6 +11,17 @@ print("🚀 机器人启动中...")
 print("📅 当前时间:", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 print("🐍 Python版本:", os.sys.version)
 
+# 强制测试 - 如果这里出错，说明代码有问题
+try:
+    print("🔧 测试基本导入...")
+    import sys
+    print(f"Python路径: {sys.executable}")
+    print(f"当前工作目录: {os.getcwd()}")
+    print("✅ 基本导入测试通过")
+except Exception as e:
+    print(f"❌ 基本导入测试失败: {e}")
+    sys.exit(1)
+
 # 检查是否在Render环境中运行
 IS_RENDER = os.environ.get('RENDER', False)
 PORT = int(os.environ.get('PORT', 8080))
@@ -25,6 +36,7 @@ print(f"   RENDER_EXTERNAL_HOSTNAME: {os.environ.get('RENDER_EXTERNAL_HOSTNAME',
 # 如果在Render环境中，导入web相关模块
 if IS_RENDER:
     try:
+        print("🔄 尝试导入aiohttp...")
         from aiohttp import web
         WEB_AVAILABLE = True
         print("✅ aiohttp 导入成功，webhook模式可用")
