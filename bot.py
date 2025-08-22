@@ -163,153 +163,153 @@ LANGUAGES = {
         'game_qu_name': "趣体育",
         'game_mk_name': "MK体育",
     },
-    'en': {
-        'welcome': "Welcome to quSports {user}, click on the menu below to interact.",
-        'main_menu_prompt': "Please select an option from the main menu.",
-        'menu_account_info': "Register Account",
-        'menu_play_game': f"{BUTTON_EMOJIS['menu_play_game']}Play Game",
-        'menu_recharge': f"{BUTTON_EMOJIS['menu_advertising_channel']}Advertising Channel",
-        'menu_withdraw': f"{BUTTON_EMOJIS['menu_promotion_channel']}Promotion Channel",
-        'menu_invite_friend': f"{BUTTON_EMOJIS['menu_invite_friend']}Invite Friends",
-        'menu_customer_service': f"{BUTTON_EMOJIS['menu_customer_service']}Customer Service",
-        'menu_download_app': f"{BUTTON_EMOJIS['menu_download_app']}Download APP",
-        'menu_change_lang': f"{BUTTON_EMOJIS['menu_change_lang']}Change Language",
-        'menu_self_register': f"{BUTTON_EMOJIS['menu_self_register']}Self-Registration", # New
-        'menu_mainland_user': f"{BUTTON_EMOJIS['menu_mainland_user']}Mainland User", # New
-        'menu_overseas_user': f"{BUTTON_EMOJIS['menu_overseas_user']}Overseas User", # New
-        'live_customer_service_title': "Please click on a customer service specialist to contact:",
-        'customer_specialist_1': "Specialist 1",
-        'customer_specialist_2': "Specialist 2",
-        'customer_specialist_3': "Specialist 3",
-        'download_app_info': "Click the buttons below to download the app:",
-        'download_android': "Android Download",
-        'download_ios': "iOS Download",
-        'invite_title': "Invite friends and earn money together!",
-        'invite_message': "By inviting friends to register through your exclusive link, you can get rich rewards!",
-        'invite_link_heading': "Your invitation link  ",
-        'invite_link_qu': "quSports (Mainland China Users)\nhttps://www.qu32.vip:30011/entry/register/?i_code=6944642",
-        'invite_link_mk': "MK Sports (Global Users)\nhttps://www.mk2001.com:9081/CHS",
-        'language_selection': "Please select your language:",
-        'lang_changed': "Language switched successfully!",
-        'welcome_to_sports': "Welcome to quSports!",
-        'official_group_handle': "Official Group: @quyuyule",
-        'official_channel_handle': "Official Channel: @qu337",
-        'customer_service_handle': "Official Customer Service: @maoyiyule",
-        'account_info_title': "My Account",
-        'member_id': "Member ID: {user_id}",
-        'member_account': "Member Account: {username}",
-        'balance': "Account Balance: {balance:.2f}CNY",
-        'vip_level': "Member Level: VIP{vip}",
-        'advertising_channel_prompt': "Click the button below to enter the advertising channel:",
-        'promotion_channel_prompt': "Click the button below to enter the promotion channel:",
-        'play_game_choice_prompt': "Please select the game you want to enter:",
-        'register_info_title': "Welcome to quSports⚽️MKsports",
-        'register_info_channel1': "Advertising Channel",
-        'register_info_channel2': "Promotion Channel",
-        'register_info_cs1': "Official Customer Service 1",
-        'register_info_cs2': "Official Customer Service 2",
-        'register_info_cs3': "Official Customer Service 3",
-        'register_info_qu_link_text': "quSports (Mainland China Users)",
-        'register_info_mk_link_text': "MK Sports (Global Users)",
-        'register_info_notice_prompt': "Please click the button below to register:", # 新增
-        'register_info_download_notice': """
-        📝 <b>Registration Notes</b>
-        1️⃣ <b>Do Not Download the APP Directly</b>
-        ‼<b>★ Important Reminder ★</b>‼ Please complete account registration first → Register for benefits with a specialist → Then download the APP
-
-        2️⃣ <b>Registration Requires Real Name Information</b>
-        We are a legitimate platform. To ensure smooth withdrawals, please use your real name for registration.
-
-        3️⃣ <b>Mobile Number and Name Must Match</b>
-        The registered mobile number must match the real name information.
-
-        4️⃣ <b>Android APP cannot be opened</b>
-        If you encounter problems, please contact a specialist for assistance.
-        """,
-        'download_app_qu_title': "quSports",
-        'download_app_mk_title': "MK Sports",
-        'game_qu_name': "quSports",
-        'game_mk_name': "MK Sports",
-    },
-    'th': {
-        'welcome': "ยินดีต้อนรับสู่ quSports {user} คลิกที่เมนูด้านล่างเพื่อโต้ตอบ",
-        'main_menu_prompt': "กรุณาเลือกตัวเลือกจากเมนูหลัก",
-        'menu_account_info': "ลงทะเบียนบัญชี",
-        'menu_play_game': f"{BUTTON_EMOJIS['menu_play_game']}เข้าสู่เกม",
-        'menu_recharge': f"{BUTTON_EMOJIS['menu_advertising_channel']}ช่องทางการโฆษณา",
-        'menu_withdraw': f"{BUTTON_EMOJIS['menu_promotion_channel']}ช่องทางโปรโมชั่น",
-        'menu_invite_friend': f"{BUTTON_EMOJIS['menu_invite_friend']}เชิญเพื่อน",
-        'menu_customer_service': f"{BUTTON_EMOJIS['menu_customer_service']}บริการลูกค้า",
-        'menu_download_app': f"{BUTTON_EMOJIS['menu_download_app']}ดาวน์โหลดแอป",
-        'menu_change_lang': f"{BUTTON_EMOJIS['menu_change_lang']}เปลี่ยนภาษา",
-        'menu_self_register': f"{BUTTON_EMOJIS['menu_self_register']}ลงทะเบียนด้วยตนเอง", # New
-        'menu_mainland_user': f"{BUTTON_EMOJIS['menu_mainland_user']}ผู้ใช้ในจีนแผ่นดินใหญ่", # New
-        'menu_overseas_user': f"{BUTTON_EMOJIS['menu_overseas_user']}ผู้ใช้ทั่วโลก", # New
-        'live_customer_service_title': "กรุณาคลิกที่ผู้เชี่ยวชาญบริการลูกค้าด้านล่างเพื่อติดต่อ:",
-        'customer_specialist_1': "ผู้เชี่ยวชาญ 1",
-        'customer_specialist_2': "ผู้เชี่ยวชาญ 2",
-        'customer_specialist_3': "ผู้เชี่ยวชาญ 3",
-        'download_app_info': "คลิกปุ่มด้านล่างเพื่อดาวน์โหลดแอป:",
-        'download_android': "ดาวน์โหลด Android",
-        'download_ios': "ดาวน์โหลด iOS",
-        'invite_title': "เชิญเพื่อนและรับเงินด้วยกัน!",
-        'invite_message': "โดยการเชิญเพื่อนให้ลงทะเบียนผ่านลิงก์พิเศษของคุณ คุณจะได้รับรางวัลมากมาย!",
-        'invite_link_heading': "ลิงก์เชิญ 🔗",
-        'invite_link_qu': "quSports (ผู้ใช้ในจีน)\nhttps://www.qu32.vip:30011/entry/register/?i_code=6944642",
-        'invite_link_mk': "MK Sports (ผู้ใช้ทั่วโลก)\nhttps://www.mk2001.com:9081/CHS",
-        'language_selection': "กรุณาเลือกภาษาของคุณ:",
-        'lang_changed': "เปลี่ยนภาษาเรียบร้อยแล้ว!",
-        'welcome_to_sports': "ยินดีต้อนรับสู่ quSports!",
-        'official_group_handle': "กลุ่มทางการ: @quyuyule",
-        'official_channel_handle': "ช่องทางการ: @qu337",
-        'customer_service_handle': "บริการลูกค้าทางการ: @maoyiyule",
-        'account_info_title': "บัญชีของฉัน",
-        'member_id': "ID สมาชิก: {user_id}",
-        'member_account': "บัญชีสมาชิก: {username}",
-        'balance': "ยอดคงเหลือในบัญชี: {balance:.2f}CNY",
-        'vip_level': "ระดับ VIP: VIP{vip}",
-        'advertising_channel_prompt': "คลิกปุ่มด้านล่างเพื่อเข้าสู่ช่องทางการโฆษณา:",
-        'promotion_channel_prompt': "คลิกปุ่มด้านล่างเพื่อเข้าสู่ช่องทางโปรโมชั่น:",
-        'play_game_choice_prompt': "กรุณาเลือกเกมที่คุณต้องการเข้า:",
-        'register_info_title': "ยินดีต้อนรับสู่ quSports⚽️MKsports",
-        'register_info_channel1': "ช่องทางการโฆษณา",
-        'register_info_channel2': "ช่องทางโปรโมชั่น",
-        'register_info_cs1': "บริการลูกค้า 1",
-        'register_info_cs2': "บริการลูกค้า 2",
-        'register_info_cs3': "บริการลูกค้า 3",
-        'register_info_qu_link_text': "quSports (ผู้ใช้ในจีน)",
-        'register_info_mk_link_text': "MK Sports (ผู้ใช้ทั่วโลก)",
-        'register_info_notice_prompt': "กรุณาคลิกปุ่มด้านล่างเพื่อลงทะเบียน:", # 新增
-        'register_info_download_notice': """
-        📝 <b>ข้อควรทราบเกี่ยวกับการลงทะเบียน</b>
-        1️⃣ <b>ห้ามดาวน์โหลดแอปโดยตรง</b>
-        ‼<b>★ ข้อควรจำที่สำคัญ ★</b>‼ โปรดลงทะเบียนบัญชีให้เรียบร้อยก่อน → ลงทะเบียนรับสิทธิประโยชน์กับผู้เชี่ยวชาญ → จากนั้นจึงดาวน์โหลดแอป
-
-        2️⃣ <b>การลงทะเบียนต้องใช้ชื่อจริง</b>
-        เราเป็นแพลตฟอร์มที่ถูกต้องตามกฎหมาย เพื่อให้การถอนเงินเป็นไปอย่างราบรื่น โปรดใช้ชื่อจริงในการลงทะเบียน.
-
-        3️⃣ <b>หมายเลขโทรศัพท์และชื่อจริงต้องตรงกัน</b>
-        หมายเลขโทรศัพท์ที่ลงทะเบียนจะต้องตรงกับข้อมูลชื่อจริง.
-
-        4️⃣ <b>ไม่สามารถเปิดแอป Android ได้</b>
-        หากพบปัญหา โปรดติดต่อผู้เชี่ยวชาญเพื่อขอความช่วยเหลือ.
-        """,
-        'download_app_qu_title': "quSports",
-        'download_app_mk_title': "MK Sports",
-        'game_qu_name': "quSports",
-        'game_mk_name': "MK Sports",
-    },
+         'en': {
+         'welcome': "Welcome to quSports {user}, click on the menu below to interact.",
+         'main_menu_prompt': "Please select an option from the main menu.",
+         'menu_account_info': "Register Account",
+         'menu_play_game': f"{BUTTON_EMOJIS['menu_play_game']}Play Game",
+         'menu_recharge': f"{BUTTON_EMOJIS['menu_advertising_channel']}QTY Official Investment",
+         'menu_withdraw': f"{BUTTON_EMOJIS['menu_promotion_channel']}2026 World Cup🏆Football Basketball Picks Five Major Leagues",
+         'menu_invite_friend': f"{BUTTON_EMOJIS['menu_invite_friend']}Invite Friends",
+         'menu_customer_service': f"{BUTTON_EMOJIS['menu_customer_service']}Customer Service",
+         'menu_download_app': f"{BUTTON_EMOJIS['menu_download_app']}Download APP",
+         'menu_change_lang': f"{BUTTON_EMOJIS['menu_change_lang']}LANGUAGE",
+         'menu_self_register': f"{BUTTON_EMOJIS['menu_self_register']}Self-Registration", # New
+         'menu_mainland_user': f"{BUTTON_EMOJIS['menu_mainland_user']}Mainland User", # New
+         'menu_overseas_user': f"{BUTTON_EMOJIS['menu_overseas_user']}Overseas User", # New
+         'live_customer_service_title': "Please click on a customer service specialist to contact:",
+         'customer_specialist_1': "Specialist 1",
+         'customer_specialist_2': "Specialist 2",
+         'customer_specialist_3': "Specialist 3",
+         'download_app_info': "Click the buttons below to download the app:",
+         'download_android': "Android Download",
+         'download_ios': "iOS Download",
+         'invite_title': "Invite friends and earn money together!",
+         'invite_message': "By inviting friends to register through your exclusive link, you can get rich rewards!",
+         'invite_link_heading': "Your invitation link  ",
+         'invite_link_qu': "quSports (Mainland China Users)\nhttps://www.qu32.vip:30011/entry/register/?i_code=6944642",
+         'invite_link_mk': "MK Sports (Global Users)\nhttps://www.mk2001.com:9081/CHS",
+         'language_selection': "Please select your language:",
+         'lang_changed': "Language switched successfully!",
+         'welcome_to_sports': "Welcome to quSports!",
+         'official_group_handle': "Official Group: @quyuyule",
+         'official_channel_handle': "Official Channel: @qu337",
+         'customer_service_handle': "Official Customer Service: @maoyiyule",
+         'account_info_title': "My Account",
+         'member_id': "Member ID: {user_id}",
+         'member_account': "Member Account: {username}",
+         'balance': "Account Balance: {balance:.2f}CNY",
+         'vip_level': "Member Level: VIP{vip}",
+         'advertising_channel_prompt': "Click the button below to enter the advertising channel:",
+         'promotion_channel_prompt': "Click the button below to enter the promotion channel:",
+         'play_game_choice_prompt': "Please select the game you want to enter:",
+         'register_info_title': "Welcome to quSports⚽️MKsports",
+         'register_info_channel1': "Advertising Channel",
+         'register_info_channel2': "Promotion Channel",
+         'register_info_cs1': "Official Customer Service 1",
+         'register_info_cs2': "Official Customer Service 2",
+         'register_info_cs3': "Official Customer Service 3",
+         'register_info_qu_link_text': "quSports (Mainland China Users)",
+         'register_info_mk_link_text': "MK Sports (Global Users)",
+         'register_info_notice_prompt': "Please click the button below to register:", # 新增
+         'register_info_download_notice': """
+         📝 <b>Registration Notes</b>
+         1️⃣ <b>Do Not Download the APP Directly</b>
+         ‼<b>★ Important Reminder ★</b>‼ Please complete account registration first → Register for benefits with a specialist → Then download the APP
+ 
+         2️⃣ <b>Registration Requires Real Name Information</b>
+         We are a legitimate platform. To ensure smooth withdrawals, please use your real name for registration.
+ 
+         3️⃣ <b>Mobile Number and Name Must Match</b>
+         The registered mobile number must match the real name information.
+ 
+         4️⃣ <b>Android APP cannot be opened</b>
+         If you encounter problems, please contact a specialist for assistance.
+         """,
+         'download_app_qu_title': "quSports",
+         'download_app_mk_title': "MK Sports",
+         'game_qu_name': "quSports",
+         'game_mk_name': "MK Sports",
+     },
+         'th': {
+         'welcome': "ยินดีต้อนรับสู่ quSports {user} คลิกที่เมนูด้านล่างเพื่อโต้ตอบ",
+         'main_menu_prompt': "กรุณาเลือกตัวเลือกจากเมนูหลัก",
+         'menu_account_info': "ลงทะเบียนบัญชี",
+         'menu_play_game': f"{BUTTON_EMOJIS['menu_play_game']}เข้าสู่เกม",
+         'menu_recharge': f"{BUTTON_EMOJIS['menu_advertising_channel']}QTY ช่องทางการลงทุนอย่างเป็นทางการ",
+         'menu_withdraw': f"{BUTTON_EMOJIS['menu_promotion_channel']}ฟุตบอลบาสเกตบอล 2026 ฟุตบอลโลก🏆เลือกห้าลีกใหญ่",
+         'menu_invite_friend': f"{BUTTON_EMOJIS['menu_invite_friend']}เชิญเพื่อน",
+         'menu_customer_service': f"{BUTTON_EMOJIS['menu_customer_service']}บริการลูกค้า",
+         'menu_download_app': f"{BUTTON_EMOJIS['menu_download_app']}ดาวน์โหลดแอป",
+         'menu_change_lang': f"{BUTTON_EMOJIS['menu_change_lang']}ภาษา", 
+         'menu_self_register': f"{BUTTON_EMOJIS['menu_self_register']}ลงทะเบียนด้วยตนเอง", # New
+         'menu_mainland_user': f"{BUTTON_EMOJIS['menu_mainland_user']}ผู้ใช้ในจีนแผ่นดินใหญ่", # New
+         'menu_overseas_user': f"{BUTTON_EMOJIS['menu_overseas_user']}ผู้ใช้ทั่วโลก", # New
+         'live_customer_service_title': "กรุณาคลิกที่ผู้เชี่ยวชาญบริการลูกค้าด้านล่างเพื่อติดต่อ:",
+         'customer_specialist_1': "ผู้เชี่ยวชาญ 1",
+         'customer_specialist_2': "ผู้เชี่ยวชาญ 2",
+         'customer_specialist_3': "ผู้เชี่ยวชาญ 3",
+         'download_app_info': "คลิกปุ่มด้านล่างเพื่อดาวน์โหลดแอป:",
+         'download_android': "ดาวน์โหลด Android",
+         'download_ios': "ดาวน์โหลด iOS",
+         'invite_title': "เชิญเพื่อนและรับเงินด้วยกัน!",
+         'invite_message': "โดยการเชิญเพื่อนให้ลงทะเบียนผ่านลิงก์พิเศษของคุณ คุณจะได้รับรางวัลมากมาย!",
+         'invite_link_heading': "ลิงก์เชิญ 🔗",
+         'invite_link_qu': "quSports (ผู้ใช้ในจีน)\nhttps://www.qu32.vip:30011/entry/register/?i_code=6944642",
+         'invite_link_mk': "MK Sports (ผู้ใช้ทั่วโลก)\nhttps://www.mk2001.com:9081/CHS",
+         'language_selection': "กรุณาเลือกภาษาของคุณ:",
+         'lang_changed': "เปลี่ยนภาษาเรียบร้อยแล้ว!",
+         'welcome_to_sports': "ยินดีต้อนรับสู่ quSports!",
+         'official_group_handle': "กลุ่มทางการ: @quyuyule",
+         'official_channel_handle': "ช่องทางการ: @qu337",
+         'customer_service_handle': "บริการลูกค้าทางการ: @maoyiyule",
+         'account_info_title': "บัญชีของฉัน",
+         'member_id': "ID สมาชิก: {user_id}",
+         'member_account': "บัญชีสมาชิก: {username}",
+         'balance': "ยอดคงเหลือในบัญชี: {balance:.2f}CNY",
+         'vip_level': "ระดับ VIP: VIP{vip}",
+         'advertising_channel_prompt': "คลิกปุ่มด้านล่างเพื่อเข้าสู่ช่องทางการโฆษณา:",
+         'promotion_channel_prompt': "คลิกปุ่มด้านล่างเพื่อเข้าสู่ช่องทางโปรโมชั่น:",
+         'play_game_choice_prompt': "กรุณาเลือกเกมที่คุณต้องการเข้า:",
+         'register_info_title': "ยินดีต้อนรับสู่ quSports⚽️MKsports",
+         'register_info_channel1': "ช่องทางการโฆษณา",
+         'register_info_channel2': "ช่องทางโปรโมชั่น",
+         'register_info_cs1': "บริการลูกค้า 1",
+         'register_info_cs2': "บริการลูกค้า 2",
+         'register_info_cs3': "บริการลูกค้า 3",
+         'register_info_qu_link_text': "quSports (ผู้ใช้ในจีน)",
+         'register_info_mk_link_text': "MK Sports (ผู้ใช้ทั่วโลก)",
+         'register_info_notice_prompt': "กรุณาคลิกปุ่มด้านล่างเพื่อลงทะเบียน:", # 新增
+         'register_info_download_notice': """
+         📝 <b>ข้อควรทราบเกี่ยวกับการลงทะเบียน</b>
+         1️⃣ <b>ห้ามดาวน์โหลดแอปโดยตรง</b>
+         ‼<b>★ ข้อควรจำที่สำคัญ ★</b>‼ โปรดลงทะเบียนบัญชีให้เรียบร้อยก่อน → ลงทะเบียนรับสิทธิประโยชน์กับผู้เชี่ยวชาญ → จากนั้นจึงดาวน์โหลดแอป
+ 
+         2️⃣ <b>การลงทะเบียนต้องใช้ชื่อจริง</b>
+         เราเป็นแพลตฟอร์มที่ถูกต้องตามกฎหมาย เพื่อให้การถอนเงินเป็นไปอย่างราบรื่น โปรดใช้ชื่อจริงในการลงทะเบียน.
+ 
+         3️⃣ <b>หมายเลขโทรศัพท์และชื่อจริงต้องตรงกัน</b>
+         หมายเลขโทรศัพท์ที่ลงทะเบียนจะต้องตรงกับข้อมูลชื่อจริง.
+ 
+         4️⃣ <b>ไม่สามารถเปิดแอป Android ได้</b>
+         หากพบปัญหา โปรดติดต่อผู้เชี่ยวชาญเพื่อขอความช่วยเหลือ.
+         """,
+         'download_app_qu_title': "quSports",
+         'download_app_mk_title': "MK Sports",
+         'game_qu_name': "quSports",
+         'game_mk_name': "MK Sports",
+     },
     'vi': {
         'welcome': "Chào mừng đến với quSports {user}, nhấp vào menu bên dưới để tương tác.",
         'main_menu_prompt': "Vui lòng chọn một tùy chọn từ menu chính.",
         'menu_account_info': "Đăng ký tài khoản",
         'menu_play_game': f"{BUTTON_EMOJIS['menu_play_game']}Vào trò chơi",
-        'menu_recharge': f"{BUTTON_EMOJIS['menu_advertising_channel']}Kênh quảng cáo",
-        'menu_withdraw': f"{BUTTON_EMOJIS['menu_promotion_channel']}Kênh khuyến mãi",
+        'menu_recharge': f"{BUTTON_EMOJIS['menu_advertising_channel']}QTY Kênh đầu tư chính thức",
+        'menu_withdraw': f"{BUTTON_EMOJIS['menu_promotion_channel']}Bóng đá Bóng rổ 2026 World Cup🏆Chọn năm giải đấu lớn",
         'menu_invite_friend': f"{BUTTON_EMOJIS['menu_invite_friend']}Mời bạn bè",
         'menu_customer_service': f"{BUTTON_EMOJIS['menu_customer_service']}Dịch vụ khách hàng",
         'menu_download_app': f"{BUTTON_EMOJIS['menu_download_app']}Tải ứng dụng",
-        'menu_change_lang': f"{BUTTON_EMOJIS['menu_change_lang']}Thay đổi ngôn ngữ",
+        'menu_change_lang': f"{BUTTON_EMOJIS['menu_change_lang']}NGÔN NGỮ",
         'menu_self_register': f"{BUTTON_EMOJIS['menu_self_register']}Tự đăng ký", # New
         'menu_mainland_user': f"{BUTTON_EMOJIS['menu_mainland_user']}Người dùng Trung Quốc đại lục", # New
         'menu_overseas_user': f"{BUTTON_EMOJIS['menu_overseas_user']}Người dùng toàn cầu", # New
@@ -507,13 +507,22 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_data[user_id] = 'zh-CN'
 
     new_welcome_text = (
-        f"🎉 嗨，{user.mention_html()}！欢迎来到趣体育⚽️MKsports。我是您的专属服务助手，请在下方选择您需要的服务。\n\n"
-        f"📢 招商频道： <a href='https://t.me/QTY18'>https://t.me/QTY18</a>\n"
-        f"📢 推单频道： <a href='https://t.me/SJB33'>https://t.me/SJB33</a>\n\n"
-        f"💬 官方客服：\n"
-        f"1️⃣ <a href='https://t.me/QTY01'>@QTY01</a>\n"
-        f"2️⃣ <a href='https://t.me/QTY15'>@QTY15</a>\n"
-        f"3️⃣ <a href='https://t.me/QTY04'>@QTY04</a>"
+        f"限时免费赠送活动（30天）\n\n"
+        f"🎁 活动福利\n"
+        f"注册并充值成功，即获赠老湿永久VIP会员！\n"
+        f"✅ 包含13个频道\n"
+        f"✅ 超百万部精品视频\n"
+        f"💰 价值 368 元 VIP 会员\n\n"
+        f"💬 领取方式\n"
+        f"注册充值成功后，请立即联系人工客服领取您的专属福利。\n\n"
+        f"📢 趣体育官方招商\n"
+        f" 👉 https://t.me/QTY18\n\n"
+        f"📢 2026世界杯🏆足球篮球推单五大联赛\n"
+        f" 👉 https://t.me/SJB33\n\n"
+        f"💬 官方客服\n"
+        f"1️⃣ @QTY01 (https://t.me/QTY01)\n"
+        f"2️⃣ @QTY15 (https://t.me/QTY15)\n"
+        f"3️⃣ @QTY04 (https://t.me/QTY04)"
     )
 
     await update.message.reply_html(
@@ -604,13 +613,13 @@ async def self_register_handler(update: Update, context: ContextTypes.DEFAULT_TY
         f"💬 <b>领取方式</b>\n"
         f"注册充值成功后，请立即联系人工客服领取您的专属福利。\n\n"
         f"📢 <b>趣体育官方招商</b>\n"
-        f" 👉 <a href='https://t.me/QTY18'>https://t.me/QTY18</a>\n\n"
+        f" 👉 https://t.me/QTY18\n\n"
         f"📢 <b>2026世界杯🏆足球篮球推单五大联赛</b>\n"
-        f" 👉 <a href='https://t.me/SJB33'>https://t.me/SJB33</a>\n\n"
+        f" 👉 https://t.me/SJB33\n\n"
         f"💬 <b>官方客服</b>\n"
-        f"1️⃣ @QTY01 (https://t.me/QTY01)\n"
-        f" 2️⃣ @QTY15 (https://t.me/QTY15)\n"
-        f"3️⃣ @QTY04 (https://t.me/QTY04)"
+        f"1️⃣ <a href='https://t.me/QTY01'>@QTY01</a>\n"
+        f"2️⃣ <a href='https://t.me/QTY15'>@QTY15</a>\n"
+        f"3️⃣ <a href='https://t.me/QTY04'>@QTY04</a>"
     )
     
     full_message = f"{welcome_message}\n{message_text}"
