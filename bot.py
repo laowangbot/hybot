@@ -702,7 +702,7 @@ async def handle_text_messages(update: Update, context: ContextTypes.DEFAULT_TYP
         await message.reply_text(texts['main_menu_prompt'], reply_markup=get_main_menu_keyboard(user_id))
 
 # 19. 主函数：运行机器人
-def main():
+async def main():
     """启动机器人"""
     application = Application.builder().token(BOT_TOKEN).build()
 
@@ -724,7 +724,7 @@ def main():
     application.add_handler(CallbackQueryHandler(handle_language_callback, pattern='^lang_'))
 
     # 设置 M 菜单中的命令
-    application.bot.set_my_commands([
+    await application.bot.set_my_commands([
         BotCommand("start", "启动机器人"),
         BotCommand("ping", "检查机器人状态"),
         BotCommand("change_language", "切换语言"),
@@ -751,7 +751,7 @@ def main():
         
         # 设置webhook
         webhook_url = f"https://{os.environ.get('RENDER_EXTERNAL_HOSTNAME', 'localhost')}/webhook/{BOT_TOKEN}"
-        application.bot.set_webhook(url=webhook_url)
+        await application.bot.set_webhook(url=webhook_url)
         logger.info(f"Webhook已设置: {webhook_url}")
         
         # 启动web服务器
@@ -762,4 +762,4 @@ def main():
         application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
