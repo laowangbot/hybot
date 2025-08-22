@@ -6,9 +6,48 @@ from datetime import datetime, timedelta
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton, BotCommand
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters, CallbackQueryHandler
 
+# 检查是否在Render环境中运行
+IS_RENDER = os.environ.get('RENDER', False)
+PORT = int(os.environ.get('PORT', 8080))
+
+# 如果在Render环境中，导入web相关模块
+if IS_RENDER:
+    try:
+        from aiohttp import web
+        WEB_AVAILABLE = True
+    except ImportError:
+        WEB_AVAILABLE = False
+        logging.warning("aiohttp not available, webhook mode disabled")
+else:
+    WEB_AVAILABLE = False
+
+# 健康检查端点
+async def health_check(request):
+    """健康检查端点，用于Render平台监控"""
+    update_activity()
+    return web.Response(text="OK", status=200)
+
+# Webhook处理函数
+async def webhook_handler(request):
+    """处理Telegram webhook请求"""
+    try:
+        data = await request.json()
+        update = Update.de_json(data, request.app['dispatcher'])
+        await request.app['dispatcher'].process_update(update)
+        return web.Response(status=200)
+    except Exception as e:
+        logger.error(f"Webhook处理错误: {e}")
+        return web.Response(status=500)
+
 # 1. 设置你的 Bot Token
 # 注意：出于安全考虑，强烈建议将 Token 存储在环境变量中，而不是直接写在代码里。
-BOT_TOKEN = '8142344692:AAHgq1MQjZ50K445Vh7WhWyopNVWiY1F4PI' 
+BOT_TOKEN = os.environ.get('BOT_TOKEN', '8142344692:AAHgq1MQjZ50K445Vh7WhWyopNVWiY1F4PI')
+
+# 检查BOT_TOKEN是否设置
+if BOT_TOKEN == "YOUR_BOT_TOKEN_HERE":
+    logging.error("请设置BOT_TOKEN环境变量或在代码中设置正确的token！")
+    if IS_RENDER:
+        exit(1) 
 
 # 2. 启用日志记录，方便调试
 logging.basicConfig(
@@ -662,12 +701,33 @@ def main():
         BotCommand("customer_service", "人工客服"),
     ])
 
-    logger.info("Bot is polling...")
-    
     # 启动心跳任务
     application.create_task(start_heartbeat(application))
     
-    application.run_polling(allowed_updates=Update.ALL_TYPES)
+    if IS_RENDER and WEB_AVAILABLE:
+        # Render环境：使用webhook
+        logger.info("🚀 在Render环境中启动，使用webhook模式")
+        
+        # 创建web应用
+        app = web.Application()
+        app['bot'] = application.bot
+        app['dispatcher'] = application
+        
+        # 添加路由
+        app.router.add_get('/', health_check)
+        app.router.add_post(f'/webhook/{BOT_TOKEN}', webhook_handler)
+        
+        # 设置webhook
+        webhook_url = f"https://{os.environ.get('RENDER_EXTERNAL_HOSTNAME', 'localhost')}/webhook/{BOT_TOKEN}"
+        application.bot.set_webhook(url=webhook_url)
+        logger.info(f"Webhook已设置: {webhook_url}")
+        
+        # 启动web服务器
+        web.run_app(app, host='0.0.0.0', port=PORT)
+    else:
+        # 本地环境：使用polling
+        logger.info("🚀 在本地环境中启动，使用polling模式")
+        application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == "__main__":
     main()

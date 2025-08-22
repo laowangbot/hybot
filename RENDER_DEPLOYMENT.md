@@ -13,7 +13,7 @@
 ### 第一步：准备代码
 
 确保您的代码已经推送到 GitHub 仓库，包含以下文件：
-- `render_bot.py` - Render 专用机器人代码
+- `bot.py` - 机器人主程序（已包含Render部署支持）
 - `requirements.txt` - Python 依赖
 - `runtime.txt` - Python 版本
 - `render.yaml` - Render 配置文件
@@ -33,7 +33,7 @@
    - **Name**: `hybot-telegram` (或您喜欢的名称)
    - **Environment**: `Python 3`
    - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `python render_bot.py`
+   - **Start Command**: `python bot.py`
    - **Plan**: `Free` (免费计划)
 
 ### 第三步：设置环境变量
