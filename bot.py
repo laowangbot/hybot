@@ -144,20 +144,20 @@ LANGUAGES = {
         'register_info_qu_link_text': "趣体育（大陆用户注册）",
         'register_info_mk_link_text': "MK体育（全球用户）",
         'register_info_notice_prompt': "请点击下方按钮前往注册：", # 新增
-        'register_info_download_notice': """
-        📝 <b>注册注意事项</b>
-        1️⃣ <b>请勿直接下载APP</b>
-        ‼️<b>★ 重要提醒 ★</b>‼️ 请先完成账号注册 → 由专员登记福利 → 再下载APP
+                 'register_info_download_notice': """
+📝 <b>注册注意事项</b>
+1️⃣ <b>请勿直接下载APP</b>
+‼️<b>★ 重要提醒 ★</b>‼️ 请先完成账号注册 → 由专员登记福利 → 再下载APP
 
-        2️⃣ <b>注册需使用实名信息</b>
-        我们是正规平台，为确保顺利提现，请务必使用真实姓名注册。
+2️⃣ <b>注册需使用实名信息</b>
+我们是正规平台，为确保顺利提现，请务必使用真实姓名注册。
 
-        3️⃣ <b>手机号与实名一致</b>
-        注册手机号必须与实名信息相符。
+3️⃣ <b>手机号与实名一致</b>
+注册手机号必须与实名信息相符。
 
-        4️⃣ <b>安卓APP无法打开</b>
-        如遇问题，请联系专员协助处理。
-        """,
+4️⃣ <b>安卓APP无法打开</b>
+如遇问题，请联系专员协助处理。
+""",
         'download_app_qu_title': "趣体育",
         'download_app_mk_title': "MK体育",
         'game_qu_name': "趣体育",
@@ -520,9 +520,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"📢 2026世界杯🏆足球篮球推单五大联赛\n"
         f" 👉 https://t.me/SJB33\n\n"
         f"💬 官方客服\n"
-        f"1️⃣ @QTY01 (https://t.me/QTY01)\n"
-        f"2️⃣ @QTY15 (https://t.me/QTY15)\n"
-        f"3️⃣ @QTY04 (https://t.me/QTY04)"
+        f"1️⃣ @QTY01\n"
+        f"2️⃣ @QTY15\n"
+        f"3️⃣ @QTY04"
     )
 
     await update.message.reply_html(
