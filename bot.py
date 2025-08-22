@@ -736,9 +736,6 @@ def main():
         BotCommand("customer_service", "人工客服"),
     ])
 
-    # 启动心跳任务
-    application.create_task(start_heartbeat(application))
-    
     if IS_RENDER and WEB_AVAILABLE:
         # Render环境：使用webhook
         logger.info("🚀 在Render环境中启动，使用webhook模式")
