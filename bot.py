@@ -10,16 +10,26 @@ from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandl
 IS_RENDER = os.environ.get('RENDER', False)
 PORT = int(os.environ.get('PORT', 8080))
 
+# 添加调试信息
+print(f"🔍 调试信息:")
+print(f"   IS_RENDER: {IS_RENDER}")
+print(f"   PORT: {PORT}")
+print(f"   BOT_TOKEN: {'已设置' if os.environ.get('BOT_TOKEN') else '未设置'}")
+print(f"   RENDER_EXTERNAL_HOSTNAME: {os.environ.get('RENDER_EXTERNAL_HOSTNAME', '未设置')}")
+
 # 如果在Render环境中，导入web相关模块
 if IS_RENDER:
     try:
         from aiohttp import web
         WEB_AVAILABLE = True
-    except ImportError:
+        logging.info("✅ aiohttp 导入成功，webhook模式可用")
+    except ImportError as e:
         WEB_AVAILABLE = False
-        logging.warning("aiohttp not available, webhook mode disabled")
+        logging.warning(f"⚠️ aiohttp 导入失败: {e}，webhook模式已禁用")
+        logging.warning("将使用polling模式运行")
 else:
     WEB_AVAILABLE = False
+    logging.info("🌐 本地环境，使用polling模式")
 
 # 这些函数将在后面定义
 
