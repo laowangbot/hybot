@@ -749,6 +749,9 @@ async def main():
         app.router.add_get('/', health_check)
         app.router.add_post(f'/webhook/{BOT_TOKEN}', webhook_handler)
         
+        # 初始化Application（webhook模式必需）
+        await application.initialize()
+        
         # 设置webhook
         webhook_url = f"https://{os.environ.get('RENDER_EXTERNAL_HOSTNAME', 'localhost')}/webhook/{BOT_TOKEN}"
         await application.bot.set_webhook(url=webhook_url)
