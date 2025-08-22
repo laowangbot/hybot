@@ -6,6 +6,11 @@ from datetime import datetime, timedelta
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton, BotCommand
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters, CallbackQueryHandler
 
+# 添加测试输出
+print("🚀 机器人启动中...")
+print("📅 当前时间:", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+print("🐍 Python版本:", os.sys.version)
+
 # 检查是否在Render环境中运行
 IS_RENDER = os.environ.get('RENDER', False)
 PORT = int(os.environ.get('PORT', 8080))
@@ -22,14 +27,20 @@ if IS_RENDER:
     try:
         from aiohttp import web
         WEB_AVAILABLE = True
+        print("✅ aiohttp 导入成功，webhook模式可用")
         logging.info("✅ aiohttp 导入成功，webhook模式可用")
     except ImportError as e:
         WEB_AVAILABLE = False
+        print(f"⚠️ aiohttp 导入失败: {e}，webhook模式已禁用")
+        print("将使用polling模式运行")
         logging.warning(f"⚠️ aiohttp 导入失败: {e}，webhook模式已禁用")
         logging.warning("将使用polling模式运行")
 else:
     WEB_AVAILABLE = False
+    print("🌐 本地环境，使用polling模式")
     logging.info("🌐 本地环境，使用polling模式")
+
+print("🔧 继续初始化...")
 
 # 这些函数将在后面定义
 
