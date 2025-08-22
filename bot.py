@@ -615,8 +615,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"📢 2026世界杯🏆足球篮球推单五大联赛\n"
         f" 👉 https://t.me/SJB33\n\n"
         f"💬 官方客服\n"
-        f"1️⃣ @qty772\n"
-        f"2️⃣ @qty772\n"
+        f"1️⃣ @QTY01\n"
+        f"2️⃣ @QTY15\n"
         f"3️⃣ @qty772"
     )
 
@@ -674,9 +674,9 @@ async def customer_service(update: Update, context: ContextTypes.DEFAULT_TYPE):
     update_visitor_stats(user_id)
     live_cs_title = get_text(user_id, 'live_customer_service_title')
     keyboard = [
-                 [InlineKeyboardButton(get_text(user_id, 'customer_specialist_1'), url='https://t.me/qty772')],
-         [InlineKeyboardButton(get_text(user_id, 'customer_specialist_2'), url='https://t.me/qty772')],
-         [InlineKeyboardButton(get_text(user_id, 'customer_specialist_3'), url='https://t.me/qty772')],
+        [InlineKeyboardButton(get_text(user_id, 'customer_specialist_1'), url='https://t.me/QTY01')],
+        [InlineKeyboardButton(get_text(user_id, 'customer_specialist_2'), url='https://t.me/QTY15')],
+        [InlineKeyboardButton(get_text(user_id, 'customer_specialist_3'), url='https://t.me/qty772')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await message.reply_html(text=live_cs_title, reply_markup=reply_markup)
@@ -709,7 +709,7 @@ async def self_register_handler(update: Update, context: ContextTypes.DEFAULT_TY
     
     message_text = get_text(user_id, 'register_info_download_notice')
     
-        # 获取访客统计信息
+    # 获取访客统计信息
     stats = get_visitor_stats()
     display_visitor_count = stats['total_visitors'] + 159413  # 显示数量 = 实际数量 + 159413
     
@@ -729,8 +729,8 @@ async def self_register_handler(update: Update, context: ContextTypes.DEFAULT_TY
         f"📢 <b>2026世界杯🏆足球篮球推单五大联赛</b>\n"
         f" 👉 https://t.me/SJB33\n\n"
         f"💬 <b>官方客服</b>\n"
-        f"1️⃣ <a href='https://t.me/qty772'>@qty772</a>\n"
-        f"2️⃣ <a href='https://t.me/qty772'>@qty772</a>\n"
+        f"1️⃣ <a href='https://t.me/QTY01'>@QTY01</a>\n"
+        f"2️⃣ <a href='https://t.me/QTY15'>@QTY15</a>\n"
         f"3️⃣ <a href='https://t.me/qty772'>@qty772</a>"
     )
     
