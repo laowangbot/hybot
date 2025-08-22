@@ -21,23 +21,7 @@ if IS_RENDER:
 else:
     WEB_AVAILABLE = False
 
-# 健康检查端点
-async def health_check(request):
-    """健康检查端点，用于Render平台监控"""
-    update_activity()
-    return web.Response(text="OK", status=200)
-
-# Webhook处理函数
-async def webhook_handler(request):
-    """处理Telegram webhook请求"""
-    try:
-        data = await request.json()
-        update = Update.de_json(data, request.app['dispatcher'])
-        await request.app['dispatcher'].process_update(update)
-        return web.Response(status=200)
-    except Exception as e:
-        logger.error(f"Webhook处理错误: {e}")
-        return web.Response(status=500)
+# 这些函数将在后面定义
 
 # 1. 设置你的 Bot Token
 # 注意：出于安全考虑，强烈建议将 Token 存储在环境变量中，而不是直接写在代码里。
@@ -373,6 +357,24 @@ def update_activity():
     global last_activity_time
     last_activity_time = datetime.now()
     logger.info(f"活动更新: {last_activity_time}")
+
+# 健康检查端点
+async def health_check(request):
+    """健康检查端点，用于Render平台监控"""
+    update_activity()
+    return web.Response(text="OK", status=200)
+
+# Webhook处理函数
+async def webhook_handler(request):
+    """处理Telegram webhook请求"""
+    try:
+        data = await request.json()
+        update = Update.de_json(data, request.app['dispatcher'])
+        await request.app['dispatcher'].process_update(update)
+        return web.Response(status=200)
+    except Exception as e:
+        logger.error(f"Webhook处理错误: {e}")
+        return web.Response(status=500)
 
 async def heartbeat_task(application: Application):
     """心跳任务，每10分钟发送一次心跳信号"""
