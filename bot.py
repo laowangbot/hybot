@@ -596,7 +596,12 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if user_id not in user_data:
         user_data[user_id] = 'zh-CN'
 
+    # 获取访客统计信息
+    stats = get_visitor_stats()
+    display_visitor_count = stats['total_visitors'] + 159413  # 显示数量 = 实际数量 + 159413
+    
     new_welcome_text = (
+        f"🎉 欢迎您！您是第 {display_visitor_count} 位访客\n\n"
         f"限时免费赠送活动（30天）\n\n"
         f"🎁 活动福利\n"
         f"注册并充值成功，即获赠老湿永久VIP会员！\n"
@@ -704,7 +709,12 @@ async def self_register_handler(update: Update, context: ContextTypes.DEFAULT_TY
     
     message_text = get_text(user_id, 'register_info_download_notice')
     
+        # 获取访客统计信息
+    stats = get_visitor_stats()
+    display_visitor_count = stats['total_visitors'] + 159413  # 显示数量 = 实际数量 + 159413
+    
     welcome_message = (
+        f"🎉 欢迎您！您是第 {display_visitor_count} 位访客\n\n"
         f"✨ <b>官方联盟老湿VIP会员</b> ✨\n"
         f"限时免费赠送活动（30天）\n\n"
         f"🎁 <b>活动福利</b>\n"
@@ -718,10 +728,10 @@ async def self_register_handler(update: Update, context: ContextTypes.DEFAULT_TY
         f" 👉 https://t.me/QTY18\n\n"
         f"📢 <b>2026世界杯🏆足球篮球推单五大联赛</b>\n"
         f" 👉 https://t.me/SJB33\n\n"
-                 f"💬 <b>官方客服</b>\n"
-         f"1️⃣ <a href='https://t.me/qty772'>@qty772</a>\n"
-         f"2️⃣ <a href='https://t.me/qty772'>@qty772</a>\n"
-         f"3️⃣ <a href='https://t.me/qty772'>@qty772</a>"
+        f"💬 <b>官方客服</b>\n"
+        f"1️⃣ <a href='https://t.me/qty772'>@qty772</a>\n"
+        f"2️⃣ <a href='https://t.me/qty772'>@qty772</a>\n"
+        f"3️⃣ <a href='https://t.me/qty772'>@qty772</a>"
     )
     
     full_message = f"{welcome_message}\n{message_text}"
