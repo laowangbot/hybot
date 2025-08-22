@@ -372,6 +372,13 @@ LANGUAGES = {
 # 4. 建立一个字典来存储用户语言设置（这只是一个简单的示例，实际应用中应使用数据库）
 user_data = {}
 
+# 访客统计相关变量
+visitor_stats = {
+    'total_visitors': 0,
+    'daily_stats': {},
+    'unique_visitors': set()
+}
+
 # 心跳激活相关变量
 last_activity_time = datetime.now()
 is_heartbeat_active = False
@@ -390,6 +397,56 @@ def update_activity():
     global last_activity_time
     last_activity_time = datetime.now()
     logger.info(f"活动更新: {last_activity_time}")
+
+def update_visitor_stats(user_id):
+    """更新访客统计"""
+    global visitor_stats
+    
+    today = datetime.now().strftime('%Y-%m-%d')
+    
+    # 更新总访客数
+    if user_id not in visitor_stats['unique_visitors']:
+        visitor_stats['unique_visitors'].add(user_id)
+        visitor_stats['total_visitors'] += 1
+    
+    # 更新每日统计
+    if today not in visitor_stats['daily_stats']:
+        visitor_stats['daily_stats'][today] = {
+            'visitors': set(),
+            'total_actions': 0
+        }
+    
+    # 记录今日访客
+    visitor_stats['daily_stats'][today]['visitors'].add(user_id)
+    visitor_stats['daily_stats'][today]['total_actions'] += 1
+    
+    logger.info(f"访客统计更新: 用户 {user_id}, 日期 {today}")
+
+def get_visitor_stats():
+    """获取访客统计信息"""
+    today = datetime.now().strftime('%Y-%m-%d')
+    
+    # 获取今日统计
+    today_stats = visitor_stats['daily_stats'].get(today, {'visitors': set(), 'total_actions': 0})
+    today_visitors = len(today_stats['visitors'])
+    today_actions = today_stats['total_actions']
+    
+    # 获取最近7天统计
+    recent_stats = {}
+    for i in range(7):
+        date = (datetime.now() - timedelta(days=i)).strftime('%Y-%m-%d')
+        if date in visitor_stats['daily_stats']:
+            recent_stats[date] = {
+                'visitors': len(visitor_stats['daily_stats'][date]['visitors']),
+                'actions': visitor_stats['daily_stats'][date]['total_actions']
+            }
+    
+    return {
+        'total_visitors': visitor_stats['total_visitors'],
+        'today_visitors': today_visitors,
+        'today_actions': today_actions,
+        'recent_stats': recent_stats
+    }
 
 # 健康检查端点
 async def health_check(request):
@@ -452,6 +509,36 @@ async def ping_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"🌐 运行环境: {'Render' if IS_RENDER else '本地'}"
     )
 
+async def admin_stats_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """处理管理员统计请求，显示访客统计信息（隐藏命令）"""
+    update_activity()
+    
+    # 检查是否为管理员（这里可以根据需要设置管理员ID）
+    user_id = update.effective_user.id
+    # 可以在这里添加管理员ID检查，例如：
+    # if user_id not in [ADMIN_ID_1, ADMIN_ID_2]:
+    #     await update.message.reply_text("❌ 权限不足，此命令仅限管理员使用。")
+    #     return
+    
+    # 获取统计信息
+    stats = get_visitor_stats()
+    
+    # 构建统计报告
+    report = f"🔐 <b>管理员统计报告</b>\n\n"
+    report += f"👥 <b>总体统计</b>\n"
+    report += f"• 总访客数: {stats['total_visitors']}\n"
+    report += f"• 今日访客: {stats['today_visitors']}\n"
+    report += f"• 今日操作: {stats['today_actions']}\n\n"
+    
+    report += f"📅 <b>最近7天统计</b>\n"
+    for date, data in sorted(stats['recent_stats'].items(), reverse=True):
+        report += f"• {date}: {data['visitors']} 访客, {data['actions']} 操作\n"
+    
+    report += f"\n⏰ 统计时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+    report += f"\n👤 查询用户: {update.effective_user.first_name} (ID: {user_id})"
+    
+    await update.message.reply_html(report)
+
 # 6. 定义主菜单按钮 (常规键盘)
 def get_main_menu_keyboard(user_id):
     """返回主菜单的键盘布局，根据用户的语言设置生成"""
@@ -502,6 +589,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     logger.info(f"User {user.first_name} started the bot.")
     user_id = user.id
+    
+    # 更新访客统计
+    update_visitor_stats(user_id)
 
     if user_id not in user_data:
         user_data[user_id] = 'zh-CN'
@@ -520,9 +610,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"📢 2026世界杯🏆足球篮球推单五大联赛\n"
         f" 👉 https://t.me/SJB33\n\n"
         f"💬 官方客服\n"
-        f"1️⃣ @QTY01\n"
-        f"2️⃣ @QTY15\n"
-        f"3️⃣ @QTY04"
+        f"1️⃣ @qty772\n"
+        f"2️⃣ @qty772\n"
+        f"3️⃣ @qty772"
     )
 
     await update.message.reply_html(
@@ -538,6 +628,9 @@ async def advertising_channel_handler(update: Update, context: ContextTypes.DEFA
     message, user = get_message_and_user(update)
     if not message or not user: return
     user_id = user.id
+    
+    # 更新访客统计
+    update_visitor_stats(user_id)
     prompt_text = get_text(user_id, 'advertising_channel_prompt')
     keyboard = [
         [InlineKeyboardButton(get_text(user_id, 'menu_recharge'), url='https://t.me/QTY18')]
@@ -553,6 +646,9 @@ async def promotion_channel_handler(update: Update, context: ContextTypes.DEFAUL
     message, user = get_message_and_user(update)
     if not message or not user: return
     user_id = user.id
+    
+    # 更新访客统计
+    update_visitor_stats(user_id)
     prompt_text = get_text(user_id, 'promotion_channel_prompt')
     keyboard = [
         [InlineKeyboardButton(get_text(user_id, 'menu_withdraw'), url='https://t.me/SJB33')]
@@ -568,11 +664,14 @@ async def customer_service(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message, user = get_message_and_user(update)
     if not message or not user: return
     user_id = user.id
+    
+    # 更新访客统计
+    update_visitor_stats(user_id)
     live_cs_title = get_text(user_id, 'live_customer_service_title')
     keyboard = [
-        [InlineKeyboardButton(get_text(user_id, 'customer_specialist_1'), url='https://t.me/QTY01')],
-        [InlineKeyboardButton(get_text(user_id, 'customer_specialist_2'), url='https://t.me/QTY15')],
-        [InlineKeyboardButton(get_text(user_id, 'customer_specialist_3'), url='https://t.me/QTY04')],
+                 [InlineKeyboardButton(get_text(user_id, 'customer_specialist_1'), url='https://t.me/qty772')],
+         [InlineKeyboardButton(get_text(user_id, 'customer_specialist_2'), url='https://t.me/qty772')],
+         [InlineKeyboardButton(get_text(user_id, 'customer_specialist_3'), url='https://t.me/qty772')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await message.reply_html(text=live_cs_title, reply_markup=reply_markup)
@@ -585,6 +684,9 @@ async def change_language(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message, user = get_message_and_user(update)
     if not message or not user: return
     user_id = user.id
+    
+    # 更新访客统计
+    update_visitor_stats(user_id)
     
     await message.reply_text(
         get_text(user_id, 'language_selection'),
@@ -616,10 +718,10 @@ async def self_register_handler(update: Update, context: ContextTypes.DEFAULT_TY
         f" 👉 https://t.me/QTY18\n\n"
         f"📢 <b>2026世界杯🏆足球篮球推单五大联赛</b>\n"
         f" 👉 https://t.me/SJB33\n\n"
-        f"💬 <b>官方客服</b>\n"
-        f"1️⃣ <a href='https://t.me/QTY01'>@QTY01</a>\n"
-        f"2️⃣ <a href='https://t.me/QTY15'>@QTY15</a>\n"
-        f"3️⃣ <a href='https://t.me/QTY04'>@QTY04</a>"
+                 f"💬 <b>官方客服</b>\n"
+         f"1️⃣ <a href='https://t.me/qty772'>@qty772</a>\n"
+         f"2️⃣ <a href='https://t.me/qty772'>@qty772</a>\n"
+         f"3️⃣ <a href='https://t.me/qty772'>@qty772</a>"
     )
     
     full_message = f"{welcome_message}\n{message_text}"
@@ -726,6 +828,9 @@ async def main():
     application.add_handler(CommandHandler("promotion_channel", promotion_channel_handler))
     application.add_handler(CommandHandler("customer_service", customer_service))
     
+    # 隐藏的管理员命令（不在菜单中显示）
+    application.add_handler(CommandHandler("admin_stats", admin_stats_handler))  # 管理员统计命令
+    
     # 注册一个通用的文本消息处理器来处理所有按钮点击
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text_messages))
     
@@ -743,6 +848,7 @@ async def main():
         BotCommand("advertising_channel", "招商频道"),
         BotCommand("promotion_channel", "推单频道"),
         BotCommand("customer_service", "人工客服"),
+        # 注意：admin_stats 命令不在菜单中显示，仅限管理员使用
     ])
 
     if IS_RENDER and WEB_AVAILABLE:
