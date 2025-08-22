@@ -755,7 +755,7 @@ async def main():
         logger.info(f"Webhook已设置: {webhook_url}")
         
         # 启动web服务器
-        web.run_app(app, host='0.0.0.0', port=PORT)
+        await web._run_app(app, host='0.0.0.0', port=PORT)
     else:
         # 本地环境：使用polling
         logger.info("🚀 在本地环境中启动，使用polling模式")
