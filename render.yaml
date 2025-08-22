@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: hybot-telegram
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python bot.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.16
+      - key: BOT_TOKEN
+        sync: false
+      - key: RENDER
+        value: true
+    healthCheckPath: /
+    autoDeploy: true
