@@ -402,7 +402,7 @@ async def webhook_handler(request):
     """处理Telegram webhook请求"""
     try:
         data = await request.json()
-        update = Update.de_json(data, request.app['dispatcher'])
+        update = Update.de_json(data, request.app['bot'])
         await request.app['dispatcher'].process_update(update)
         return web.Response(status=200)
     except Exception as e:
