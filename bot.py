@@ -598,7 +598,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # 获取访客统计信息
     stats = get_visitor_stats()
-    display_visitor_count = stats['total_visitors'] + 159413  # 显示数量 = 实际数量 + 159413
+    display_visitor_count = stats['total_visitors'] + 15941  # 显示数量 = 实际数量 + 15941
     
     new_welcome_text = (
         f"🎉 欢迎您！您是第 {display_visitor_count} 位访客\n\n"
@@ -711,7 +711,7 @@ async def self_register_handler(update: Update, context: ContextTypes.DEFAULT_TY
     
     # 获取访客统计信息
     stats = get_visitor_stats()
-    display_visitor_count = stats['total_visitors'] + 159413  # 显示数量 = 实际数量 + 159413
+    display_visitor_count = stats['total_visitors'] + 15941  # 显示数量 = 实际数量 + 15941
     
     welcome_message = (
         f"🎉 欢迎您！您是第 {display_visitor_count} 位访客\n\n"
