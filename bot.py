@@ -432,12 +432,30 @@ LANGUAGES = {
 # 4. 建立一个字典来存储用户语言设置（这只是一个简单的示例，实际应用中应使用数据库）
 user_data = {}
 
+# Firebase配置
+FIREBASE_CONFIG = {
+    'type': os.environ.get('FIREBASE_TYPE', 'service_account'),
+    'project_id': os.environ.get('FIREBASE_PROJECT_ID', ''),
+    'private_key_id': os.environ.get('FIREBASE_PRIVATE_KEY_ID', ''),
+    'private_key': os.environ.get('FIREBASE_PRIVATE_KEY', '').replace('\\n', '\n'),
+    'client_email': os.environ.get('FIREBASE_CLIENT_EMAIL', ''),
+    'client_id': os.environ.get('FIREBASE_CLIENT_ID', ''),
+    'auth_uri': os.environ.get('FIREBASE_AUTH_URI', 'https://accounts.google.com/o/oauth2/auth'),
+    'token_uri': os.environ.get('FIREBASE_TOKEN_URI', 'https://oauth2.googleapis.com/token'),
+    'auth_provider_x509_cert_url': os.environ.get('FIREBASE_AUTH_PROVIDER_X509_CERT_URL', 'https://www.googleapis.com/oauth2/v1/certs'),
+    'client_x509_cert_url': os.environ.get('FIREBASE_CLIENT_X509_CERT_URL', '')
+}
+
 # 访客统计相关变量
 visitor_stats = {
     'total_visitors': 0,
     'daily_stats': {},
     'unique_visitors': set()
 }
+
+# Firebase初始化标志
+firebase_initialized = False
+firebase_db = None
 
 # 心跳激活相关变量
 last_activity_time = datetime.now()
@@ -452,6 +470,38 @@ def get_text(user_id, key):
     lang_code = user_data.get(user_id, 'zh-CN')
     return LANGUAGES.get(lang_code, LANGUAGES['zh-CN']).get(key, key)
 
+def initialize_firebase():
+    """初始化Firebase连接"""
+    global firebase_initialized, firebase_db
+    
+    try:
+        # 检查Firebase配置是否完整
+        if not all([FIREBASE_CONFIG['project_id'], FIREBASE_CONFIG['private_key'], FIREBASE_CONFIG['client_email']]):
+            logger.warning("Firebase配置不完整，将使用本地存储")
+            return False
+        
+        import firebase_admin
+        from firebase_admin import credentials, firestore
+        
+        # 创建Firebase凭证
+        cred = credentials.Certificate(FIREBASE_CONFIG)
+        
+        # 初始化Firebase应用
+        if not firebase_admin._apps:
+            firebase_admin.initialize_app(cred)
+        
+        # 获取Firestore数据库实例
+        firebase_db = firestore.client()
+        firebase_initialized = True
+        
+        logger.info("✅ Firebase初始化成功")
+        return True
+        
+    except Exception as e:
+        logger.error(f"❌ Firebase初始化失败: {e}")
+        firebase_initialized = False
+        return False
+
 def update_activity():
     """更新最后活动时间"""
     global last_activity_time
@@ -464,7 +514,7 @@ def update_visitor_stats(user_id):
     
     today = datetime.now().strftime('%Y-%m-%d')
     
-    # 更新总访客数
+    # 更新本地统计
     if user_id not in visitor_stats['unique_visitors']:
         visitor_stats['unique_visitors'].add(user_id)
         visitor_stats['total_visitors'] += 1
@@ -480,11 +530,69 @@ def update_visitor_stats(user_id):
     visitor_stats['daily_stats'][today]['visitors'].add(user_id)
     visitor_stats['daily_stats'][today]['total_actions'] += 1
     
+    # 如果Firebase可用，同步到云端
+    if firebase_initialized and firebase_db:
+        try:
+            # 更新总访客数
+            stats_ref = firebase_db.collection('bot_stats').document('visitor_stats')
+            stats_ref.set({
+                'total_visitors': visitor_stats['total_visitors'],
+                'last_updated': datetime.now()
+            }, merge=True)
+            
+            # 更新每日统计
+            daily_ref = firebase_db.collection('bot_stats').document('daily_stats').collection('dates').document(today)
+            daily_ref.set({
+                'visitors': list(visitor_stats['daily_stats'][today]['visitors']),
+                'total_actions': visitor_stats['daily_stats'][today]['total_actions'],
+                'last_updated': datetime.now()
+            }, merge=True)
+            
+            logger.info(f"✅ 访客统计已同步到Firebase: 用户 {user_id}, 日期 {today}")
+            
+        except Exception as e:
+            logger.error(f"❌ Firebase同步失败: {e}")
+    
     logger.info(f"访客统计更新: 用户 {user_id}, 日期 {today}")
 
 def get_visitor_stats():
     """获取访客统计信息"""
+    global visitor_stats
+    
     today = datetime.now().strftime('%Y-%m-%d')
+    
+    # 如果Firebase可用，尝试从云端恢复数据
+    if firebase_initialized and firebase_db and not visitor_stats['total_visitors']:
+        try:
+            # 恢复总访客数
+            stats_ref = firebase_db.collection('bot_stats').document('visitor_stats')
+            stats_doc = stats_ref.get()
+            if stats_doc.exists:
+                visitor_stats['total_visitors'] = stats_doc.to_dict().get('total_visitors', 0)
+                logger.info(f"✅ 从Firebase恢复总访客数: {visitor_stats['total_visitors']}")
+            
+            # 恢复最近7天的数据
+            for i in range(7):
+                date = (datetime.now() - timedelta(days=i)).strftime('%Y-%m-%d')
+                daily_ref = firebase_db.collection('bot_stats').document('daily_stats').collection('dates').document(date)
+                daily_doc = daily_ref.get()
+                if daily_doc.exists:
+                    daily_data = daily_doc.to_dict()
+                    visitors_set = set(daily_data.get('visitors', []))
+                    total_actions = daily_data.get('total_actions', 0)
+                    
+                    visitor_stats['daily_stats'][date] = {
+                        'visitors': visitors_set,
+                        'total_actions': total_actions
+                    }
+                    
+                    # 更新唯一访客集合
+                    visitor_stats['unique_visitors'].update(visitors_set)
+                    
+                    logger.info(f"✅ 从Firebase恢复日期 {date} 的统计: {len(visitors_set)} 访客, {total_actions} 操作")
+                    
+        except Exception as e:
+            logger.error(f"❌ 从Firebase恢复数据失败: {e}")
     
     # 获取今日统计
     today_stats = visitor_stats['daily_stats'].get(today, {'visitors': set(), 'total_actions': 0})
@@ -885,6 +993,9 @@ async def handle_text_messages(update: Update, context: ContextTypes.DEFAULT_TYP
 # 19. 主函数：运行机器人
 async def main():
     """启动机器人"""
+    # 初始化Firebase
+    initialize_firebase()
+    
     application = Application.builder().token(BOT_TOKEN).build()
 
     # 注册命令处理器，以便 M 菜单和手动输入命令都能工作
