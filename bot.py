@@ -644,17 +644,28 @@ async def heartbeat_task(application: Application):
     """心跳任务，每10分钟发送一次心跳信号"""
     global is_heartbeat_active
     
+    logger.info("💓 心跳任务开始运行")
+    heartbeat_count = 0
+    
     while True:
         try:
             if is_heartbeat_active:
+                heartbeat_count += 1
+                current_time = datetime.now()
+                
                 # 发送心跳日志
-                logger.info(f"💓 心跳信号 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+                logger.info(f"💓 心跳信号 #{heartbeat_count} - {current_time.strftime('%Y-%m-%d %H:%M:%S')}")
                 
                 # 检查是否需要发送激活信号
-                time_since_last_activity = datetime.now() - last_activity_time
+                time_since_last_activity = current_time - last_activity_time
                 if time_since_last_activity > timedelta(minutes=10):
-                    logger.info("⚠️ 检测到长时间无活动，发送激活信号")
+                    logger.info(f"⚠️ 检测到长时间无活动 ({time_since_last_activity.total_seconds()/60:.1f}分钟)，发送激活信号")
                     # 这里可以添加其他激活逻辑，比如发送webhook请求等
+                else:
+                    logger.info(f"✅ 活动正常，距离上次活动: {time_since_last_activity.total_seconds()/60:.1f}分钟")
+                
+                # 记录心跳统计
+                logger.info(f"📊 心跳统计: 总次数={heartbeat_count}, 运行环境={'Render' if IS_RENDER else '本地'}")
                 
             # 等待10分钟
             await asyncio.sleep(600)  # 600秒 = 10分钟
@@ -676,12 +687,69 @@ async def ping_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """处理ping请求，用于保持机器人活跃"""
     update_activity()
     
+    # 计算运行时间
+    uptime = datetime.now() - last_activity_time
+    
     await update.message.reply_text(
-        "🏓 Pong! 机器人正在运行中...\n"
-        f"⏰ 最后活动时间: {last_activity_time.strftime('%Y-%m-%d %H:%M:%S')}\n"
-        f"💓 心跳状态: {'活跃' if is_heartbeat_active else '停止'}\n"
-        f"🌐 运行环境: {'Render' if IS_RENDER else '本地'}"
+        "🏓 Pong! 机器人正在运行中...\n\n"
+        f"⏰ <b>时间信息</b>\n"
+        f"• 当前时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+        f"• 最后活动: {last_activity_time.strftime('%Y-%m-%d %H:%M:%S')}\n"
+        f"• 运行时长: {uptime.total_seconds()/60:.1f} 分钟\n\n"
+        f"💓 <b>心跳状态</b>\n"
+        f"• 状态: {'🟢 活跃' if is_heartbeat_active else '🔴 停止'}\n"
+        f"• 环境: {'🌐 Render' if IS_RENDER else '💻 本地'}\n"
+        f"• 端口: {PORT}\n\n"
+        f"🔧 <b>系统状态</b>\n"
+        f"• Firebase: {'✅ 已连接' if firebase_initialized else '❌ 未连接'}\n"
+        f"• 数据库: {FIREBASE_CONFIG['project_id'] if FIREBASE_CONFIG['project_id'] else '未配置'}"
     )
+
+async def heartbeat_status_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """处理心跳状态检查请求"""
+    update_activity()
+    
+    try:
+        # 计算运行时间
+        uptime = datetime.now() - last_activity_time
+        
+        # 构建详细的心跳状态报告
+        status_report = (
+            "💓 <b>心跳状态详细报告</b>\n\n"
+            f"⏰ <b>时间信息</b>\n"
+            f"• 当前时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+            f"• 最后活动: {last_activity_time.strftime('%Y-%m-%d %H:%M:%S')}\n"
+            f"• 运行时长: {uptime.total_seconds()/60:.1f} 分钟\n\n"
+            f"💓 <b>心跳系统状态</b>\n"
+            f"• 心跳状态: {'🟢 活跃' if is_heartbeat_active else '🔴 停止'}\n"
+            f"• 运行环境: {'🌐 Render' if IS_RENDER else '💻 本地'}\n"
+            f"• 监听端口: {PORT}\n\n"
+            f"🔧 <b>服务状态</b>\n"
+            f"• Firebase: {'✅ 已连接' if firebase_initialized else '❌ 未连接'}\n"
+            f"• 数据库: {FIREBASE_CONFIG['project_id'] if FIREBASE_CONFIG['project_id'] else '未配置'}\n"
+            f"• Webhook: {'✅ 可用' if IS_RENDER and WEB_AVAILABLE else '❌ 不可用'}\n\n"
+            f"📊 <b>活动监控</b>\n"
+            f"• 距离上次活动: {uptime.total_seconds()/60:.1f} 分钟\n"
+            f"• 活动状态: {'🟢 正常' if uptime.total_seconds() < 600 else '🟡 需要关注'}\n"
+            f"• 建议: {'✅ 系统运行正常' if uptime.total_seconds() < 600 else '⚠️ 建议检查系统状态'}"
+        )
+        
+        await update.message.reply_html(status_report)
+        logger.info(f"✅ 心跳状态检查成功，用户: {update.effective_user.id}")
+        
+    except Exception as e:
+        error_msg = f"❌ 心跳状态检查失败: {str(e)}"
+        await update.message.reply_text(error_msg)
+        logger.error(f"心跳状态检查错误: {e}")
+
+async def test_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """测试命令处理器"""
+    try:
+        await update.message.reply_text("🧪 测试命令工作正常！")
+        logger.info(f"✅ 测试命令成功，用户: {update.effective_user.id}")
+    except Exception as e:
+        await update.message.reply_text(f"❌ 测试命令失败: {str(e)}")
+        logger.error(f"测试命令错误: {e}")
 
 async def admin_stats_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """处理管理员统计请求，显示访客统计信息（隐藏命令）"""
@@ -1042,6 +1110,8 @@ async def main():
     # 注册命令处理器，以便 M 菜单和手动输入命令都能工作
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("ping", ping_handler))  # 新增ping命令
+    application.add_handler(CommandHandler("heartbeat", heartbeat_status_handler))  # 心跳状态检查
+    application.add_handler(CommandHandler("test", test_handler))  # 测试命令
     application.add_handler(CommandHandler("change_language", change_language))
     application.add_handler(CommandHandler("self_register", self_register_handler))
     application.add_handler(CommandHandler("mainland_user", mainland_user_handler))
@@ -1063,6 +1133,7 @@ async def main():
     await application.bot.set_my_commands([
         BotCommand("start", "启动机器人"),
         BotCommand("ping", "检查机器人状态"),
+        BotCommand("heartbeat", "心跳状态检查"),
         BotCommand("change_language", "切换语言"),
         BotCommand("self_register", "自助注册"),
         BotCommand("mainland_user", "大陆用户"),
@@ -1076,6 +1147,10 @@ async def main():
     if IS_RENDER and WEB_AVAILABLE:
         # Render环境：使用webhook
         logger.info("🚀 在Render环境中启动，使用webhook模式")
+        
+        # 启动心跳任务
+        await start_heartbeat(application)
+        logger.info("💓 心跳任务已启动")
         
         # 创建web应用
         app = web.Application()
@@ -1099,6 +1174,11 @@ async def main():
     else:
         # 本地环境：使用polling
         logger.info("🚀 在本地环境中启动，使用polling模式")
+        
+        # 启动心跳任务
+        await start_heartbeat(application)
+        logger.info("💓 心跳任务已启动")
+        
         application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == "__main__":
