@@ -19,6 +19,19 @@
 
 在Render中设置以下环境变量：
 
+### 🔄 共用数据库配置（推荐）
+如果您已经有Firebase数据库并想共用，只需要设置以下环境变量：
+
+```
+BOT_ID=hybot                                    # 机器人唯一标识符
+FIREBASE_PROJECT_ID=your-existing-project-id    # 现有项目ID
+FIREBASE_PRIVATE_KEY="your-private-key"         # 现有私钥
+FIREBASE_CLIENT_EMAIL=your-service-account@...  # 现有服务账户邮箱
+```
+
+### 🆕 新建数据库配置
+如果是新建Firebase项目，需要设置所有环境变量：
+
 ### 必需的环境变量：
 ```
 FIREBASE_PROJECT_ID=your-project-id
@@ -45,9 +58,14 @@ FIREBASE_CLIENT_X509_CERT_URL=https://www.googleapis.com/robot/v1/metadata/x509/
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // 允许机器人统计数据的读写
-    match /bot_stats/{document=**} {
+    // 允许所有机器人统计数据的读写
+    match /bots/{botId}/stats/{document=**} {
       allow read, write: if true; // 注意：生产环境应该设置更严格的规则
+    }
+    
+    // 兼容旧版本的数据结构（如果有的话）
+    match /bot_stats/{document=**} {
+      allow read, write: if true;
     }
   }
 }
@@ -55,23 +73,35 @@ service cloud.firestore {
 
 ## 📊 数据结构
 
-Firebase将自动创建以下数据结构：
+Firebase将自动创建以下数据结构，支持多个机器人共用：
 
 ```
-bot_stats/
-├── visitor_stats/
-│   ├── total_visitors: number
-│   └── last_updated: timestamp
-└── daily_stats/
-    └── dates/
-        ├── 2025-01-20/
-        │   ├── visitors: [user_id1, user_id2, ...]
-        │   ├── total_actions: number
-        │   └── last_updated: timestamp
-        └── 2025-01-21/
-            ├── visitors: [user_id3, user_id4, ...]
-            ├── total_actions: number
-            └── last_updated: timestamp
+bots/
+├── hybot/                    # 会员机器人
+│   └── stats/
+│       ├── visitor_stats/
+│       │   ├── total_visitors: number
+│       │   ├── last_updated: timestamp
+│       │   ├── bot_id: "hybot"
+│       │   └── bot_name: "会员机器人"
+│       └── daily_stats/
+│           └── dates/
+│               ├── 2025-01-20/
+│               │   ├── visitors: [user_id1, user_id2, ...]
+│               │   ├── total_actions: number
+│               │   ├── last_updated: timestamp
+│               │   └── bot_id: "hybot"
+│               └── 2025-01-21/
+│                   ├── visitors: [user_id3, user_id4, ...]
+│                   ├── total_actions: number
+│                   ├── last_updated: timestamp
+│                   └── bot_id: "hybot"
+├── bot2/                     # 其他机器人
+│   └── stats/
+│       └── ...
+└── bot3/                     # 其他机器人
+    └── stats/
+        └── ...
 ```
 
 ## ✅ 验证设置

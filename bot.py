@@ -446,6 +446,9 @@ FIREBASE_CONFIG = {
     'client_x509_cert_url': os.environ.get('FIREBASE_CLIENT_X509_CERT_URL', '')
 }
 
+# 机器人标识符 - 用于区分不同机器人的数据
+BOT_ID = os.environ.get('BOT_ID', 'hybot')  # 默认标识符
+
 # 访客统计相关变量
 visitor_stats = {
     'total_visitors': 0,
@@ -533,22 +536,25 @@ def update_visitor_stats(user_id):
     # 如果Firebase可用，同步到云端
     if firebase_initialized and firebase_db:
         try:
-            # 更新总访客数
-            stats_ref = firebase_db.collection('bot_stats').document('visitor_stats')
+            # 更新总访客数 - 使用机器人标识符区分
+            stats_ref = firebase_db.collection('bots').document(BOT_ID).collection('stats').document('visitor_stats')
             stats_ref.set({
                 'total_visitors': visitor_stats['total_visitors'],
-                'last_updated': datetime.now()
+                'last_updated': datetime.now(),
+                'bot_id': BOT_ID,
+                'bot_name': '会员机器人'
             }, merge=True)
             
-            # 更新每日统计
-            daily_ref = firebase_db.collection('bot_stats').document('daily_stats').collection('dates').document(today)
+            # 更新每日统计 - 使用机器人标识符区分
+            daily_ref = firebase_db.collection('bots').document(BOT_ID).collection('stats').document('daily_stats').collection('dates').document(today)
             daily_ref.set({
                 'visitors': list(visitor_stats['daily_stats'][today]['visitors']),
                 'total_actions': visitor_stats['daily_stats'][today]['total_actions'],
-                'last_updated': datetime.now()
+                'last_updated': datetime.now(),
+                'bot_id': BOT_ID
             }, merge=True)
             
-            logger.info(f"✅ 访客统计已同步到Firebase: 用户 {user_id}, 日期 {today}")
+            logger.info(f"✅ 访客统计已同步到Firebase: 用户 {user_id}, 日期 {today}, 机器人: {BOT_ID}")
             
         except Exception as e:
             logger.error(f"❌ Firebase同步失败: {e}")
@@ -564,17 +570,17 @@ def get_visitor_stats():
     # 如果Firebase可用，尝试从云端恢复数据
     if firebase_initialized and firebase_db and not visitor_stats['total_visitors']:
         try:
-            # 恢复总访客数
-            stats_ref = firebase_db.collection('bot_stats').document('visitor_stats')
+            # 恢复总访客数 - 使用机器人标识符
+            stats_ref = firebase_db.collection('bots').document(BOT_ID).collection('stats').document('visitor_stats')
             stats_doc = stats_ref.get()
             if stats_doc.exists:
                 visitor_stats['total_visitors'] = stats_doc.to_dict().get('total_visitors', 0)
-                logger.info(f"✅ 从Firebase恢复总访客数: {visitor_stats['total_visitors']}")
+                logger.info(f"✅ 从Firebase恢复总访客数: {visitor_stats['total_visitors']}, 机器人: {BOT_ID}")
             
-            # 恢复最近7天的数据
+            # 恢复最近7天的数据 - 使用机器人标识符
             for i in range(7):
                 date = (datetime.now() - timedelta(days=i)).strftime('%Y-%m-%d')
-                daily_ref = firebase_db.collection('bot_stats').document('daily_stats').collection('dates').document(date)
+                daily_ref = firebase_db.collection('bots').document(BOT_ID).collection('stats').document('daily_stats').collection('dates').document(date)
                 daily_doc = daily_ref.get()
                 if daily_doc.exists:
                     daily_data = daily_doc.to_dict()
@@ -589,7 +595,7 @@ def get_visitor_stats():
                     # 更新唯一访客集合
                     visitor_stats['unique_visitors'].update(visitors_set)
                     
-                    logger.info(f"✅ 从Firebase恢复日期 {date} 的统计: {len(visitors_set)} 访客, {total_actions} 操作")
+                    logger.info(f"✅ 从Firebase恢复日期 {date} 的统计: {len(visitors_set)} 访客, {total_actions} 操作, 机器人: {BOT_ID}")
                     
         except Exception as e:
             logger.error(f"❌ 从Firebase恢复数据失败: {e}")
@@ -688,11 +694,16 @@ async def admin_stats_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
     #     await update.message.reply_text("❌ 权限不足，此命令仅限管理员使用。")
     #     return
     
-    # 获取统计信息
+    # 获取当前机器人统计信息
     stats = get_visitor_stats()
     
     # 构建统计报告
     report = f"🔐 <b>管理员统计报告</b>\n\n"
+    report += f"🤖 <b>机器人信息</b>\n"
+    report += f"• 机器人ID: {BOT_ID}\n"
+    report += f"• 机器人名称: 会员机器人\n"
+    report += f"• 数据库: {FIREBASE_CONFIG['project_id'] if FIREBASE_CONFIG['project_id'] else '未配置'}\n\n"
+    
     report += f"👥 <b>总体统计</b>\n"
     report += f"• 总访客数: {stats['total_visitors']}\n"
     report += f"• 今日访客: {stats['today_visitors']}\n"
@@ -701,6 +712,36 @@ async def admin_stats_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
     report += f"📅 <b>最近7天统计</b>\n"
     for date, data in sorted(stats['recent_stats'].items(), reverse=True):
         report += f"• {date}: {data['visitors']} 访客, {data['actions']} 操作\n"
+    
+    # 如果Firebase可用，尝试获取所有机器人统计
+    if firebase_initialized and firebase_db:
+        try:
+            # 获取所有机器人列表
+            bots_ref = firebase_db.collection('bots')
+            bots_docs = bots_ref.stream()
+            
+            all_bots_stats = []
+            for bot_doc in bots_docs:
+                bot_id = bot_doc.id
+                bot_stats_ref = bot_doc.reference.collection('stats').document('visitor_stats')
+                bot_stats_doc = bot_stats_ref.get()
+                
+                if bot_stats_doc.exists:
+                    bot_data = bot_stats_doc.to_dict()
+                    all_bots_stats.append({
+                        'id': bot_id,
+                        'name': bot_data.get('bot_name', bot_id),
+                        'visitors': bot_data.get('total_visitors', 0),
+                        'last_updated': bot_data.get('last_updated', '未知')
+                    })
+            
+            if all_bots_stats:
+                report += f"\n🤖 <b>所有机器人统计</b>\n"
+                for bot in all_bots_stats:
+                    report += f"• {bot['name']} ({bot['id']}): {bot['visitors']} 访客\n"
+                
+        except Exception as e:
+            logger.error(f"获取所有机器人统计失败: {e}")
     
     report += f"\n⏰ 统计时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
     report += f"\n👤 查询用户: {update.effective_user.first_name} (ID: {user_id})"

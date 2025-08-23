@@ -30,5 +30,7 @@ services:
         value: https://www.googleapis.com/oauth2/v1/certs
       - key: FIREBASE_CLIENT_X509_CERT_URL
         sync: false
+      - key: BOT_ID
+        value: hybot
     healthCheckPath: /
     autoDeploy: true
