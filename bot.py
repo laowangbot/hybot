@@ -463,6 +463,8 @@ firebase_db = None
 # 心跳激活相关变量
 last_activity_time = datetime.now()
 is_heartbeat_active = False
+heartbeat_monitor_task = None
+last_heartbeat_time = datetime.now()
 
 # 检查是否在Render环境中运行
 IS_RENDER = os.environ.get('RENDER', False)
@@ -649,74 +651,97 @@ async def webhook_handler(request):
         return web.Response(status=500)
 
 async def heartbeat_task(application: Application):
-    """心跳任务，每10分钟发送一次心跳信号（控制台增强版）"""
+    """心跳任务，每10分钟发送一次心跳信号（增强版+自动恢复）"""
     global is_heartbeat_active
     
     logger.info("💓 心跳任务开始运行")
     print("💓 心跳任务开始运行")
     heartbeat_count = 0
+    consecutive_errors = 0
+    max_consecutive_errors = 3
     
     while True:
         try:
-            if is_heartbeat_active:
-                heartbeat_count += 1
-                current_time = datetime.now()
-                
-                # 每次心跳都在控制台显示详细信息
-                print(f"\n{'='*60}")
-                print(f"💓 心跳信号 #{heartbeat_count} - {current_time.strftime('%Y-%m-%d %H:%M:%S')}")
-                print(f"⏰ 当前时间: {current_time.strftime('%Y-%m-%d %H:%M:%S')}")
-                
-                # 检查活动状态
-                time_since_last_activity = current_time - last_activity_time
-                activity_minutes = time_since_last_activity.total_seconds() / 60
-                
-                print(f"📊 距离上次活动: {activity_minutes:.1f} 分钟")
-                
-                if time_since_last_activity > timedelta(minutes=10):
-                    print(f"⚠️  长时间无活动: {activity_minutes:.1f} 分钟")
-                    logger.warning(f"⚠️ 长时间无活动: {activity_minutes:.1f}分钟")
-                else:
-                    print(f"✅ 活动正常: {activity_minutes:.1f} 分钟")
-                    logger.info(f"✅ 活动正常: {activity_minutes:.1f}分钟")
-                
-                # 显示系统状态
-                print(f"🌐 运行环境: {'Render' if IS_RENDER else '本地'}")
-                print(f"🔧 Firebase状态: {'✅ 已连接' if firebase_initialized else '❌ 未连接'}")
-                print(f"💻 心跳状态: {'🟢 活跃' if is_heartbeat_active else '🔴 停止'}")
-                
-                # 显示心跳统计
-                print(f"📈 心跳统计: 总次数={heartbeat_count}, 运行时长={activity_minutes:.1f}分钟")
-                print(f"{'='*60}\n")
-                
-                # 同时记录到日志
-                logger.info(f"💓 心跳信号 #{heartbeat_count} - {current_time.strftime('%Y-%m-%d %H:%M:%S')} - 活动状态: {'正常' if activity_minutes < 10 else '需要关注'}")
-                
-                # 强制更新活动时间，防止机器人停止
-                update_activity()
-                
+            # 检查心跳状态
+            if not is_heartbeat_active:
+                print(f"🔴 心跳任务被停止，尝试重新激活...")
+                is_heartbeat_active = True
+                logger.warning("心跳任务被停止，已重新激活")
+            
+            heartbeat_count += 1
+            current_time = datetime.now()
+            
+            # 每次心跳都在控制台显示详细信息
+            print(f"\n{'='*60}")
+            print(f"💓 心跳信号 #{heartbeat_count} - {current_time.strftime('%Y-%m-%d %H:%M:%S')}")
+            print(f"⏰ 当前时间: {current_time.strftime('%Y-%m-%d %H:%M:%S')}")
+            
+            # 检查活动状态
+            time_since_last_activity = current_time - last_activity_time
+            activity_minutes = time_since_last_activity.total_seconds() / 60
+            
+            print(f"📊 距离上次活动: {activity_minutes:.1f} 分钟")
+            
+            if time_since_last_activity > timedelta(minutes=10):
+                print(f"⚠️  长时间无活动: {activity_minutes:.1f} 分钟")
+                logger.warning(f"⚠️ 长时间无活动: {activity_minutes:.1f}分钟")
             else:
-                print(f"🔴 心跳任务已停止 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-                logger.warning("🔴 心跳任务已停止")
-                
-                # 即使心跳停止，也要更新活动时间
-                update_activity()
+                print(f"✅ 活动正常: {activity_minutes:.1f} 分钟")
+                logger.info(f"✅ 活动正常: {activity_minutes:.1f}分钟")
+            
+            # 显示系统状态
+            print(f"🌐 运行环境: {'Render' if IS_RENDER else '本地'}")
+            print(f"🔧 Firebase状态: {'✅ 已连接' if firebase_initialized else '❌ 未连接'}")
+            print(f"💻 心跳状态: {'🟢 活跃' if is_heartbeat_active else '🔴 停止'}")
+            print(f"🔄 连续错误: {consecutive_errors}/{max_consecutive_errors}")
+            
+            # 显示心跳统计
+            print(f"📈 心跳统计: 总次数={heartbeat_count}, 运行时长={activity_minutes:.1f}分钟")
+            print(f"{'='*60}\n")
+            
+            # 同时记录到日志
+            logger.info(f"💓 心跳信号 #{heartbeat_count} - {current_time.strftime('%Y-%m-%d %H:%M:%S')} - 活动状态: {'正常' if activity_minutes < 10 else '需要关注'}")
+            
+            # 强制更新活动时间，防止机器人停止
+            update_activity()
+            
+            # 更新心跳监控时间
+            global last_heartbeat_time
+            last_heartbeat_time = current_time
+            
+            # 重置错误计数
+            consecutive_errors = 0
             
             # 等待10分钟
             await asyncio.sleep(600)  # 600秒 = 10分钟
                 
         except Exception as e:
-            error_msg = f"❌ 心跳任务错误: {e}"
+            consecutive_errors += 1
+            error_msg = f"❌ 心跳任务错误 #{consecutive_errors}: {e}"
             print(f"\n{'='*60}")
             print(error_msg)
             print(f"⏰ 错误时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            print(f"🔄 连续错误: {consecutive_errors}/{max_consecutive_errors}")
             print(f"{'='*60}\n")
-            logger.error(f"心跳任务错误: {e}")
-            await asyncio.sleep(60)  # 出错时等待1分钟后重试
+            logger.error(f"心跳任务错误 #{consecutive_errors}: {e}")
+            
+            # 如果连续错误过多，尝试重启心跳
+            if consecutive_errors >= max_consecutive_errors:
+                print(f"🚨 连续错误过多，尝试重启心跳任务...")
+                logger.critical(f"连续错误过多，重启心跳任务")
+                is_heartbeat_active = False
+                await asyncio.sleep(5)  # 等待5秒
+                is_heartbeat_active = True
+                consecutive_errors = 0
+            
+            # 等待时间根据错误次数调整
+            wait_time = min(60 * consecutive_errors, 300)  # 最多等待5分钟
+            print(f"⏳ 等待 {wait_time} 秒后重试...")
+            await asyncio.sleep(wait_time)
 
 async def start_heartbeat(application: Application):
-    """启动心跳任务（修复版）"""
-    global is_heartbeat_active
+    """启动心跳任务（增强版+监控）"""
+    global is_heartbeat_active, heartbeat_monitor_task
     
     try:
         # 设置心跳状态为活跃
@@ -732,6 +757,11 @@ async def start_heartbeat(application: Application):
         
         logger.info("🚀 心跳任务已启动")
         
+        # 启动心跳监控任务
+        if heartbeat_monitor_task is None:
+            heartbeat_monitor_task = asyncio.create_task(heartbeat_monitor(application))
+            print("✅ 心跳监控任务已启动")
+        
         # 直接启动心跳任务，不使用create_task
         await heartbeat_task(application)
         
@@ -743,6 +773,43 @@ async def start_heartbeat(application: Application):
         print(f"{'='*60}\n")
         logger.error(f"心跳任务启动失败: {e}")
         is_heartbeat_active = False
+
+async def heartbeat_monitor(application: Application):
+    """心跳监控任务，检测心跳是否正常"""
+    global last_heartbeat_time, is_heartbeat_active
+    
+    print("🔍 心跳监控任务启动")
+    logger.info("🔍 心跳监控任务启动")
+    
+    while True:
+        try:
+            current_time = datetime.now()
+            time_since_last_heartbeat = current_time - last_heartbeat_time
+            
+            # 如果超过15分钟没有心跳，尝试重启
+            if time_since_last_heartbeat > timedelta(minutes=15):
+                print(f"🚨 心跳监控警告: 超过15分钟没有心跳信号")
+                print(f"⏰ 最后心跳: {last_heartbeat_time.strftime('%Y-%m-%d %H:%M:%S')}")
+                print(f"⏰ 当前时间: {current_time.strftime('%Y-%m-%d %H:%M:%S')}")
+                print(f"⏰ 间隔时间: {time_since_last_heartbeat.total_seconds()/60:.1f} 分钟")
+                
+                logger.warning(f"心跳监控: 超过15分钟没有心跳，尝试重启")
+                
+                # 尝试重启心跳
+                is_heartbeat_active = False
+                await asyncio.sleep(5)
+                is_heartbeat_active = True
+                
+                print("🔄 心跳任务已重启")
+                logger.info("心跳任务已重启")
+            
+            # 每5分钟检查一次
+            await asyncio.sleep(300)
+            
+        except Exception as e:
+            print(f"❌ 心跳监控错误: {e}")
+            logger.error(f"心跳监控错误: {e}")
+            await asyncio.sleep(60)
 
 async def ping_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """处理ping请求，用于保持机器人活跃"""
