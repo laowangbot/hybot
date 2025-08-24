@@ -512,7 +512,7 @@ def update_activity():
     logger.info(f"活动更新: {last_activity_time}")
 
 def update_visitor_stats(user_id):
-    """更新访客统计"""
+    """更新访客统计（优化版）"""
     global visitor_stats
     
     today = datetime.now().strftime('%Y-%m-%d')
@@ -533,33 +533,41 @@ def update_visitor_stats(user_id):
     visitor_stats['daily_stats'][today]['visitors'].add(user_id)
     visitor_stats['daily_stats'][today]['total_actions'] += 1
     
-    # 如果Firebase可用，同步到云端
+    # 异步更新Firebase（不阻塞主流程）
     if firebase_initialized and firebase_db:
         try:
-            # 更新总访客数 - 使用机器人标识符区分
-            stats_ref = firebase_db.collection('bots').document(BOT_ID).collection('stats').document('visitor_stats')
-            stats_ref.set({
-                'total_visitors': visitor_stats['total_visitors'],
-                'last_updated': datetime.now(),
-                'bot_id': BOT_ID,
-                'bot_name': '会员机器人'
-            }, merge=True)
-            
-            # 更新每日统计 - 使用机器人标识符区分
-            daily_ref = firebase_db.collection('bots').document(BOT_ID).collection('stats').document('daily_stats').collection('dates').document(today)
-            daily_ref.set({
-                'visitors': list(visitor_stats['daily_stats'][today]['visitors']),
-                'total_actions': visitor_stats['daily_stats'][today]['total_actions'],
-                'last_updated': datetime.now(),
-                'bot_id': BOT_ID
-            }, merge=True)
-            
-            logger.info(f"✅ 访客统计已同步到Firebase: 用户 {user_id}, 日期 {today}, 机器人: {BOT_ID}")
-            
+            # 使用异步任务更新Firebase，避免阻塞
+            asyncio.create_task(_async_update_firebase(user_id, today))
         except Exception as e:
-            logger.error(f"❌ Firebase同步失败: {e}")
+            logger.error(f"❌ 创建Firebase异步任务失败: {e}")
     
-    logger.info(f"访客统计更新: 用户 {user_id}, 日期 {today}")
+    logger.debug(f"访客统计更新: 用户 {user_id}, 日期 {today}")
+
+async def _async_update_firebase(user_id, today):
+    """异步更新Firebase数据"""
+    try:
+        # 更新总访客数
+        stats_ref = firebase_db.collection('bots').document(BOT_ID).collection('stats').document('visitor_stats')
+        await asyncio.get_event_loop().run_in_executor(None, lambda: stats_ref.set({
+            'total_visitors': visitor_stats['total_visitors'],
+            'last_updated': datetime.now(),
+            'bot_id': BOT_ID,
+            'bot_name': '会员机器人'
+        }, merge=True))
+        
+        # 更新每日统计
+        daily_ref = firebase_db.collection('bots').document(BOT_ID).collection('stats').document('daily_stats').collection('dates').document(today)
+        await asyncio.get_event_loop().run_in_executor(None, lambda: daily_ref.set({
+            'visitors': list(visitor_stats['daily_stats'][today]['visitors']),
+            'total_actions': visitor_stats['daily_stats'][today]['total_actions'],
+            'last_updated': datetime.now(),
+            'bot_id': BOT_ID
+        }, merge=True))
+        
+        logger.debug(f"✅ Firebase异步更新成功: 用户 {user_id}, 日期 {today}")
+        
+    except Exception as e:
+        logger.error(f"❌ Firebase异步更新失败: {e}")
 
 def get_visitor_stats():
     """获取访客统计信息"""
@@ -641,7 +649,7 @@ async def webhook_handler(request):
         return web.Response(status=500)
 
 async def heartbeat_task(application: Application):
-    """心跳任务，每10分钟发送一次心跳信号"""
+    """心跳任务，每10分钟发送一次心跳信号（优化版）"""
     global is_heartbeat_active
     
     logger.info("💓 心跳任务开始运行")
@@ -653,19 +661,19 @@ async def heartbeat_task(application: Application):
                 heartbeat_count += 1
                 current_time = datetime.now()
                 
-                # 发送心跳日志
-                logger.info(f"💓 心跳信号 #{heartbeat_count} - {current_time.strftime('%Y-%m-%d %H:%M:%S')}")
-                
-                # 检查是否需要发送激活信号
-                time_since_last_activity = current_time - last_activity_time
-                if time_since_last_activity > timedelta(minutes=10):
-                    logger.info(f"⚠️ 检测到长时间无活动 ({time_since_last_activity.total_seconds()/60:.1f}分钟)，发送激活信号")
-                    # 这里可以添加其他激活逻辑，比如发送webhook请求等
+                # 轻量级心跳日志（减少资源占用）
+                if heartbeat_count % 6 == 1:  # 每小时只记录一次详细日志
+                    logger.info(f"💓 心跳信号 #{heartbeat_count} - {current_time.strftime('%Y-%m-%d %H:%M:%S')}")
+                    
+                    # 检查活动状态
+                    time_since_last_activity = current_time - last_activity_time
+                    if time_since_last_activity > timedelta(minutes=10):
+                        logger.info(f"⚠️ 长时间无活动: {time_since_last_activity.total_seconds()/60:.1f}分钟")
+                    else:
+                        logger.info(f"✅ 活动正常: {time_since_last_activity.total_seconds()/60:.1f}分钟")
                 else:
-                    logger.info(f"✅ 活动正常，距离上次活动: {time_since_last_activity.total_seconds()/60:.1f}分钟")
-                
-                # 记录心跳统计
-                logger.info(f"📊 心跳统计: 总次数={heartbeat_count}, 运行环境={'Render' if IS_RENDER else '本地'}")
+                    # 简单的心跳标记
+                    logger.debug(f"💓 心跳 #{heartbeat_count}")
                 
             # 等待10分钟
             await asyncio.sleep(600)  # 600秒 = 10分钟
@@ -750,6 +758,37 @@ async def test_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         await update.message.reply_text(f"❌ 测试命令失败: {str(e)}")
         logger.error(f"测试命令错误: {e}")
+
+async def performance_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """性能监控命令"""
+    try:
+        start_time = datetime.now()
+        update_activity()
+        
+        # 测试基本响应速度
+        response_time = (datetime.now() - start_time).total_seconds() * 1000
+        
+        # 构建性能报告
+        performance_report = (
+            "⚡ <b>性能监控报告</b>\n\n"
+            f"🕐 <b>响应时间</b>\n"
+            f"• 命令处理: {response_time:.2f} ms\n"
+            f"• 当前时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+            f"💓 <b>系统状态</b>\n"
+            f"• 心跳状态: {'🟢 活跃' if is_heartbeat_active else '🔴 停止'}\n"
+            f"• Firebase: {'✅ 已连接' if firebase_initialized else '❌ 未连接'}\n"
+            f"• 运行环境: {'🌐 Render' if IS_RENDER else '💻 本地'}\n\n"
+            f"📊 <b>性能指标</b>\n"
+            f"• 响应状态: {'🟢 正常' if response_time < 1000 else '🟡 较慢' if response_time < 5000 else '🔴 很慢'}\n"
+            f"• 建议: {'✅ 性能良好' if response_time < 1000 else '⚠️ 建议优化' if response_time < 5000 else '🚨 需要立即优化'}"
+        )
+        
+        await update.message.reply_html(performance_report)
+        logger.info(f"✅ 性能监控成功，响应时间: {response_time:.2f}ms")
+        
+    except Exception as e:
+        await update.message.reply_text(f"❌ 性能监控失败: {str(e)}")
+        logger.error(f"性能监控错误: {e}")
 
 async def admin_stats_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """处理管理员统计请求，显示访客统计信息（隐藏命令）"""
@@ -1112,6 +1151,7 @@ async def main():
     application.add_handler(CommandHandler("ping", ping_handler))  # 新增ping命令
     application.add_handler(CommandHandler("heartbeat", heartbeat_status_handler))  # 心跳状态检查
     application.add_handler(CommandHandler("test", test_handler))  # 测试命令
+    application.add_handler(CommandHandler("performance", performance_handler))  # 性能监控
     application.add_handler(CommandHandler("change_language", change_language))
     application.add_handler(CommandHandler("self_register", self_register_handler))
     application.add_handler(CommandHandler("mainland_user", mainland_user_handler))
