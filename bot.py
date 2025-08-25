@@ -3,12 +3,13 @@ import re
 import asyncio
 import os
 from datetime import datetime, timedelta
+import pytz
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton, BotCommand
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters, CallbackQueryHandler
 
 # 添加测试输出
 print("🚀 机器人启动中...")
-print("📅 当前时间:", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+print("📅 当前时间:", get_beijing_time().strftime('%Y-%m-%d %H:%M:%S'))
 print("🐍 Python版本:", os.sys.version)
 
 # 强制测试 - 如果这里出错，说明代码有问题
@@ -77,6 +78,15 @@ GAME_URL_QU = "https://www.qu32.vip:30011/entry/register/?i_code=6944642"
 GAME_URL_MK = "https://www.mk2001.com:9081/CHS"
 # 定义官方客服的 Telegram 句柄
 CS_HANDLE = "@maoyiyule"
+
+# 时区设置
+BEIJING_TZ = pytz.timezone('Asia/Shanghai')
+
+def get_beijing_time():
+    """获取北京时间"""
+    utc_now = datetime.now(pytz.UTC)
+    beijing_time = utc_now.astimezone(BEIJING_TZ)
+    return beijing_time
 
 # 定义按钮的表情符号
 BUTTON_EMOJIS = {
@@ -461,10 +471,10 @@ firebase_initialized = False
 firebase_db = None
 
 # 心跳激活相关变量
-last_activity_time = datetime.now()
+last_activity_time = get_beijing_time()
 is_heartbeat_active = False
 heartbeat_monitor_task = None
-last_heartbeat_time = datetime.now()
+last_heartbeat_time = get_beijing_time()
 
 # 检查是否在Render环境中运行
 IS_RENDER = os.environ.get('RENDER', False)
@@ -510,14 +520,14 @@ def initialize_firebase():
 def update_activity():
     """更新最后活动时间"""
     global last_activity_time
-    last_activity_time = datetime.now()
+    last_activity_time = get_beijing_time()
     logger.info(f"活动更新: {last_activity_time}")
 
 def update_visitor_stats(user_id):
     """更新访客统计（增强日志版）"""
     global visitor_stats
     
-    today = datetime.now().strftime('%Y-%m-%d')
+    today = get_beijing_time().strftime('%Y-%m-%d')
     
     # 详细记录更新过程
     logger.info(f"🔄 开始更新访客统计: 用户 {user_id}, 日期 {today}")
@@ -574,7 +584,7 @@ async def _async_update_firebase(user_id, today):
         stats_ref = firebase_db.collection('bots').document(BOT_ID).collection('stats').document('visitor_stats')
         await asyncio.get_event_loop().run_in_executor(None, lambda: stats_ref.set({
             'total_visitors': visitor_stats['total_visitors'],
-            'last_updated': datetime.now(),
+            'last_updated': get_beijing_time(),
             'bot_id': BOT_ID,
             'bot_name': '会员机器人'
         }, merge=True))
@@ -587,7 +597,7 @@ async def _async_update_firebase(user_id, today):
         await asyncio.get_event_loop().run_in_executor(None, lambda: daily_ref.set({
             'visitors': list(visitor_stats['daily_stats'][today]['visitors']),
             'total_actions': visitor_stats['daily_stats'][today]['total_actions'],
-            'last_updated': datetime.now(),
+            'last_updated': get_beijing_time(),
             'bot_id': BOT_ID
         }, merge=True))
         
@@ -606,7 +616,7 @@ def get_visitor_stats():
     """获取访客统计信息（增强版）"""
     global visitor_stats
     
-    today = datetime.now().strftime('%Y-%m-%d')
+    today = get_beijing_time().strftime('%Y-%m-%d')
     
     # 如果本地数据为空，强制恢复
     if visitor_stats['total_visitors'] == 0:
@@ -620,7 +630,7 @@ def get_visitor_stats():
                 all_unique_visitors = set()
                 
                 for i in range(7):
-                    date = (datetime.now() - timedelta(days=i)).strftime('%Y-%m-%d')
+                    date = (get_beijing_time() - timedelta(days=i)).strftime('%Y-%m-%d')
                     daily_ref = firebase_db.collection('bots').document(BOT_ID).collection('stats').document('daily_stats').collection('dates').document(date)
                     daily_doc = daily_ref.get()
                     
@@ -677,7 +687,7 @@ def get_visitor_stats():
     # 获取最近7天统计
     recent_stats = {}
     for i in range(7):
-        date = (datetime.now() - timedelta(days=i)).strftime('%Y-%m-%d')
+        date = (get_beijing_time() - timedelta(days=i)).strftime('%Y-%m-%d')
         if date in visitor_stats['daily_stats']:
             recent_stats[date] = {
                 'visitors': len(visitor_stats['daily_stats'][date]['visitors']),
@@ -753,7 +763,7 @@ async def heartbeat_task(application: Application):
                 logger.warning("心跳任务被停止，已重新激活")
             
             heartbeat_count += 1
-            current_time = datetime.now()
+            current_time = get_beijing_time()
             
             # 每次心跳都在控制台显示详细信息
             print(f"\n{'='*60}")
@@ -804,7 +814,7 @@ async def heartbeat_task(application: Application):
             error_msg = f"❌ 心跳任务错误 #{consecutive_errors}: {e}"
             print(f"\n{'='*60}")
             print(error_msg)
-            print(f"⏰ 错误时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            print(f"⏰ 错误时间: {get_beijing_time().strftime('%Y-%m-%d %H:%M:%S')}")
             print(f"🔄 连续错误: {consecutive_errors}/{max_consecutive_errors}")
             print(f"{'='*60}\n")
             logger.error(f"心跳任务错误 #{consecutive_errors}: {e}")
@@ -834,7 +844,7 @@ async def start_heartbeat(application: Application):
         # 在控制台显示启动信息
         print(f"\n{'='*60}")
         print("🚀 心跳任务启动中...")
-        print(f"⏰ 启动时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"⏰ 启动时间: {get_beijing_time().strftime('%Y-%m-%d %H:%M:%S')}")
         print(f"💓 心跳状态: {'🟢 活跃' if is_heartbeat_active else '🔴 停止'}")
         print(f"🌐 运行环境: {'Render' if IS_RENDER else '本地'}")
         print(f"{'='*60}\n")
@@ -853,7 +863,7 @@ async def start_heartbeat(application: Application):
         error_msg = f"❌ 心跳任务启动失败: {e}"
         print(f"\n{'='*60}")
         print(error_msg)
-        print(f"⏰ 错误时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"⏰ 错误时间: {get_beijing_time().strftime('%Y-%m-%d %H:%M:%S')}")
         print(f"{'='*60}\n")
         logger.error(f"心跳任务启动失败: {e}")
         is_heartbeat_active = False
@@ -867,7 +877,7 @@ async def heartbeat_monitor(application: Application):
     
     while True:
         try:
-            current_time = datetime.now()
+            current_time = get_beijing_time()
             time_since_last_heartbeat = current_time - last_heartbeat_time
             
             # 如果超过15分钟没有心跳，尝试重启
@@ -900,12 +910,12 @@ async def ping_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     update_activity()
     
     # 计算运行时间
-    uptime = datetime.now() - last_activity_time
+    uptime = get_beijing_time() - last_activity_time
     
     await update.message.reply_text(
         "🏓 Pong! 机器人正在运行中...\n\n"
         f"⏰ <b>时间信息</b>\n"
-        f"• 当前时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+        f"• 当前时间: {get_beijing_time().strftime('%Y-%m-%d %H:%M:%S')}\n"
         f"• 最后活动: {last_activity_time.strftime('%Y-%m-%d %H:%M:%S')}\n"
         f"• 运行时长: {uptime.total_seconds()/60:.1f} 分钟\n\n"
         f"💓 <b>心跳状态</b>\n"
@@ -923,13 +933,13 @@ async def heartbeat_status_handler(update: Update, context: ContextTypes.DEFAULT
     
     try:
         # 计算运行时间
-        uptime = datetime.now() - last_activity_time
+        uptime = get_beijing_time() - last_activity_time
         
         # 构建详细的心跳状态报告
         status_report = (
             "💓 <b>心跳状态详细报告</b>\n\n"
             f"⏰ <b>时间信息</b>\n"
-            f"• 当前时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+            f"• 当前时间: {get_beijing_time().strftime('%Y-%m-%d %H:%M:%S')}\n"
             f"• 最后活动: {last_activity_time.strftime('%Y-%m-%d %H:%M:%S')}\n"
             f"• 运行时长: {uptime.total_seconds()/60:.1f} 分钟\n\n"
             f"💓 <b>心跳系统状态</b>\n"
@@ -966,18 +976,18 @@ async def test_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def performance_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """性能监控命令"""
     try:
-        start_time = datetime.now()
+        start_time = get_beijing_time()
         update_activity()
         
         # 测试基本响应速度
-        response_time = (datetime.now() - start_time).total_seconds() * 1000
+        response_time = (get_beijing_time() - start_time).total_seconds() * 1000
         
         # 构建性能报告
         performance_report = (
             "⚡ <b>性能监控报告</b>\n\n"
             f"🕐 <b>响应时间</b>\n"
             f"• 命令处理: {response_time:.2f} ms\n"
-            f"• 当前时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+            f"• 当前时间: {get_beijing_time().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
             f"💓 <b>系统状态</b>\n"
             f"• 心跳状态: {'🟢 活跃' if is_heartbeat_active else '🔴 停止'}\n"
             f"• Firebase: {'✅ 已连接' if firebase_initialized else '❌ 未连接'}\n"
@@ -1054,7 +1064,7 @@ async def admin_stats_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
         except Exception as e:
             logger.error(f"获取所有机器人统计失败: {e}")
     
-    report += f"\n⏰ 统计时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+    report += f"\n⏰ 统计时间: {get_beijing_time().strftime('%Y-%m-%d %H:%M:%S')}"
     report += f"\n👤 查询用户: {update.effective_user.first_name} (ID: {user_id})"
     
     await update.message.reply_html(report)
@@ -1346,6 +1356,7 @@ async def handle_text_messages(update: Update, context: ContextTypes.DEFAULT_TYP
 async def main():
     """启动机器人"""
     print("🚀 机器人启动中...")
+    print(f"📅 当前时间: {get_beijing_time().strftime('%Y-%m-%d %H:%M:%S')}")
     
     # 1. 初始化Firebase
     print("🔧 初始化Firebase...")
@@ -1476,7 +1487,7 @@ async def force_restore_firebase_data():
         
         # 恢复最近30天的数据
         for i in range(30):
-            date = (datetime.now() - timedelta(days=i)).strftime('%Y-%m-%d')
+            date = (get_beijing_time() - timedelta(days=i)).strftime('%Y-%m-%d')
             daily_ref = firebase_db.collection('bots').document(BOT_ID).collection('stats').document('daily_stats').collection('dates').document(date)
             daily_doc = daily_ref.get()
             
