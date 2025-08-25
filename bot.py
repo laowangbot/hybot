@@ -367,7 +367,7 @@ LANGUAGES = {
         'download_ios': "Tải iOS",
         'invite_title': "Mời bạn bè và kiếm tiền cùng nhau!",
         'invite_message': "Bằng cách mời bạn bè đăng ký thông qua liên kết độc quyền của bạn, bạn có thể nhận được phần thưởng phong phú!",
-        'invite_link_heading': "Liên kết mời  ",
+        'invite_link_heading': "Liên kết mời ",
         'invite_link_qu': "quSports (người dùng Trung Quốc)\nhttps://www.qu32.vip:30011/entry/register/?i_code=6944642",
         'invite_link_mk': "MK Sports (người dùng toàn cầu)\nhttps://www.mk2001.com:9081/CHS",
         'language_selection': "Vui lòng chọn ngôn ngữ của bạn:",
@@ -514,15 +514,22 @@ def update_activity():
     logger.info(f"活动更新: {last_activity_time}")
 
 def update_visitor_stats(user_id):
-    """更新访客统计（优化版）"""
+    """更新访客统计（增强日志版）"""
     global visitor_stats
     
     today = datetime.now().strftime('%Y-%m-%d')
+    
+    # 详细记录更新过程
+    logger.info(f"🔄 开始更新访客统计: 用户 {user_id}, 日期 {today}")
+    print(f"🔄 开始更新访客统计: 用户 {user_id}, 日期 {today}")
+    logger.info(f"📊 更新前状态: 总访客={visitor_stats['total_visitors']}, 今日访客={len(visitor_stats['daily_stats'].get(today, {}).get('visitors', set()))}")
     
     # 更新本地统计
     if user_id not in visitor_stats['unique_visitors']:
         visitor_stats['unique_visitors'].add(user_id)
         visitor_stats['total_visitors'] += 1
+        logger.info(f"✅ 新增唯一访客: {user_id}, 总访客数: {visitor_stats['total_visitors']}")
+        print(f"✅ 新增唯一访客: {user_id}, 总访客数: {visitor_stats['total_visitors']}")
     
     # 更新每日统计
     if today not in visitor_stats['daily_stats']:
@@ -530,24 +537,39 @@ def update_visitor_stats(user_id):
             'visitors': set(),
             'total_actions': 0
         }
+        logger.info(f"📅 创建新日期记录: {today}")
+        print(f"📅 创建新日期记录: {today}")
     
     # 记录今日访客
     visitor_stats['daily_stats'][today]['visitors'].add(user_id)
     visitor_stats['daily_stats'][today]['total_actions'] += 1
+    logger.info(f"📈 今日统计更新: 访客={len(visitor_stats['daily_stats'][today]['visitors'])}, 操作={visitor_stats['daily_stats'][today]['total_actions']}")
+    print(f"📈 今日统计更新: 访客={len(visitor_stats['daily_stats'][today]['visitors'])}, 操作={visitor_stats['daily_stats'][today]['total_actions']}")
     
-    # 异步更新Firebase（不阻塞主流程）
+    # 异步更新Firebase
     if firebase_initialized and firebase_db:
+        logger.info(f"🌐 准备更新Firebase: 机器人ID={BOT_ID}")
+        print(f"🌐 准备更新Firebase: 机器人ID={BOT_ID}")
         try:
-            # 使用异步任务更新Firebase，避免阻塞
             asyncio.create_task(_async_update_firebase(user_id, today))
+            logger.info(f"✅ Firebase异步任务已创建")
+            print(f"✅ Firebase异步任务已创建")
         except Exception as e:
             logger.error(f"❌ 创建Firebase异步任务失败: {e}")
+            print(f"❌ 创建Firebase异步任务失败: {e}")
+    else:
+        logger.warning(f"⚠️ Firebase未初始化或不可用: initialized={firebase_initialized}, db={firebase_db is not None}")
+        print(f"⚠️ Firebase未初始化或不可用: initialized={firebase_initialized}, db={firebase_db is not None}")
     
-    logger.debug(f"访客统计更新: 用户 {user_id}, 日期 {today}")
+    logger.info(f"✅ 访客统计更新完成: 用户 {user_id}, 日期 {today}")
+    print(f"✅ 访客统计更新完成: 用户 {user_id}, 日期 {today}")
 
 async def _async_update_firebase(user_id, today):
-    """异步更新Firebase数据"""
+    """异步更新Firebase数据（增强日志版）"""
     try:
+        logger.info(f"🌐 开始Firebase异步更新: 用户 {user_id}, 日期 {today}")
+        print(f"🌐 开始Firebase异步更新: 用户 {user_id}, 日期 {today}")
+        
         # 更新总访客数
         stats_ref = firebase_db.collection('bots').document(BOT_ID).collection('stats').document('visitor_stats')
         await asyncio.get_event_loop().run_in_executor(None, lambda: stats_ref.set({
@@ -556,6 +578,9 @@ async def _async_update_firebase(user_id, today):
             'bot_id': BOT_ID,
             'bot_name': '会员机器人'
         }, merge=True))
+        
+        logger.info(f"✅ 总访客数更新成功: {visitor_stats['total_visitors']}")
+        print(f"✅ 总访客数更新成功: {visitor_stats['total_visitors']}")
         
         # 更新每日统计
         daily_ref = firebase_db.collection('bots').document(BOT_ID).collection('stats').document('daily_stats').collection('dates').document(today)
@@ -566,38 +591,52 @@ async def _async_update_firebase(user_id, today):
             'bot_id': BOT_ID
         }, merge=True))
         
-        logger.debug(f"✅ Firebase异步更新成功: 用户 {user_id}, 日期 {today}")
+        logger.info(f"✅ 每日统计更新成功: 访客={len(visitor_stats['daily_stats'][today]['visitors'])}, 操作={visitor_stats['daily_stats'][today]['total_actions']}")
+        print(f"✅ 每日统计更新成功: 访客={len(visitor_stats['daily_stats'][today]['visitors'])}, 操作={visitor_stats['daily_stats'][today]['total_actions']}")
+        
+        logger.info(f"✅ Firebase异步更新完成: 用户 {user_id}, 日期 {today}")
+        print(f"✅ Firebase异步更新完成: 用户 {user_id}, 日期 {today}")
         
     except Exception as e:
-        logger.error(f"❌ Firebase异步更新失败: {e}")
+        error_msg = f"❌ Firebase异步更新失败: 用户 {user_id}, 日期 {today}, 错误: {e}"
+        logger.error(error_msg)
+        print(error_msg)
 
 def get_visitor_stats():
-    """获取访客统计信息"""
+    """获取访客统计信息（增强版）"""
     global visitor_stats
     
     today = datetime.now().strftime('%Y-%m-%d')
     
-    # 如果Firebase可用，尝试从云端恢复数据
-    if firebase_initialized and firebase_db and not visitor_stats['total_visitors']:
-        try:
-            # 恢复总访客数 - 使用机器人标识符
-            stats_ref = firebase_db.collection('bots').document(BOT_ID).collection('stats').document('visitor_stats')
-            stats_doc = stats_ref.get()
-            if stats_doc.exists:
-                visitor_stats['total_visitors'] = stats_doc.to_dict().get('total_visitors', 0)
-                logger.info(f"✅ 从Firebase恢复总访客数: {visitor_stats['total_visitors']}, 机器人: {BOT_ID}")
-            
-            # 恢复最近7天的数据 - 使用机器人标识符
-            for i in range(7):
-                date = (datetime.now() - timedelta(days=i)).strftime('%Y-%m-%d')
-                daily_ref = firebase_db.collection('bots').document(BOT_ID).collection('stats').document('daily_stats').collection('dates').document(date)
+    # 如果本地数据为空，强制恢复
+    if visitor_stats['total_visitors'] == 0:
+        logger.warning("⚠️ 本地统计数据为空，尝试恢复...")
+        print("⚠️ 本地统计数据为空，尝试恢复...")
+        
+        # 同步恢复数据
+        if firebase_initialized and firebase_db:
+            try:
+                # 恢复总访客数
+                stats_ref = firebase_db.collection('bots').document(BOT_ID).collection('stats').document('visitor_stats')
+                stats_doc = stats_ref.get()
+                
+                if stats_doc.exists:
+                    stats_data = stats_doc.to_dict()
+                    visitor_stats['total_visitors'] = stats_data.get('total_visitors', 0)
+                    logger.info(f"✅ 同步恢复总访客数: {visitor_stats['total_visitors']}")
+                    print(f"✅ 同步恢复总访客数: {visitor_stats['total_visitors']}")
+                
+                # 恢复今日数据
+                daily_ref = firebase_db.collection('bots').document(BOT_ID).collection('stats').document('daily_stats').collection('dates').document(today)
                 daily_doc = daily_ref.get()
+                
                 if daily_doc.exists:
                     daily_data = daily_doc.to_dict()
-                    visitors_set = set(daily_data.get('visitors', []))
+                    visitors_list = daily_data.get('visitors', [])
                     total_actions = daily_data.get('total_actions', 0)
                     
-                    visitor_stats['daily_stats'][date] = {
+                    visitors_set = set(visitors_list)
+                    visitor_stats['daily_stats'][today] = {
                         'visitors': visitors_set,
                         'total_actions': total_actions
                     }
@@ -605,10 +644,37 @@ def get_visitor_stats():
                     # 更新唯一访客集合
                     visitor_stats['unique_visitors'].update(visitors_set)
                     
-                    logger.info(f"✅ 从Firebase恢复日期 {date} 的统计: {len(visitors_set)} 访客, {total_actions} 操作, 机器人: {BOT_ID}")
+                    logger.info(f"✅ 同步恢复今日数据: {len(visitors_set)} 访客, {total_actions} 操作")
+                    print(f"✅ 同步恢复今日数据: {len(visitors_set)} 访客, {total_actions} 操作")
                     
-        except Exception as e:
-            logger.error(f"❌ 从Firebase恢复数据失败: {e}")
+            except Exception as e:
+                logger.error(f"❌ 同步数据恢复失败: {e}")
+                print(f"❌ 同步数据恢复失败: {e}")
+    
+    # 获取今日统计
+    today_stats = visitor_stats['daily_stats'].get(today, {'visitors': set(), 'total_actions': 0})
+    today_visitors = len(today_stats['visitors'])
+    today_actions = today_stats['total_actions']
+    
+    # 获取最近7天统计
+    recent_stats = {}
+    for i in range(7):
+        date = (datetime.now() - timedelta(days=i)).strftime('%Y-%m-%d')
+        if date in visitor_stats['daily_stats']:
+            recent_stats[date] = {
+                'visitors': len(visitor_stats['daily_stats'][date]['visitors']),
+                'actions': visitor_stats['daily_stats'][date]['total_actions']
+            }
+    
+    result = {
+        'total_visitors': visitor_stats['total_visitors'],
+        'today_visitors': today_visitors,
+        'today_actions': today_actions,
+        'recent_stats': recent_stats
+    }
+    
+    logger.info(f"📊 获取统计结果: {result}")
+    return result
     
     # 获取今日统计
     today_stats = visitor_stats['daily_stats'].get(today, {'visitors': set(), 'total_actions': 0})
@@ -1261,9 +1327,23 @@ async def handle_text_messages(update: Update, context: ContextTypes.DEFAULT_TYP
 # 19. 主函数：运行机器人
 async def main():
     """启动机器人"""
-    # 初始化Firebase
+    print("🚀 机器人启动中...")
+    
+    # 1. 初始化Firebase
+    print("🔧 初始化Firebase...")
     initialize_firebase()
     
+    # 2. 强制恢复数据（重要！）
+    print("🔄 恢复访客数据...")
+    restore_success = await force_restore_firebase_data()
+    
+    if restore_success:
+        print(f"✅ 数据恢复成功: 总访客={visitor_stats['total_visitors']}")
+    else:
+        print("⚠️ 数据恢复失败，使用默认值")
+    
+    # 3. 创建Application
+    print("🔧 创建机器人应用...")
     application = Application.builder().token(BOT_TOKEN).build()
 
     # 注册命令处理器，以便 M 菜单和手动输入命令都能工作
@@ -1352,6 +1432,75 @@ async def main():
             logger.error(f"心跳任务创建失败: {e}")
         
         application.run_polling(allowed_updates=Update.ALL_TYPES)
+
+async def force_restore_firebase_data():
+    """强制从Firebase恢复所有数据"""
+    global visitor_stats
+    
+    if not firebase_initialized or not firebase_db:
+        logger.warning("⚠️ Firebase不可用，跳过数据恢复")
+        print("⚠️ Firebase不可用，跳过数据恢复")
+        return False
+    
+    try:
+        logger.info("🔄 强制恢复Firebase数据...")
+        print("🔄 强制恢复Firebase数据...")
+        
+        # 清空本地数据，强制重新加载
+        visitor_stats = {
+            'total_visitors': 0,
+            'daily_stats': {},
+            'unique_visitors': set()
+        }
+        
+        # 恢复总访客数
+        stats_ref = firebase_db.collection('bots').document(BOT_ID).collection('stats').document('visitor_stats')
+        stats_doc = stats_ref.get()
+        
+        if stats_doc.exists:
+            stats_data = stats_doc.to_dict()
+            visitor_stats['total_visitors'] = stats_data.get('total_visitors', 0)
+            logger.info(f"✅ 恢复总访客数: {visitor_stats['total_visitors']}")
+            print(f"✅ 恢复总访客数: {visitor_stats['total_visitors']}")
+        else:
+            logger.warning("⚠️ 未找到访客统计数据")
+            print("⚠️ 未找到访客统计数据")
+        
+        # 恢复最近30天的数据
+        for i in range(30):
+            date = (datetime.now() - timedelta(days=i)).strftime('%Y-%m-%d')
+            daily_ref = firebase_db.collection('bots').document(BOT_ID).collection('stats').document('daily_stats').collection('dates').document(date)
+            daily_doc = daily_ref.get()
+            
+            if daily_doc.exists:
+                daily_data = daily_doc.to_dict()
+                visitors_list = daily_data.get('visitors', [])
+                total_actions = daily_data.get('total_actions', 0)
+                
+                # 转换为set
+                visitors_set = set(visitors_list)
+                
+                visitor_stats['daily_stats'][date] = {
+                    'visitors': visitors_set,
+                    'total_actions': total_actions
+                }
+                
+                # 更新唯一访客集合
+                visitor_stats['unique_visitors'].update(visitors_set)
+                
+                logger.info(f"✅ 恢复日期 {date}: {len(visitors_set)} 访客, {total_actions} 操作")
+                print(f"✅ 恢复日期 {date}: {len(visitors_set)} 访客, {total_actions} 操作")
+        
+        logger.info(f"✅ 数据恢复完成: 总访客={visitor_stats['total_visitors']}, 唯一访客={len(visitor_stats['unique_visitors'])}")
+        print(f"✅ 数据恢复完成: 总访客={visitor_stats['total_visitors']}, 唯一访客={len(visitor_stats['unique_visitors'])}")
+        
+        return True
+        
+    except Exception as e:
+        error_msg = f"❌ 数据恢复失败: {e}"
+        logger.error(error_msg)
+        print(error_msg)
+        return False
 
 if __name__ == "__main__":
     asyncio.run(main())
