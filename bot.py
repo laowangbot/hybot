@@ -9,7 +9,6 @@ from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandl
 
 # 添加测试输出
 print("🚀 机器人启动中...")
-print("📅 当前时间:", get_beijing_time().strftime('%Y-%m-%d %H:%M:%S'))
 print("🐍 Python版本:", os.sys.version)
 
 # 强制测试 - 如果这里出错，说明代码有问题
