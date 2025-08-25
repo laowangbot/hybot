@@ -616,36 +616,54 @@ def get_visitor_stats():
         # 同步恢复数据
         if firebase_initialized and firebase_db:
             try:
-                # 恢复总访客数
+                # 先恢复最近7天的数据，收集所有唯一访客
+                all_unique_visitors = set()
+                
+                for i in range(7):
+                    date = (datetime.now() - timedelta(days=i)).strftime('%Y-%m-%d')
+                    daily_ref = firebase_db.collection('bots').document(BOT_ID).collection('stats').document('daily_stats').collection('dates').document(date)
+                    daily_doc = daily_ref.get()
+                    
+                    if daily_doc.exists:
+                        daily_data = daily_doc.to_dict()
+                        visitors_list = daily_data.get('visitors', [])
+                        total_actions = daily_data.get('total_actions', 0)
+                        
+                        visitors_set = set(visitors_list)
+                        visitor_stats['daily_stats'][date] = {
+                            'visitors': visitors_set,
+                            'total_actions': total_actions
+                        }
+                        
+                        # 收集所有唯一访客
+                        all_unique_visitors.update(visitors_set)
+                        
+                        logger.info(f"✅ 同步恢复日期 {date}: {len(visitors_set)} 访客, {total_actions} 操作")
+                        print(f"✅ 同步恢复日期 {date}: {len(visitors_set)} 访客, {total_actions} 操作")
+                
+                # 更新唯一访客集合和总访客数
+                visitor_stats['unique_visitors'].update(all_unique_visitors)
+                visitor_stats['total_visitors'] = len(visitor_stats['unique_visitors'])
+                
+                # 恢复总访客数（如果Firebase中有记录，使用较大的值）
                 stats_ref = firebase_db.collection('bots').document(BOT_ID).collection('stats').document('visitor_stats')
                 stats_doc = stats_ref.get()
                 
                 if stats_doc.exists:
                     stats_data = stats_doc.to_dict()
-                    visitor_stats['total_visitors'] = stats_data.get('total_visitors', 0)
-                    logger.info(f"✅ 同步恢复总访客数: {visitor_stats['total_visitors']}")
-                    print(f"✅ 同步恢复总访客数: {visitor_stats['total_visitors']}")
-                
-                # 恢复今日数据
-                daily_ref = firebase_db.collection('bots').document(BOT_ID).collection('stats').document('daily_stats').collection('dates').document(today)
-                daily_doc = daily_ref.get()
-                
-                if daily_doc.exists:
-                    daily_data = daily_doc.to_dict()
-                    visitors_list = daily_data.get('visitors', [])
-                    total_actions = daily_data.get('total_actions', 0)
+                    firebase_total = stats_data.get('total_visitors', 0)
                     
-                    visitors_set = set(visitors_list)
-                    visitor_stats['daily_stats'][today] = {
-                        'visitors': visitors_set,
-                        'total_actions': total_actions
-                    }
-                    
-                    # 更新唯一访客集合
-                    visitor_stats['unique_visitors'].update(visitors_set)
-                    
-                    logger.info(f"✅ 同步恢复今日数据: {len(visitors_set)} 访客, {total_actions} 操作")
-                    print(f"✅ 同步恢复今日数据: {len(visitors_set)} 访客, {total_actions} 操作")
+                    # 使用较大的值，确保数据完整性
+                    if firebase_total > visitor_stats['total_visitors']:
+                        visitor_stats['total_visitors'] = firebase_total
+                        logger.info(f"✅ 使用Firebase记录的总访客数: {visitor_stats['total_visitors']}")
+                        print(f"✅ 使用Firebase记录的总访客数: {visitor_stats['total_visitors']}")
+                    else:
+                        logger.info(f"✅ 使用计算得出的总访客数: {visitor_stats['total_visitors']}")
+                        print(f"✅ 使用计算得出的总访客数: {visitor_stats['total_visitors']}")
+                else:
+                    logger.info(f"✅ 使用计算得出的总访客数: {visitor_stats['total_visitors']}")
+                    print(f"✅ 使用计算得出的总访客数: {visitor_stats['total_visitors']}")
                     
             except Exception as e:
                 logger.error(f"❌ 同步数据恢复失败: {e}")
@@ -1453,18 +1471,8 @@ async def force_restore_firebase_data():
             'unique_visitors': set()
         }
         
-        # 恢复总访客数
-        stats_ref = firebase_db.collection('bots').document(BOT_ID).collection('stats').document('visitor_stats')
-        stats_doc = stats_ref.get()
-        
-        if stats_doc.exists:
-            stats_data = stats_doc.to_dict()
-            visitor_stats['total_visitors'] = stats_data.get('total_visitors', 0)
-            logger.info(f"✅ 恢复总访客数: {visitor_stats['total_visitors']}")
-            print(f"✅ 恢复总访客数: {visitor_stats['total_visitors']}")
-        else:
-            logger.warning("⚠️ 未找到访客统计数据")
-            print("⚠️ 未找到访客统计数据")
+        # 先恢复所有日期的数据，收集所有唯一访客
+        all_unique_visitors = set()
         
         # 恢复最近30天的数据
         for i in range(30):
@@ -1485,11 +1493,35 @@ async def force_restore_firebase_data():
                     'total_actions': total_actions
                 }
                 
-                # 更新唯一访客集合
-                visitor_stats['unique_visitors'].update(visitors_set)
+                # 收集所有唯一访客
+                all_unique_visitors.update(visitors_set)
                 
                 logger.info(f"✅ 恢复日期 {date}: {len(visitors_set)} 访客, {total_actions} 操作")
                 print(f"✅ 恢复日期 {date}: {len(visitors_set)} 访客, {total_actions} 操作")
+        
+        # 更新唯一访客集合和总访客数
+        visitor_stats['unique_visitors'] = all_unique_visitors
+        visitor_stats['total_visitors'] = len(all_unique_visitors)
+        
+        # 恢复总访客数（如果Firebase中有记录，使用较大的值）
+        stats_ref = firebase_db.collection('bots').document(BOT_ID).collection('stats').document('visitor_stats')
+        stats_doc = stats_ref.get()
+        
+        if stats_doc.exists:
+            stats_data = stats_doc.to_dict()
+            firebase_total = stats_data.get('total_visitors', 0)
+            
+            # 使用较大的值，确保数据完整性
+            if firebase_total > visitor_stats['total_visitors']:
+                visitor_stats['total_visitors'] = firebase_total
+                logger.info(f"✅ 使用Firebase记录的总访客数: {visitor_stats['total_visitors']}")
+                print(f"✅ 使用Firebase记录的总访客数: {visitor_stats['total_visitors']}")
+            else:
+                logger.info(f"✅ 使用计算得出的总访客数: {visitor_stats['total_visitors']}")
+                print(f"✅ 使用计算得出的总访客数: {visitor_stats['total_visitors']}")
+        else:
+            logger.info(f"✅ 使用计算得出的总访客数: {visitor_stats['total_visitors']}")
+            print(f"✅ 使用计算得出的总访客数: {visitor_stats['total_visitors']}")
         
         logger.info(f"✅ 数据恢复完成: 总访客={visitor_stats['total_visitors']}, 唯一访客={len(visitor_stats['unique_visitors'])}")
         print(f"✅ 数据恢复完成: 总访客={visitor_stats['total_visitors']}, 唯一访客={len(visitor_stats['unique_visitors'])}")
