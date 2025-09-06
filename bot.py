@@ -175,7 +175,7 @@ LANGUAGES = {
         'activity_title': "限时免费赠送活动（30天）",
         'activity_benefits': "🎁 活动福利",
         'activity_description': "注册并充值成功，即获赠老湿永久VIP会员！",
-        'benefit_1': "✅ 包含13个频道",
+        'benefit_1': "✅ 包含15个SVIP频道",
         'benefit_2': "✅ 超百万部精品视频",
         'benefit_3': "💰 价值 368 元 VIP 会员",
         'claim_method': "💬 领取方式",
@@ -185,6 +185,9 @@ LANGUAGES = {
         'promotion_channel': "📢 2026世界杯🏆足球篮球推单五大联赛",
         'promotion_link': "👉 https://t.me/SJB33",
         'customer_service_title': "💬 官方客服",
+        'registration_prompt_title': "🌍 注册提示",
+        'mainland_user_prompt': "🇨🇳 大陆用户请点击大陆用户按钮注册",
+        'overseas_user_prompt': "🌍 海外用户请点击海外按钮注册",
         'vip_member_title': "✨ 官方联盟老湿VIP会员 ✨",
     },
          'en': {
@@ -258,7 +261,7 @@ LANGUAGES = {
          'activity_title': "Limited Time Free Gift Event (30 days)",
          'activity_benefits': "🎁 Event Benefits",
          'activity_description': "Register and recharge successfully to receive permanent VIP membership!",
-         'benefit_1': "✅ Includes 13 channels",
+         'benefit_1': "✅ Includes 15 SVIP channels",
          'benefit_2': "✅ Over 1 million premium videos",
          'benefit_3': "💰 Worth 368 yuan VIP membership",
          'claim_method': "💬 How to claim",
@@ -268,6 +271,9 @@ LANGUAGES = {
          'promotion_channel': "📢 2026 World Cup🏆Football Basketball Picks Five Major Leagues",
          'promotion_link': "👉 https://t.me/SJB33",
          'customer_service_title': "💬 Official Customer Service",
+         'registration_prompt_title': "🌍 Registration Notice",
+         'mainland_user_prompt': "🇨🇳 Mainland users please click the Mainland User button to register",
+         'overseas_user_prompt': "🌍 Overseas users please click the Overseas User button to register",
          'vip_member_title': "✨ Official Alliance VIP Membership ✨",
      },
          'th': {
@@ -341,7 +347,7 @@ LANGUAGES = {
          'activity_title': "กิจกรรมแจกฟรีเป็นเวลาจำกัด (30 วัน)",
          'activity_benefits': "🎁 สิทธิประโยชน์กิจกรรม",
          'activity_description': "ลงทะเบียนและเติมเงินสำเร็จ รับสมาชิก VIP ถาวรทันที!",
-         'benefit_1': "✅ รวม 13 ช่อง",
+         'benefit_1': "✅ รวม 15 ช่อง SVIP",
          'benefit_2': "✅ วิดีโอคุณภาพสูงกว่า 1 ล้านเรื่อง",
          'benefit_3': "💰 สมาชิก VIP มูลค่า 368 หยวน",
          'claim_method': "💬 วิธีรับสิทธิประโยชน์",
@@ -351,6 +357,9 @@ LANGUAGES = {
          'promotion_channel': "📢 ฟุตบอลบาสเกตบอล 2026 ฟุตบอลโลก🏆เลือกห้าลีกใหญ่",
          'promotion_link': "👉 https://t.me/SJB33",
          'customer_service_title': "💬 บริการลูกค้าอย่างเป็นทางการ",
+         'registration_prompt_title': "🌍 ข้อแนะนำการลงทะเบียน",
+         'mainland_user_prompt': "🇨🇳 ผู้ใช้ในจีนแผ่นดินใหญ่กรุณาคลิกปุ่มผู้ใช้ในจีนแผ่นดินใหญ่เพื่อลงทะเบียน",
+         'overseas_user_prompt': "🌍 ผู้ใช้ทั่วโลกกรุณาคลิกปุ่มผู้ใช้ทั่วโลกเพื่อลงทะเบียน",
          'vip_member_title': "✨ สมาชิก VIP พันธมิตรอย่างเป็นทางการ ✨",
      },
     'vi': {
@@ -424,7 +433,7 @@ LANGUAGES = {
         'activity_title': "Sự kiện tặng miễn phí có thời hạn (30 ngày)",
         'activity_benefits': "🎁 Lợi ích sự kiện",
         'activity_description': "Đăng ký và nạp tiền thành công, nhận ngay thành viên VIP vĩnh viễn!",
-        'benefit_1': "✅ Bao gồm 13 kênh",
+        'benefit_1': "✅ Bao gồm 15 kênh SVIP",
         'benefit_2': "✅ Hơn 1 triệu video chất lượng cao",
         'benefit_3': "💰 Thành viên VIP trị giá 368 nhân dân tệ",
         'claim_method': "💬 Cách nhận",
@@ -434,6 +443,9 @@ LANGUAGES = {
         'promotion_channel': "📢 Bóng đá Bóng rổ 2026 World Cup🏆Chọn năm giải đấu lớn",
         'promotion_link': "👉 https://t.me/SJB33",
         'customer_service_title': "💬 Dịch vụ khách hàng chính thức",
+        'registration_prompt_title': "🌍 Hướng dẫn đăng ký",
+        'mainland_user_prompt': "🇨🇳 Người dùng Trung Quốc đại lục vui lòng nhấp vào nút Người dùng Trung Quốc đại lục để đăng ký",
+        'overseas_user_prompt': "🌍 Người dùng toàn cầu vui lòng nhấp vào nút Người dùng toàn cầu để đăng ký",
         'vip_member_title': "✨ Thành viên VIP liên minh chính thức ✨",
     }
 }
@@ -1260,7 +1272,10 @@ async def self_register_handler(update: Update, context: ContextTypes.DEFAULT_TY
         f"💬 <b>{get_text(user_id, 'customer_service_title')}</b>\n"
         f"1️⃣ <a href='https://t.me/QTY01'>@QTY01</a>\n"
         f"2️⃣ <a href='https://t.me/QTY15'>@QTY15</a>\n"
-        f"3️⃣ <a href='https://t.me/qty772'>@qty772</a>"
+        f"3️⃣ <a href='https://t.me/qty772'>@qty772</a>\n\n"
+        f"<b>{get_text(user_id, 'registration_prompt_title')}</b>\n"
+        f"{get_text(user_id, 'mainland_user_prompt')}\n"
+        f"{get_text(user_id, 'overseas_user_prompt')}"
     )
     
     full_message = f"{welcome_message}\n{message_text}"
