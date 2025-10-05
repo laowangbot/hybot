@@ -78,6 +78,18 @@ GAME_URL_MK = "https://www.mk2001.com:9081/CHS"
 # 定义官方客服的 Telegram 句柄
 CS_HANDLE = "@QTY01"
 
+# 客服用户ID列表 (需要替换为实际的客服用户ID)
+CUSTOMER_SERVICE_USERS = [123456789]  # 替换为实际的客服用户ID
+
+# 用户名到用户ID的映射
+USERNAME_TO_ID = {
+    "QTY01": 123456789,  # @QTY01 对应的用户ID，需要更新
+}
+
+# 双向联系会话管理
+user_customer_service_sessions = {}
+message_mapping = {}
+
 # 时区设置
 BEIJING_TZ = pytz.timezone('Asia/Shanghai')
 
@@ -100,6 +112,7 @@ BUTTON_EMOJIS = {
     'menu_self_register': '📝',  # 新增自助注册的表情
     'menu_mainland_user': '🇨🇳',  # 新增大陆用户的表情
     'menu_overseas_user': '🌍',  # 新增海外用户的表情
+    'menu_bidirectional_contact': '💬',  # 双向联系的表情
 }
 
 # 3. 准备多语言文本
@@ -187,6 +200,14 @@ LANGUAGES = {
         'mainland_user_prompt': "🇨🇳 大陆用户请点击大陆用户按钮注册",
         'overseas_user_prompt': "🌍 海外用户请点击海外按钮注册",
         'vip_member_title': "✨ 官方联盟老湿VIP会员 ✨",
+        'menu_bidirectional_contact': f"{BUTTON_EMOJIS['menu_bidirectional_contact']}双向联系",
+        'start_cs_session': "✅ 客服会话已启动\n\n现在您可以发送消息，我会转发给客服。\n发送 /endcs 结束会话。",
+        'end_cs_session': "✅ 客服会话已结束",
+        'cs_message_sent': "✅ 消息已转发给客服，请等待回复",
+        'cs_reply_received': "💬 客服回复\n客服: @QTY01\n时间: {time}\n\n{message}",
+        'new_cs_session_notification': "🆕 新的客服会话\n用户: {user_name} (ID: {user_id})\n时间: {time}",
+        'cs_session_ended_notification': "🔚 客服会话结束\n用户: {user_name} (ID: {user_id})\n时间: {time}",
+        'get_user_id_info': "📋 用户信息\n用户ID: {user_id}\n用户名: @{username}\n姓名: {first_name}\n\n请将用户ID发送给管理员配置到机器人中。",
     },
          'en': {
          'welcome': "Welcome to quSports {user}, click on the menu below to interact.",
@@ -271,6 +292,14 @@ LANGUAGES = {
          'mainland_user_prompt': "🇨🇳 Mainland users please click the Mainland User button to register",
          'overseas_user_prompt': "🌍 Overseas users please click the Overseas User button to register",
          'vip_member_title': "✨ Official Alliance VIP Membership ✨",
+         'menu_bidirectional_contact': f"{BUTTON_EMOJIS['menu_bidirectional_contact']}Bidirectional Contact",
+         'start_cs_session': "✅ Customer service session started\n\nYou can now send messages, I will forward them to customer service.\nSend /endcs to end the session.",
+         'end_cs_session': "✅ Customer service session ended",
+         'cs_message_sent': "✅ Message forwarded to customer service, please wait for reply",
+         'cs_reply_received': "💬 Customer Service Reply\nService: @QTY01\nTime: {time}\n\n{message}",
+         'new_cs_session_notification': "🆕 New customer service session\nUser: {user_name} (ID: {user_id})\nTime: {time}",
+         'cs_session_ended_notification': "🔚 Customer service session ended\nUser: {user_name} (ID: {user_id})\nTime: {time}",
+         'get_user_id_info': "📋 User Information\nUser ID: {user_id}\nUsername: @{username}\nName: {first_name}\n\nPlease send the User ID to the administrator to configure in the bot.",
      },
          'th': {
          'welcome': "ยินดีต้อนรับสู่ quSports {user} คลิกที่เมนูด้านล่างเพื่อโต้ตอบ",
@@ -355,6 +384,14 @@ LANGUAGES = {
          'mainland_user_prompt': "🇨🇳 ผู้ใช้ในจีนแผ่นดินใหญ่กรุณาคลิกปุ่มผู้ใช้ในจีนแผ่นดินใหญ่เพื่อลงทะเบียน",
          'overseas_user_prompt': "🌍 ผู้ใช้ทั่วโลกกรุณาคลิกปุ่มผู้ใช้ทั่วโลกเพื่อลงทะเบียน",
          'vip_member_title': "✨ สมาชิก VIP พันธมิตรอย่างเป็นทางการ ✨",
+         'menu_bidirectional_contact': f"{BUTTON_EMOJIS['menu_bidirectional_contact']}ติดต่อสองทาง",
+         'start_cs_session': "✅ เซสชันบริการลูกค้าเริ่มแล้ว\n\nตอนนี้คุณสามารถส่งข้อความได้ ฉันจะส่งต่อให้กับบริการลูกค้า\nส่ง /endcs เพื่อจบเซสชัน",
+         'end_cs_session': "✅ เซสชันบริการลูกค้าจบแล้ว",
+         'cs_message_sent': "✅ ส่งข้อความไปยังบริการลูกค้าแล้ว กรุณารอการตอบกลับ",
+         'cs_reply_received': "💬 คำตอบจากบริการลูกค้า\nบริการ: @QTY01\nเวลา: {time}\n\n{message}",
+         'new_cs_session_notification': "🆕 เซสชันบริการลูกค้าใหม่\nผู้ใช้: {user_name} (ID: {user_id})\nเวลา: {time}",
+         'cs_session_ended_notification': "🔚 เซสชันบริการลูกค้าจบแล้ว\nผู้ใช้: {user_name} (ID: {user_id})\nเวลา: {time}",
+         'get_user_id_info': "📋 ข้อมูลผู้ใช้\nID ผู้ใช้: {user_id}\nชื่อผู้ใช้: @{username}\nชื่อ: {first_name}\n\nกรุณาส่ง ID ผู้ใช้ให้ผู้ดูแลระบบเพื่อกำหนดค่าในบอท",
      },
     'vi': {
         'welcome': "Chào mừng đến với quSports {user}, nhấp vào menu bên dưới để tương tác.",
@@ -439,6 +476,14 @@ LANGUAGES = {
         'mainland_user_prompt': "🇨🇳 Người dùng Trung Quốc đại lục vui lòng nhấp vào nút Người dùng Trung Quốc đại lục để đăng ký",
         'overseas_user_prompt': "🌍 Người dùng toàn cầu vui lòng nhấp vào nút Người dùng toàn cầu để đăng ký",
         'vip_member_title': "✨ Thành viên VIP liên minh chính thức ✨",
+        'menu_bidirectional_contact': f"{BUTTON_EMOJIS['menu_bidirectional_contact']}Liên hệ hai chiều",
+        'start_cs_session': "✅ Phiên dịch vụ khách hàng đã bắt đầu\n\nBây giờ bạn có thể gửi tin nhắn, tôi sẽ chuyển tiếp cho dịch vụ khách hàng.\nGửi /endcs để kết thúc phiên.",
+        'end_cs_session': "✅ Phiên dịch vụ khách hàng đã kết thúc",
+        'cs_message_sent': "✅ Tin nhắn đã được chuyển tiếp cho dịch vụ khách hàng, vui lòng chờ phản hồi",
+        'cs_reply_received': "💬 Phản hồi từ dịch vụ khách hàng\nDịch vụ: @QTY01\nThời gian: {time}\n\n{message}",
+        'new_cs_session_notification': "🆕 Phiên dịch vụ khách hàng mới\nNgười dùng: {user_name} (ID: {user_id})\nThời gian: {time}",
+        'cs_session_ended_notification': "🔚 Phiên dịch vụ khách hàng đã kết thúc\nNgười dùng: {user_name} (ID: {user_id})\nThời gian: {time}",
+        'get_user_id_info': "📋 Thông tin người dùng\nID người dùng: {user_id}\nTên người dùng: @{username}\nTên: {first_name}\n\nVui lòng gửi ID người dùng cho quản trị viên để cấu hình trong bot.",
     }
 }
 
@@ -1089,7 +1134,8 @@ def get_main_menu_keyboard(user_id):
             KeyboardButton(get_text(user_id, 'menu_withdraw')) # 推单频道
         ],
         [
-            KeyboardButton(get_text(user_id, 'menu_customer_service'))
+            KeyboardButton(get_text(user_id, 'menu_customer_service')),
+            KeyboardButton(get_text(user_id, 'menu_bidirectional_contact'))
         ]
     ]
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=False)
@@ -1210,6 +1256,215 @@ async def customer_service(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     await message.reply_html(text=live_cs_title, reply_markup=reply_markup)
 
+# 12.1 定义「双向联系」按钮的处理器
+async def start_customer_service_session(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """启动客服会话"""
+    update_activity()
+    
+    message, user = get_message_and_user(update)
+    if not message or not user: return
+    user_id = user.id
+    user_name = user.first_name or "Unknown"
+    
+    # 更新访客统计
+    update_visitor_stats(user_id)
+    
+    # 记录会话开始
+    user_customer_service_sessions[user_id] = {
+        'status': 'active',
+        'start_time': get_beijing_time(),
+        'last_activity': get_beijing_time()
+    }
+    
+    # 通知客服有新会话
+    notification_text = get_text(user_id, 'new_cs_session_notification').format(
+        user_name=user_name,
+        user_id=user_id,
+        time=get_beijing_time().strftime('%Y-%m-%d %H:%M:%S')
+    )
+    
+    for cs_id in CUSTOMER_SERVICE_USERS:
+        try:
+            await context.bot.send_message(chat_id=cs_id, text=notification_text)
+        except Exception as e:
+            logger.error(f"通知客服失败: {e}")
+    
+    # 回复用户
+    await message.reply_text(get_text(user_id, 'start_cs_session'))
+
+# 12.2 结束客服会话
+async def end_customer_service_session(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """结束客服会话"""
+    update_activity()
+    
+    message, user = get_message_and_user(update)
+    if not message or not user: return
+    user_id = user.id
+    user_name = user.first_name or "Unknown"
+    
+    if user_id in user_customer_service_sessions:
+        del user_customer_service_sessions[user_id]
+        
+        # 通知客服会话结束
+        end_notification = get_text(user_id, 'cs_session_ended_notification').format(
+            user_name=user_name,
+            user_id=user_id,
+            time=get_beijing_time().strftime('%Y-%m-%d %H:%M:%S')
+        )
+        
+        for cs_id in CUSTOMER_SERVICE_USERS:
+            try:
+                await context.bot.send_message(chat_id=cs_id, text=end_notification)
+            except Exception as e:
+                logger.error(f"通知客服会话结束失败: {e}")
+        
+        await message.reply_text(get_text(user_id, 'end_cs_session'))
+    else:
+        await message.reply_text(get_text(user_id, 'end_cs_session'))
+
+# 12.3 转发用户消息给客服
+async def forward_user_message_to_cs(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """将用户消息转发给客服"""
+    update_activity()
+    
+    message = update.message
+    user_id = message.from_user.id
+    user_name = message.from_user.first_name or "Unknown"
+    
+    # 构建转发消息
+    forward_text = f"👤 用户消息\n用户: {user_name} (ID: {user_id})\n时间: {get_beijing_time().strftime('%Y-%m-%d %H:%M:%S')}\n\n{message.text}"
+    
+    # 发送给客服
+    for cs_id in CUSTOMER_SERVICE_USERS:
+        try:
+            sent_message = await context.bot.send_message(
+                chat_id=cs_id,
+                text=forward_text
+            )
+            # 记录消息映射
+            message_mapping[sent_message.message_id] = {
+                'user_id': user_id,
+                'direction': 'to_cs',
+                'timestamp': get_beijing_time()
+            }
+        except Exception as e:
+            logger.error(f"转发用户消息到客服失败: {e}")
+    
+    # 确认消息已收到
+    await message.reply_text(get_text(user_id, 'cs_message_sent'))
+    
+    # 更新会话活动时间
+    if user_id in user_customer_service_sessions:
+        user_customer_service_sessions[user_id]['last_activity'] = get_beijing_time()
+
+# 12.4 处理客服回复的消息
+async def handle_customer_service_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """处理客服回复的消息"""
+    update_activity()
+    
+    message = update.message
+    cs_id = message.from_user.id
+    
+    # 检查是否是回复消息
+    if message.reply_to_message:
+        original_message = message.reply_to_message
+        if original_message.message_id in message_mapping:
+            target_user_id = message_mapping[original_message.message_id]['user_id']
+            
+            # 构建回复消息
+            reply_text = get_text(target_user_id, 'cs_reply_received').format(
+                time=get_beijing_time().strftime('%Y-%m-%d %H:%M:%S'),
+                message=message.text
+            )
+            
+            try:
+                await context.bot.send_message(
+                    chat_id=target_user_id,
+                    text=reply_text
+                )
+                await message.reply_text("✅ 回复已发送给用户")
+            except Exception as e:
+                logger.error(f"转发客服回复失败: {e}")
+                await message.reply_text("❌ 转发失败，用户可能已屏蔽机器人")
+        else:
+            await message.reply_text("❌ 无法找到对应的用户消息")
+    else:
+        # 如果不是回复消息，直接转发给所有活跃会话的用户
+        if user_customer_service_sessions:
+            broadcast_text = f"📢 客服广播消息\n客服: @QTY01\n时间: {get_beijing_time().strftime('%Y-%m-%d %H:%M:%S')}\n\n{message.text}"
+            
+            for user_id in list(user_customer_service_sessions.keys()):
+                try:
+                    await context.bot.send_message(chat_id=user_id, text=broadcast_text)
+                except Exception as e:
+                    logger.error(f"广播消息到用户 {user_id} 失败: {e}")
+            
+            await message.reply_text(f"✅ 广播消息已发送给 {len(user_customer_service_sessions)} 个活跃会话")
+        else:
+            await message.reply_text("❌ 当前没有活跃的客服会话")
+
+# 12.5 获取用户ID命令
+async def get_user_id_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """获取用户ID的命令"""
+    update_activity()
+    
+    user = update.effective_user
+    user_id = user.id
+    username = user.username or "无用户名"
+    first_name = user.first_name or "未知"
+    
+    # 获取用户语言设置
+    lang_code = user_data.get(user_id, 'zh-CN')
+    texts = LANGUAGES[lang_code]
+    
+    # 构建用户信息
+    user_info = texts['get_user_id_info'].format(
+        user_id=user_id,
+        username=username,
+        first_name=first_name
+    )
+    
+    await update.message.reply_text(user_info)
+    
+    # 如果是客服用户，自动更新配置
+    if username == "QTY01":
+        # 自动更新客服用户ID
+        global CUSTOMER_SERVICE_USERS, USERNAME_TO_ID
+        if user_id not in CUSTOMER_SERVICE_USERS:
+            CUSTOMER_SERVICE_USERS.append(user_id)
+        USERNAME_TO_ID["QTY01"] = user_id
+        
+        # 通知配置已更新
+        config_updated = f"✅ 客服配置已自动更新\n@QTY01 的用户ID: {user_id}\n双向联系功能已激活！"
+        await update.message.reply_text(config_updated)
+        
+        logger.info(f"✅ 自动更新客服配置: @QTY01 -> {user_id}")
+
+# 12.6 管理员命令：查看客服配置
+async def admin_cs_config_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """管理员查看客服配置的命令"""
+    update_activity()
+    
+    user = update.effective_user
+    user_id = user.id
+    
+    # 检查是否是管理员（这里可以添加管理员权限检查）
+    # 暂时允许所有用户查看，实际使用时应该限制权限
+    
+    config_info = f"📋 客服配置信息\n\n"
+    config_info += f"客服句柄: {CS_HANDLE}\n"
+    config_info += f"客服用户ID列表: {CUSTOMER_SERVICE_USERS}\n"
+    config_info += f"用户名映射: {USERNAME_TO_ID}\n"
+    config_info += f"活跃会话数: {len(user_customer_service_sessions)}\n"
+    config_info += f"消息映射数: {len(message_mapping)}\n"
+    
+    if user_customer_service_sessions:
+        config_info += f"\n活跃会话用户:\n"
+        for uid, session in user_customer_service_sessions.items():
+            config_info += f"- 用户ID: {uid}, 开始时间: {session['start_time'].strftime('%H:%M:%S')}\n"
+    
+    await update.message.reply_text(config_info)
+
 # 13. 定义「切换语言」按钮的处理器
 async def change_language(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """当用户点击「切换语言」按钮时调用"""
@@ -1329,6 +1584,21 @@ async def handle_text_messages(update: Update, context: ContextTypes.DEFAULT_TYP
     user_id = message.from_user.id
     text = message.text
     
+    # 检查是否是客服用户
+    if user_id in CUSTOMER_SERVICE_USERS:
+        await handle_customer_service_message(update, context)
+        return
+    
+    # 检查是否在客服会话中
+    if user_id in user_customer_service_sessions:
+        # 检查是否是结束会话命令
+        if text == '/endcs':
+            await end_customer_service_session(update, context)
+        else:
+            # 转发消息给客服
+            await forward_user_message_to_cs(update, context)
+        return
+    
     # 获取当前用户的语言代码
     lang_code = user_data.get(user_id, 'zh-CN')
     texts = LANGUAGES[lang_code]
@@ -1346,6 +1616,8 @@ async def handle_text_messages(update: Update, context: ContextTypes.DEFAULT_TYP
         await promotion_channel_handler(update, context)
     elif text == texts['menu_customer_service']:
         await customer_service(update, context)
+    elif text == texts['menu_bidirectional_contact']:
+        await start_customer_service_session(update, context)
     elif text == texts['menu_change_lang']:
         await change_language(update, context)
     else:
@@ -1391,6 +1663,8 @@ async def main():
     
     # 隐藏的管理员命令（不在菜单中显示）
     application.add_handler(CommandHandler("admin_stats", admin_stats_handler))  # 管理员统计命令
+    application.add_handler(CommandHandler("getid", get_user_id_command))  # 获取用户ID命令
+    application.add_handler(CommandHandler("cs_config", admin_cs_config_command))  # 查看客服配置命令
     
     # 注册一个通用的文本消息处理器来处理所有按钮点击
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text_messages))
@@ -1410,7 +1684,8 @@ async def main():
         BotCommand("advertising_channel", "招商频道"),
         BotCommand("promotion_channel", "推单频道"),
         BotCommand("customer_service", "人工客服"),
-        # 注意：admin_stats 命令不在菜单中显示，仅限管理员使用
+        BotCommand("getid", "获取用户ID"),
+        # 注意：admin_stats 和 cs_config 命令不在菜单中显示，仅限管理员使用
     ])
 
     if IS_RENDER and WEB_AVAILABLE:
