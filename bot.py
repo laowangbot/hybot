@@ -72,18 +72,45 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# 多机器人配置
+BOT_CONFIGS = {
+    'bot1': {
+        'BOT_ID': 'bot1',
+        'BOT_NAME': '趣体育机器人1',
+        'CS_HANDLE': '@QTY01',
+        'CUSTOMER_SERVICE_USERS': [123456789],  # 会被 /getid 自动更新
+    },
+    'bot2': {
+        'BOT_ID': 'bot2',
+        'BOT_NAME': '趣体育机器人2',
+        'CS_HANDLE': '@QTY15',
+        'CUSTOMER_SERVICE_USERS': [123456789],  # 会被 /getid 自动更新
+    },
+    'bot3': {
+        'BOT_ID': 'bot3',
+        'BOT_NAME': '趣体育机器人3',
+        'CS_HANDLE': '@qty772',
+        'CUSTOMER_SERVICE_USERS': [123456789],  # 会被 /getid 自动更新
+    }
+}
+
+# 获取当前机器人配置
+BOT_ID = os.environ.get('BOT_ID', 'bot1')
+CURRENT_BOT_CONFIG = BOT_CONFIGS.get(BOT_ID, BOT_CONFIGS['bot1'])
+
 # 定义游戏的 URL
 GAME_URL_QU = "https://www.qu32.vip:30011/entry/register/?i_code=6944642"
 GAME_URL_MK = "https://www.mk2001.com:9081/CHS"
-# 定义官方客服的 Telegram 句柄
-CS_HANDLE = "@QTY01"
 
-# 客服用户ID列表 (需要替换为实际的客服用户ID)
-CUSTOMER_SERVICE_USERS = [123456789]  # 替换为实际的客服用户ID
+# 使用当前机器人配置
+CS_HANDLE = CURRENT_BOT_CONFIG['CS_HANDLE']
+CUSTOMER_SERVICE_USERS = CURRENT_BOT_CONFIG['CUSTOMER_SERVICE_USERS']
 
 # 用户名到用户ID的映射
 USERNAME_TO_ID = {
     "QTY01": 123456789,  # @QTY01 对应的用户ID，需要更新
+    "QTY15": 123456789,  # @QTY15 对应的用户ID，需要更新
+    "qty772": 123456789,  # @qty772 对应的用户ID，需要更新
 }
 
 # 双向联系会话管理
@@ -1070,7 +1097,7 @@ async def admin_stats_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
     report = f"🔐 <b>管理员统计报告</b>\n\n"
     report += f"🤖 <b>机器人信息</b>\n"
     report += f"• 机器人ID: {BOT_ID}\n"
-    report += f"• 机器人名称: 会员机器人\n"
+    report += f"• 机器人名称: {CURRENT_BOT_CONFIG['BOT_NAME']}\n"
     report += f"• 数据库: {FIREBASE_CONFIG['project_id'] if FIREBASE_CONFIG['project_id'] else '未配置'}\n\n"
     
     report += f"👥 <b>总体统计</b>\n"
@@ -1427,18 +1454,20 @@ async def get_user_id_command(update: Update, context: ContextTypes.DEFAULT_TYPE
     await update.message.reply_text(user_info)
     
     # 如果是客服用户，自动更新配置
-    if username == "QTY01":
+    expected_username = CS_HANDLE[1:] if CS_HANDLE.startswith('@') else CS_HANDLE
+    
+    if username == expected_username:
         # 自动更新客服用户ID
-        global CUSTOMER_SERVICE_USERS, USERNAME_TO_ID
+        global CUSTOMER_SERVICE_USERS, USERNAME_TO_ID, CURRENT_BOT_CONFIG
         if user_id not in CUSTOMER_SERVICE_USERS:
             CUSTOMER_SERVICE_USERS.append(user_id)
-        USERNAME_TO_ID["QTY01"] = user_id
+        USERNAME_TO_ID[expected_username] = user_id
         
         # 通知配置已更新
-        config_updated = f"✅ 客服配置已自动更新\n@QTY01 的用户ID: {user_id}\n双向联系功能已激活！"
+        config_updated = f"✅ 客服配置已自动更新\n{CS_HANDLE} 的用户ID: {user_id}\n双向联系功能已激活！"
         await update.message.reply_text(config_updated)
         
-        logger.info(f"✅ 自动更新客服配置: @QTY01 -> {user_id}")
+        logger.info(f"✅ 自动更新客服配置: {CS_HANDLE} -> {user_id}")
 
 # 12.6 管理员命令：查看客服配置
 async def admin_cs_config_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1452,6 +1481,8 @@ async def admin_cs_config_command(update: Update, context: ContextTypes.DEFAULT_
     # 暂时允许所有用户查看，实际使用时应该限制权限
     
     config_info = f"📋 客服配置信息\n\n"
+    config_info += f"机器人ID: {BOT_ID}\n"
+    config_info += f"机器人名称: {CURRENT_BOT_CONFIG['BOT_NAME']}\n"
     config_info += f"客服句柄: {CS_HANDLE}\n"
     config_info += f"客服用户ID列表: {CUSTOMER_SERVICE_USERS}\n"
     config_info += f"用户名映射: {USERNAME_TO_ID}\n"

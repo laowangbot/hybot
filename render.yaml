@@ -1,4 +1,5 @@
 services:
+  # 机器人1 - 现有机器人
   - type: web
     name: hybot-telegram
     env: python
@@ -9,7 +10,13 @@ services:
       - key: PYTHON_VERSION
         value: 3.9.16
       - key: BOT_TOKEN
-        sync: false
+        value: 8142344692:AAHgq1MQjZ50K445Vh7WhWyopNVWiY1F4PI
+      - key: BOT_ID
+        value: bot1
+      - key: CS_HANDLE
+        value: "@QTY01"
+      - key: CUSTOMER_SERVICE_USERS
+        value: "[123456789]"
       - key: RENDER
         value: true
       - key: FIREBASE_PROJECT_ID
@@ -30,7 +37,87 @@ services:
         value: https://www.googleapis.com/oauth2/v1/certs
       - key: FIREBASE_CLIENT_X509_CERT_URL
         sync: false
+    healthCheckPath: /
+    autoDeploy: true
+
+  # 机器人2 - 新增
+  - type: web
+    name: hybot-2-telegram
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python bot.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.16
+      - key: BOT_TOKEN
+        value: 8093578739:AAFXV__Tn2-e0foSX6VeAa7JHFmevSTZsQI
       - key: BOT_ID
-        value: hybot
+        value: bot2
+      - key: CS_HANDLE
+        value: "@QTY15"
+      - key: CUSTOMER_SERVICE_USERS
+        value: "[123456789]"
+      - key: RENDER
+        value: true
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+      - key: FIREBASE_PRIVATE_KEY
+        sync: false
+      - key: FIREBASE_CLIENT_EMAIL
+        sync: false
+      - key: FIREBASE_PRIVATE_KEY_ID
+        sync: false
+      - key: FIREBASE_CLIENT_ID
+        sync: false
+      - key: FIREBASE_AUTH_URI
+        value: https://accounts.google.com/o/oauth2/auth
+      - key: FIREBASE_TOKEN_URI
+        value: https://oauth2.googleapis.com/token
+      - key: FIREBASE_AUTH_PROVIDER_X509_CERT_URL
+        value: https://www.googleapis.com/oauth2/v1/certs
+      - key: FIREBASE_CLIENT_X509_CERT_URL
+        sync: false
+    healthCheckPath: /
+    autoDeploy: true
+
+  # 机器人3 - 新增
+  - type: web
+    name: hybot-3-telegram
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python bot.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.16
+      - key: BOT_TOKEN
+        value: 8285108508:AAEwdzB_LJUMHMdFLU7AUPCczUfoLxjh_MY
+      - key: BOT_ID
+        value: bot3
+      - key: CS_HANDLE
+        value: "@qty772"
+      - key: CUSTOMER_SERVICE_USERS
+        value: "[123456789]"
+      - key: RENDER
+        value: true
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+      - key: FIREBASE_PRIVATE_KEY
+        sync: false
+      - key: FIREBASE_CLIENT_EMAIL
+        sync: false
+      - key: FIREBASE_PRIVATE_KEY_ID
+        sync: false
+      - key: FIREBASE_CLIENT_ID
+        sync: false
+      - key: FIREBASE_AUTH_URI
+        value: https://accounts.google.com/o/oauth2/auth
+      - key: FIREBASE_TOKEN_URI
+        value: https://oauth2.googleapis.com/token
+      - key: FIREBASE_AUTH_PROVIDER_X509_CERT_URL
+        value: https://www.googleapis.com/oauth2/v1/certs
+      - key: FIREBASE_CLIENT_X509_CERT_URL
+        sync: false
     healthCheckPath: /
     autoDeploy: true
