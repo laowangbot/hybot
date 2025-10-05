@@ -76,7 +76,7 @@ logger = logging.getLogger(__name__)
 GAME_URL_QU = "https://www.qu32.vip:30011/entry/register/?i_code=6944642"
 GAME_URL_MK = "https://www.mk2001.com:9081/CHS"
 # 定义官方客服的 Telegram 句柄
-CS_HANDLE = "@maoyiyule"
+CS_HANDLE = "@QTY01"
 
 # 时区设置
 BEIJING_TZ = pytz.timezone('Asia/Shanghai')
@@ -119,9 +119,7 @@ LANGUAGES = {
         'menu_mainland_user': f"{BUTTON_EMOJIS['menu_mainland_user']}大陆用户", # 新增
         'menu_overseas_user': f"{BUTTON_EMOJIS['menu_overseas_user']}海外用户", # 新增
         'live_customer_service_title': "请点击以下客服专员联系：",
-        'customer_specialist_1': "客服专员一",
-        'customer_specialist_2': "客服专员二",
-        'customer_specialist_3': "客服专员三",
+        'customer_specialist_1': "官方客服 @QTY01",
         'download_app_info': "点击下方按钮下载应用程序：",
         'download_android': "安卓下载",
         'download_ios': "苹果下载",
@@ -135,7 +133,7 @@ LANGUAGES = {
         'welcome_to_sports': "欢迎来到 qu体育！",
         'official_group_handle': "官方群组： @quyuyule",
         'official_channel_handle': "官方频道： @qu337",
-        'customer_service_handle': "官方客服： @maoyiyule",
+        'customer_service_handle': "官方客服： @QTY01",
         'account_info_title': "我的账户",
         'member_id': "会员 ID： {user_id}",
         'member_account': "会员账号： {username}",
@@ -205,9 +203,7 @@ LANGUAGES = {
          'menu_mainland_user': f"{BUTTON_EMOJIS['menu_mainland_user']}Mainland User", # New
          'menu_overseas_user': f"{BUTTON_EMOJIS['menu_overseas_user']}Overseas User", # New
          'live_customer_service_title': "Please click on a customer service specialist to contact:",
-         'customer_specialist_1': "Specialist 1",
-         'customer_specialist_2': "Specialist 2",
-         'customer_specialist_3': "Specialist 3",
+         'customer_specialist_1': "Official Customer Service @QTY01",
          'download_app_info': "Click the buttons below to download the app:",
          'download_android': "Android Download",
          'download_ios': "iOS Download",
@@ -221,7 +217,7 @@ LANGUAGES = {
          'welcome_to_sports': "Welcome to quSports!",
          'official_group_handle': "Official Group: @quyuyule",
          'official_channel_handle': "Official Channel: @qu337",
-         'customer_service_handle': "Official Customer Service: @maoyiyule",
+         'customer_service_handle': "Official Customer Service: @QTY01",
          'account_info_title': "My Account",
          'member_id': "Member ID: {user_id}",
          'member_account': "Member Account: {username}",
@@ -291,9 +287,7 @@ LANGUAGES = {
          'menu_mainland_user': f"{BUTTON_EMOJIS['menu_mainland_user']}ผู้ใช้ในจีนแผ่นดินใหญ่", # New
          'menu_overseas_user': f"{BUTTON_EMOJIS['menu_overseas_user']}ผู้ใช้ทั่วโลก", # New
          'live_customer_service_title': "กรุณาคลิกที่ผู้เชี่ยวชาญบริการลูกค้าด้านล่างเพื่อติดต่อ:",
-         'customer_specialist_1': "ผู้เชี่ยวชาญ 1",
-         'customer_specialist_2': "ผู้เชี่ยวชาญ 2",
-         'customer_specialist_3': "ผู้เชี่ยวชาญ 3",
+         'customer_specialist_1': "บริการลูกค้าอย่างเป็นทางการ @QTY01",
          'download_app_info': "คลิกปุ่มด้านล่างเพื่อดาวน์โหลดแอป:",
          'download_android': "ดาวน์โหลด Android",
          'download_ios': "ดาวน์โหลด iOS",
@@ -307,7 +301,7 @@ LANGUAGES = {
          'welcome_to_sports': "ยินดีต้อนรับสู่ quSports!",
          'official_group_handle': "กลุ่มทางการ: @quyuyule",
          'official_channel_handle': "ช่องทางการ: @qu337",
-         'customer_service_handle': "บริการลูกค้าทางการ: @maoyiyule",
+         'customer_service_handle': "บริการลูกค้าทางการ: @QTY01",
          'account_info_title': "บัญชีของฉัน",
          'member_id': "ID สมาชิก: {user_id}",
          'member_account': "บัญชีสมาชิก: {username}",
@@ -377,9 +371,7 @@ LANGUAGES = {
         'menu_mainland_user': f"{BUTTON_EMOJIS['menu_mainland_user']}Người dùng Trung Quốc đại lục", # New
         'menu_overseas_user': f"{BUTTON_EMOJIS['menu_overseas_user']}Người dùng toàn cầu", # New
         'live_customer_service_title': "Vui lòng nhấp vào chuyên viên dịch vụ khách hàng dưới đây để liên hệ:",
-        'customer_specialist_1': "Chuyên viên 1",
-        'customer_specialist_2': "Chuyên viên 2",
-        'customer_specialist_3': "Chuyên viên 3",
+        'customer_specialist_1': "Dịch vụ khách hàng chính thức @QTY01",
         'download_app_info': "Nhấp vào các nút dưới đây để tải ứng dụng:",
         'download_android': "Tải Android",
         'download_ios': "Tải iOS",
@@ -393,7 +385,7 @@ LANGUAGES = {
         'welcome_to_sports': "Chào mừng đến với quSports!",
         'official_group_handle': "Nhóm chính thức: @quyuyule",
         'official_channel_handle': "Kênh chính thức: @qu337",
-        'customer_service_handle': "Dịch vụ khách hàng chính thức: @maoyiyule",
+        'customer_service_handle': "Dịch vụ khách hàng chính thức: @QTY01",
         'account_info_title': "Tài khoản của tôi",
         'member_id': "ID thành viên: {user_id}",
         'member_account': "Tài khoản thành viên: {username}",
@@ -1156,9 +1148,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"{get_text(user_id, 'promotion_channel')}\n"
         f" {get_text(user_id, 'promotion_link')}\n\n"
         f"{get_text(user_id, 'customer_service_title')}\n"
-        f"1️⃣ @QTY01\n"
-        f"2️⃣ @QTY15\n"
-        f"3️⃣ @qty772"
+        f"@QTY01"
     )
 
     await update.message.reply_html(
@@ -1216,8 +1206,6 @@ async def customer_service(update: Update, context: ContextTypes.DEFAULT_TYPE):
     live_cs_title = get_text(user_id, 'live_customer_service_title')
     keyboard = [
         [InlineKeyboardButton(get_text(user_id, 'customer_specialist_1'), url='https://t.me/QTY01')],
-        [InlineKeyboardButton(get_text(user_id, 'customer_specialist_2'), url='https://t.me/QTY15')],
-        [InlineKeyboardButton(get_text(user_id, 'customer_specialist_3'), url='https://t.me/qty772')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await message.reply_html(text=live_cs_title, reply_markup=reply_markup)
@@ -1270,9 +1258,7 @@ async def self_register_handler(update: Update, context: ContextTypes.DEFAULT_TY
         f"📢 <b>{get_text(user_id, 'promotion_channel')}</b>\n"
         f" {get_text(user_id, 'promotion_link')}\n\n"
         f"💬 <b>{get_text(user_id, 'customer_service_title')}</b>\n"
-        f"1️⃣ <a href='https://t.me/QTY01'>@QTY01</a>\n"
-        f"2️⃣ <a href='https://t.me/QTY15'>@QTY15</a>\n"
-        f"3️⃣ <a href='https://t.me/qty772'>@qty772</a>\n\n"
+        f"<a href='https://t.me/QTY01'>@QTY01</a>\n\n"
         f"<b>{get_text(user_id, 'registration_prompt_title')}</b>\n"
         f"{get_text(user_id, 'mainland_user_prompt')}\n"
         f"{get_text(user_id, 'overseas_user_prompt')}"

@@ -120,7 +120,7 @@ python bot.py
 ## 📞 技术支持
 
 如有问题，请联系：
-- 官方客服: @QTY01, @QTY15, @QTY04
+- 官方客服: @QTY01
 - 招商频道: https://t.me/QTY18
 - 推单频道: https://t.me/SJB33
 
