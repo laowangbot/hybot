@@ -1621,19 +1621,25 @@ async def handle_text_messages(update: Update, context: ContextTypes.DEFAULT_TYP
         await handle_customer_service_message(update, context)
         return
     
+    # 获取当前用户的语言代码
+    lang_code = user_data.get(user_id, 'zh-CN')
+    texts = LANGUAGES[lang_code]
+    
     # 检查是否在客服会话中
     if user_id in user_customer_service_sessions:
         # 检查是否是结束会话命令
         if text == '/endcs':
             await end_customer_service_session(update, context)
         else:
-            # 转发消息给客服
-            await forward_user_message_to_cs(update, context)
-        return
-    
-    # 获取当前用户的语言代码
-    lang_code = user_data.get(user_id, 'zh-CN')
-    texts = LANGUAGES[lang_code]
+            # 检查是否是菜单按钮，如果是则先结束会话再处理
+            if text in [texts['menu_self_register'], texts['menu_mainland_user'], texts['menu_overseas_user'], 
+                       texts['menu_recharge'], texts['menu_withdraw'], texts['menu_customer_service'], 
+                       texts['menu_bidirectional_contact'], texts['menu_change_lang']]:
+                await end_customer_service_session(update, context)
+            else:
+                # 转发消息给客服
+                await forward_user_message_to_cs(update, context)
+                return
     
     # 根据消息文本调用相应的处理器
     if text == texts['menu_self_register']:
