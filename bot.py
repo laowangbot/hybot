@@ -78,19 +78,19 @@ BOT_CONFIGS = {
         'BOT_ID': 'bot1',
         'BOT_NAME': '趣体育机器人1',
         'CS_HANDLE': '@QTY01',
-        'CUSTOMER_SERVICE_USERS': [123456789],  # 请替换为 @QTY01 的真实用户ID
+        'CUSTOMER_SERVICE_USERS': [5079390159],  # @QTY01 的真实用户ID
     },
     'bot2': {
         'BOT_ID': 'bot2',
         'BOT_NAME': '趣体育机器人2',
         'CS_HANDLE': '@QTY15',
-        'CUSTOMER_SERVICE_USERS': [123456789],  # 请替换为 @QTY15 的真实用户ID
+        'CUSTOMER_SERVICE_USERS': [7951964655],  # @QTY15 的真实用户ID
     },
     'bot3': {
         'BOT_ID': 'bot3',
         'BOT_NAME': '趣体育机器人3',
         'CS_HANDLE': '@qty772',
-        'CUSTOMER_SERVICE_USERS': [123456789],  # 请替换为 @qty772 的真实用户ID
+        'CUSTOMER_SERVICE_USERS': [8075220391],  # @qty772 的真实用户ID
     }
 }
 
@@ -107,11 +107,10 @@ CS_HANDLE = CURRENT_BOT_CONFIG['CS_HANDLE']
 CUSTOMER_SERVICE_USERS = CURRENT_BOT_CONFIG['CUSTOMER_SERVICE_USERS']
 
 # 用户名到用户ID的映射
-# 注意：请先获取真实的用户ID，然后替换下面的123456789
 USERNAME_TO_ID = {
-    "QTY01": 123456789,  # @QTY01 对应的用户ID，请替换为真实ID
-    "QTY15": 123456789,  # @QTY15 对应的用户ID，请替换为真实ID
-    "qty772": 123456789,  # @qty772 对应的用户ID，请替换为真实ID
+    "QTY01": 5079390159,  # @QTY01 对应的用户ID
+    "QTY15": 7951964655,  # @QTY15 对应的用户ID
+    "qty772": 8075220391,  # @qty772 对应的用户ID
 }
 
 # 双向联系会话管理
