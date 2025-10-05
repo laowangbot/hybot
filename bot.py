@@ -231,7 +231,7 @@ LANGUAGES = {
         'start_cs_session': "✅ 客服会话已启动\n\n现在您可以发送消息，我会转发给客服。\n发送 /endcs 结束会话。",
         'end_cs_session': "✅ 客服会话已结束",
         'cs_message_sent': "✅ 消息已转发给客服，请等待回复",
-        'cs_reply_received': "💬 客服回复\n客服: @QTY01\n时间: {time}\n\n{message}",
+        'cs_reply_received': "💬 客服回复\n客服: {cs_handle}\n时间: {time}\n\n{message}",
         'new_cs_session_notification': "🆕 新的客服会话\n用户: {user_name} (ID: {user_id})\n时间: {time}",
         'cs_session_ended_notification': "🔚 客服会话结束\n用户: {user_name} (ID: {user_id})\n时间: {time}",
         'get_user_id_info': "📋 用户信息\n用户ID: {user_id}\n用户名: @{username}\n姓名: {first_name}\n\n请将用户ID发送给管理员配置到机器人中。",
@@ -323,7 +323,7 @@ LANGUAGES = {
          'start_cs_session': "✅ Customer service session started\n\nYou can now send messages, I will forward them to customer service.\nSend /endcs to end the session.",
          'end_cs_session': "✅ Customer service session ended",
          'cs_message_sent': "✅ Message forwarded to customer service, please wait for reply",
-         'cs_reply_received': "💬 Customer Service Reply\nService: @QTY01\nTime: {time}\n\n{message}",
+         'cs_reply_received': "💬 Customer Service Reply\nService: {cs_handle}\nTime: {time}\n\n{message}",
          'new_cs_session_notification': "🆕 New customer service session\nUser: {user_name} (ID: {user_id})\nTime: {time}",
          'cs_session_ended_notification': "🔚 Customer service session ended\nUser: {user_name} (ID: {user_id})\nTime: {time}",
          'get_user_id_info': "📋 User Information\nUser ID: {user_id}\nUsername: @{username}\nName: {first_name}\n\nPlease send the User ID to the administrator to configure in the bot.",
@@ -415,7 +415,7 @@ LANGUAGES = {
          'start_cs_session': "✅ เซสชันบริการลูกค้าเริ่มแล้ว\n\nตอนนี้คุณสามารถส่งข้อความได้ ฉันจะส่งต่อให้กับบริการลูกค้า\nส่ง /endcs เพื่อจบเซสชัน",
          'end_cs_session': "✅ เซสชันบริการลูกค้าจบแล้ว",
          'cs_message_sent': "✅ ส่งข้อความไปยังบริการลูกค้าแล้ว กรุณารอการตอบกลับ",
-         'cs_reply_received': "💬 คำตอบจากบริการลูกค้า\nบริการ: @QTY01\nเวลา: {time}\n\n{message}",
+         'cs_reply_received': "💬 คำตอบจากบริการลูกค้า\nบริการ: {cs_handle}\nเวลา: {time}\n\n{message}",
          'new_cs_session_notification': "🆕 เซสชันบริการลูกค้าใหม่\nผู้ใช้: {user_name} (ID: {user_id})\nเวลา: {time}",
          'cs_session_ended_notification': "🔚 เซสชันบริการลูกค้าจบแล้ว\nผู้ใช้: {user_name} (ID: {user_id})\nเวลา: {time}",
          'get_user_id_info': "📋 ข้อมูลผู้ใช้\nID ผู้ใช้: {user_id}\nชื่อผู้ใช้: @{username}\nชื่อ: {first_name}\n\nกรุณาส่ง ID ผู้ใช้ให้ผู้ดูแลระบบเพื่อกำหนดค่าในบอท",
@@ -507,7 +507,7 @@ LANGUAGES = {
         'start_cs_session': "✅ Phiên dịch vụ khách hàng đã bắt đầu\n\nBây giờ bạn có thể gửi tin nhắn, tôi sẽ chuyển tiếp cho dịch vụ khách hàng.\nGửi /endcs để kết thúc phiên.",
         'end_cs_session': "✅ Phiên dịch vụ khách hàng đã kết thúc",
         'cs_message_sent': "✅ Tin nhắn đã được chuyển tiếp cho dịch vụ khách hàng, vui lòng chờ phản hồi",
-        'cs_reply_received': "💬 Phản hồi từ dịch vụ khách hàng\nDịch vụ: @QTY01\nThời gian: {time}\n\n{message}",
+        'cs_reply_received': "💬 Phản hồi từ dịch vụ khách hàng\nDịch vụ: {cs_handle}\nThời gian: {time}\n\n{message}",
         'new_cs_session_notification': "🆕 Phiên dịch vụ khách hàng mới\nNgười dùng: {user_name} (ID: {user_id})\nThời gian: {time}",
         'cs_session_ended_notification': "🔚 Phiên dịch vụ khách hàng đã kết thúc\nNgười dùng: {user_name} (ID: {user_id})\nThời gian: {time}",
         'get_user_id_info': "📋 Thông tin người dùng\nID người dùng: {user_id}\nTên người dùng: @{username}\nTên: {first_name}\n\nVui lòng gửi ID người dùng cho quản trị viên để cấu hình trong bot.",
@@ -1221,7 +1221,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"{get_text(user_id, 'promotion_channel')}\n"
         f" {get_text(user_id, 'promotion_link')}\n\n"
         f"{get_text(user_id, 'customer_service_title')}\n"
-        f"@QTY01"
+        f"{CS_HANDLE}"
     )
 
     await update.message.reply_html(
@@ -1278,7 +1278,7 @@ async def customer_service(update: Update, context: ContextTypes.DEFAULT_TYPE):
     update_visitor_stats(user_id)
     live_cs_title = get_text(user_id, 'live_customer_service_title')
     keyboard = [
-        [InlineKeyboardButton(get_text(user_id, 'customer_specialist_1'), url='https://t.me/QTY01')],
+        [InlineKeyboardButton(get_text(user_id, 'customer_specialist_1'), url=f'https://t.me/{CS_HANDLE[1:]}')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await message.reply_html(text=live_cs_title, reply_markup=reply_markup)
@@ -1400,6 +1400,7 @@ async def handle_customer_service_message(update: Update, context: ContextTypes.
             
             # 构建回复消息
             reply_text = get_text(target_user_id, 'cs_reply_received').format(
+                cs_handle=CS_HANDLE,
                 time=get_beijing_time().strftime('%Y-%m-%d %H:%M:%S'),
                 message=message.text
             )
@@ -1418,7 +1419,7 @@ async def handle_customer_service_message(update: Update, context: ContextTypes.
     else:
         # 如果不是回复消息，直接转发给所有活跃会话的用户
         if user_customer_service_sessions:
-            broadcast_text = f"📢 客服广播消息\n客服: @QTY01\n时间: {get_beijing_time().strftime('%Y-%m-%d %H:%M:%S')}\n\n{message.text}"
+            broadcast_text = f"📢 客服广播消息\n客服: {CS_HANDLE}\n时间: {get_beijing_time().strftime('%Y-%m-%d %H:%M:%S')}\n\n{message.text}"
             
             for user_id in list(user_customer_service_sessions.keys()):
                 try:
@@ -1544,7 +1545,7 @@ async def self_register_handler(update: Update, context: ContextTypes.DEFAULT_TY
         f"📢 <b>{get_text(user_id, 'promotion_channel')}</b>\n"
         f" {get_text(user_id, 'promotion_link')}\n\n"
         f"💬 <b>{get_text(user_id, 'customer_service_title')}</b>\n"
-        f"<a href='https://t.me/QTY01'>@QTY01</a>\n\n"
+        f"<a href='https://t.me/{CS_HANDLE[1:]}'>{CS_HANDLE}</a>\n\n"
         f"<b>{get_text(user_id, 'registration_prompt_title')}</b>\n"
         f"{get_text(user_id, 'mainland_user_prompt')}\n"
         f"{get_text(user_id, 'overseas_user_prompt')}"
