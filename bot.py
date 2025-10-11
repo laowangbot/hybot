@@ -2,6 +2,7 @@ import logging
 import re
 import asyncio
 import os
+import json
 from datetime import datetime, timedelta
 import pytz
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton, BotCommand
@@ -79,18 +80,27 @@ BOT_CONFIGS = {
         'BOT_NAME': '趣体育机器人1',
         'CS_HANDLE': '@QTY01',
         'CUSTOMER_SERVICE_USERS': [5079390159],  # @QTY01 的真实用户ID
+        'MK_URL': 'https://www.mk2144.com:9153/entry/register46620/?i_code=91262507',  # 机器人1的MK体育链接
+        'WELCOME_IMAGE': None,  # 欢迎图片URL，如果不需要图片请设为None
+        'REGISTER_IMAGE': None,  # 自助注册图片URL，如果不需要图片请设为None
     },
     'bot2': {
         'BOT_ID': 'bot2',
         'BOT_NAME': '趣体育机器人2',
         'CS_HANDLE': '@QTY15',
         'CUSTOMER_SERVICE_USERS': [7951964655],  # @QTY15 的真实用户ID
+        'MK_URL': 'https://www.mk2144.com:9153/entry/register22993/?i_code=77201329',  # 机器人2的MK体育链接
+        'WELCOME_IMAGE': None,  # 欢迎图片URL，如果不需要图片请设为None
+        'REGISTER_IMAGE': None,  # 自助注册图片URL，如果不需要图片请设为None
     },
     'bot3': {
         'BOT_ID': 'bot3',
         'BOT_NAME': '趣体育机器人3',
         'CS_HANDLE': '@qty772',
         'CUSTOMER_SERVICE_USERS': [8075220391],  # @qty772 的真实用户ID
+        'MK_URL': 'https://www.mk2144.com:9153/entry/register86237/?i_code=60150868',  # 机器人3的MK体育链接
+        'WELCOME_IMAGE': None,  # 欢迎图片URL，如果不需要图片请设为None
+        'REGISTER_IMAGE': None,  # 自助注册图片URL，如果不需要图片请设为None
     }
 }
 
@@ -100,11 +110,15 @@ CURRENT_BOT_CONFIG = BOT_CONFIGS.get(BOT_ID, BOT_CONFIGS['bot1'])
 
 # 定义游戏的 URL
 GAME_URL_QU = "https://www.qu32.vip:30011/entry/register/?i_code=6944642"
-GAME_URL_MK = "https://www.mk2001.com:9081/CHS"
+GAME_URL_MK = CURRENT_BOT_CONFIG['MK_URL']  # 从当前机器人配置中获取MK体育链接
 
 # 使用当前机器人配置
 CS_HANDLE = CURRENT_BOT_CONFIG['CS_HANDLE']
 CUSTOMER_SERVICE_USERS = CURRENT_BOT_CONFIG['CUSTOMER_SERVICE_USERS']
+
+# 超级管理员配置（可以管理所有机器人）
+SUPER_ADMIN_USERNAME = "wzm1984"  # 超级管理员用户名（不带@）
+SUPER_ADMIN_ID = None  # 会在运行时自动识别并设置
 
 # 用户名到用户ID的映射
 USERNAME_TO_ID = {
@@ -117,6 +131,9 @@ USERNAME_TO_ID = {
 user_customer_service_sessions = {}
 message_mapping = {}
 
+# 图片设置状态管理
+user_image_setting_state = {}  # {user_id: {'type': 'WELCOME_IMAGE'/'REGISTER_IMAGE', 'bot_id': 'bot1/bot2/bot3'}}
+
 # 时区设置
 BEIJING_TZ = pytz.timezone('Asia/Shanghai')
 
@@ -125,6 +142,76 @@ def get_beijing_time():
     utc_now = datetime.now(pytz.UTC)
     beijing_time = utc_now.astimezone(BEIJING_TZ)
     return beijing_time
+
+def check_and_set_super_admin(user):
+    """检查并自动设置超级管理员"""
+    global SUPER_ADMIN_ID
+    if user and user.username:
+        username = user.username.lower()
+        if username == SUPER_ADMIN_USERNAME.lower() and SUPER_ADMIN_ID is None:
+            SUPER_ADMIN_ID = user.id
+            logger.info(f"✅ 自动识别超级管理员: @{user.username} (ID: {user.id})")
+            return True
+    return False
+
+def is_super_admin(user_id):
+    """检查用户是否是超级管理员"""
+    return SUPER_ADMIN_ID is not None and user_id == SUPER_ADMIN_ID
+
+def can_manage_images(user_id):
+    """检查用户是否有权限管理图片"""
+    return is_super_admin(user_id) or user_id in CUSTOMER_SERVICE_USERS
+
+# 图片配置文件路径
+IMAGE_CONFIG_FILE = 'bot_images_config.json'
+
+def load_image_config():
+    """从文件加载图片配置"""
+    try:
+        if os.path.exists(IMAGE_CONFIG_FILE):
+            with open(IMAGE_CONFIG_FILE, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+                # 更新到 BOT_CONFIGS
+                for bot_id, bot_config in BOT_CONFIGS.items():
+                    if bot_id in config:
+                        if 'WELCOME_IMAGE' in config[bot_id]:
+                            bot_config['WELCOME_IMAGE'] = config[bot_id]['WELCOME_IMAGE']
+                        if 'REGISTER_IMAGE' in config[bot_id]:
+                            bot_config['REGISTER_IMAGE'] = config[bot_id]['REGISTER_IMAGE']
+                logger.info("图片配置加载成功")
+    except Exception as e:
+        logger.error(f"加载图片配置失败: {e}")
+
+def save_image_config(bot_id, image_type, file_id):
+    """保存图片配置到文件"""
+    try:
+        # 读取现有配置
+        config = {}
+        if os.path.exists(IMAGE_CONFIG_FILE):
+            with open(IMAGE_CONFIG_FILE, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+        
+        # 更新配置
+        if bot_id not in config:
+            config[bot_id] = {}
+        config[bot_id][image_type] = file_id
+        
+        # 保存到文件
+        with open(IMAGE_CONFIG_FILE, 'w', encoding='utf-8') as f:
+            json.dump(config, f, ensure_ascii=False, indent=2)
+        
+        # 同时更新内存中的配置
+        if bot_id in BOT_CONFIGS:
+            BOT_CONFIGS[bot_id][image_type] = file_id
+        
+        logger.info(f"图片配置已保存: {bot_id} - {image_type}")
+        return True
+    except Exception as e:
+        logger.error(f"保存图片配置失败: {e}")
+        return False
+
+# 启动时加载图片配置
+load_image_config()
 
 # 定义按钮的表情符号
 BUTTON_EMOJIS = {
@@ -167,7 +254,7 @@ LANGUAGES = {
         'invite_message': "👉邀请您的好友，联系客服专员获取您的奖金!",
         'invite_link_heading': "邀请链接 🔗",
         'invite_link_qu': "趣体育（大陆用户）\nhttps://www.qu32.vip:30011/entry/register/?i_code=6944642",
-        'invite_link_mk': "MK体育（全球用户）\nhttps://www.mk2001.com:9081/CHS",
+        'invite_link_mk': f"MK体育（全球用户）\n{GAME_URL_MK}",
         'language_selection': "请选择您的语言：",
         'lang_changed': "语言已成功切换！",
         'welcome_to_sports': "欢迎来到 qu体育！",
@@ -213,7 +300,7 @@ LANGUAGES = {
         'activity_title': "限时免费赠送活动（30天）",
         'activity_benefits': "🎁 活动福利",
         'activity_description': "注册并充值成功，即获赠老湿永久VIP会员！",
-        'benefit_1': "✅ 包含15个SVIP频道",
+        'benefit_1': "✅ 包含18个SVIP频道",
         'benefit_2': "✅ 超百万部精品视频",
         'benefit_3': "💰 价值 368 元 VIP 会员",
         'claim_method': "💬 领取方式",
@@ -259,7 +346,7 @@ LANGUAGES = {
          'invite_message': "By inviting friends to register through your exclusive link, you can get rich rewards!",
          'invite_link_heading': "Your invitation link  ",
          'invite_link_qu': "quSports (Mainland China Users)\nhttps://www.qu32.vip:30011/entry/register/?i_code=6944642",
-         'invite_link_mk': "MK Sports (Global Users)\nhttps://www.mk2001.com:9081/CHS",
+         'invite_link_mk': f"MK Sports (Global Users)\n{GAME_URL_MK}",
          'language_selection': "Please select your language:",
          'lang_changed': "Language switched successfully!",
          'welcome_to_sports': "Welcome to quSports!",
@@ -351,7 +438,7 @@ LANGUAGES = {
          'invite_message': "โดยการเชิญเพื่อนให้ลงทะเบียนผ่านลิงก์พิเศษของคุณ คุณจะได้รับรางวัลมากมาย!",
          'invite_link_heading': "ลิงก์เชิญ 🔗",
          'invite_link_qu': "quSports (ผู้ใช้ในจีน)\nhttps://www.qu32.vip:30011/entry/register/?i_code=6944642",
-         'invite_link_mk': "MK Sports (ผู้ใช้ทั่วโลก)\nhttps://www.mk2001.com:9081/CHS",
+         'invite_link_mk': f"MK Sports (ผู้ใช้ทั่วโลก)\n{GAME_URL_MK}",
          'language_selection': "กรุณาเลือกภาษาของคุณ:",
          'lang_changed': "เปลี่ยนภาษาเรียบร้อยแล้ว!",
          'welcome_to_sports': "ยินดีต้อนรับสู่ quSports!",
@@ -443,7 +530,7 @@ LANGUAGES = {
         'invite_message': "Bằng cách mời bạn bè đăng ký thông qua liên kết độc quyền của bạn, bạn có thể nhận được phần thưởng phong phú!",
         'invite_link_heading': "Liên kết mời ",
         'invite_link_qu': "quSports (người dùng Trung Quốc)\nhttps://www.qu32.vip:30011/entry/register/?i_code=6944642",
-        'invite_link_mk': "MK Sports (người dùng toàn cầu)\nhttps://www.mk2001.com:9081/CHS",
+        'invite_link_mk': f"MK Sports (người dùng toàn cầu)\n{GAME_URL_MK}",
         'language_selection': "Vui lòng chọn ngôn ngữ của bạn:",
         'lang_changed': "Đã thay đổi ngôn ngữ thành công!",
         'welcome_to_sports': "Chào mừng đến với quSports!",
@@ -1048,6 +1135,189 @@ async def test_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"❌ 测试命令失败: {str(e)}")
         logger.error(f"测试命令错误: {e}")
 
+async def set_welcome_image_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """设置欢迎图片命令处理器"""
+    update_activity()
+    user = update.effective_user
+    
+    # 自动识别超级管理员
+    check_and_set_super_admin(user)
+    
+    user_id = user.id
+    
+    # 检查权限
+    if not can_manage_images(user_id):
+        await update.message.reply_text("❌ 抱歉，只有管理员和客服人员可以设置图片。")
+        return
+    
+    # 如果是超级管理员，显示机器人选择菜单
+    if is_super_admin(user_id):
+        keyboard = [
+            [InlineKeyboardButton("机器人1 (@QTY01)", callback_data="set_img_welcome_bot1")],
+            [InlineKeyboardButton("机器人2 (@QTY15)", callback_data="set_img_welcome_bot2")],
+            [InlineKeyboardButton("机器人3 (@qty772)", callback_data="set_img_welcome_bot3")],
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await update.message.reply_text(
+            "📸 <b>设置欢迎图片</b>\n\n"
+            "请选择要设置图片的机器人：",
+            parse_mode='HTML',
+            reply_markup=reply_markup
+        )
+        logger.info(f"超级管理员 {user_id} 开始设置欢迎图片")
+    else:
+        # 普通客服只能设置当前机器人
+        user_image_setting_state[user_id] = {'type': 'WELCOME_IMAGE', 'bot_id': BOT_ID}
+        
+        await update.message.reply_text(
+            "📸 <b>设置欢迎图片</b>\n\n"
+            "请发送一张图片，这张图片将用于欢迎信息（/start 命令）。\n\n"
+            "💡 提示：\n"
+            "• 支持 JPG、PNG 等常见格式\n"
+            "• 建议图片尺寸：800x600 或更高\n"
+            "• 图片会自动保存并应用到当前机器人\n\n"
+            "发送图片后，系统会自动设置。",
+            parse_mode='HTML'
+        )
+        logger.info(f"客服 {user_id} 开始为 {BOT_ID} 设置欢迎图片")
+
+async def set_register_image_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """设置注册图片命令处理器"""
+    update_activity()
+    user = update.effective_user
+    
+    # 自动识别超级管理员
+    check_and_set_super_admin(user)
+    
+    user_id = user.id
+    
+    # 检查权限
+    if not can_manage_images(user_id):
+        await update.message.reply_text("❌ 抱歉，只有管理员和客服人员可以设置图片。")
+        return
+    
+    # 如果是超级管理员，显示机器人选择菜单
+    if is_super_admin(user_id):
+        keyboard = [
+            [InlineKeyboardButton("机器人1 (@QTY01)", callback_data="set_img_register_bot1")],
+            [InlineKeyboardButton("机器人2 (@QTY15)", callback_data="set_img_register_bot2")],
+            [InlineKeyboardButton("机器人3 (@qty772)", callback_data="set_img_register_bot3")],
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await update.message.reply_text(
+            "📸 <b>设置注册图片</b>\n\n"
+            "请选择要设置图片的机器人：",
+            parse_mode='HTML',
+            reply_markup=reply_markup
+        )
+        logger.info(f"超级管理员 {user_id} 开始设置注册图片")
+    else:
+        # 普通客服只能设置当前机器人
+        user_image_setting_state[user_id] = {'type': 'REGISTER_IMAGE', 'bot_id': BOT_ID}
+        
+        await update.message.reply_text(
+            "📸 <b>设置注册图片</b>\n\n"
+            "请发送一张图片，这张图片将用于自助注册功能。\n\n"
+            "💡 提示：\n"
+            "• 支持 JPG、PNG 等常见格式\n"
+            "• 建议图片尺寸：800x600 或更高\n"
+            "• 图片会自动保存并应用到当前机器人\n\n"
+            "发送图片后，系统会自动设置。",
+            parse_mode='HTML'
+        )
+        logger.info(f"客服 {user_id} 开始为 {BOT_ID} 设置注册图片")
+
+async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """处理用户发送的图片"""
+    update_activity()
+    user_id = update.effective_user.id
+    
+    # 检查用户是否正在设置图片
+    if user_id not in user_image_setting_state:
+        return  # 如果不是在设置图片状态，忽略
+    
+    # 检查权限
+    if not can_manage_images(user_id):
+        await update.message.reply_text("❌ 抱歉，只有管理员和客服人员可以设置图片。")
+        return
+    
+    try:
+        # 获取图片 file_id（选择最大尺寸的图片）
+        photo = update.message.photo[-1]
+        file_id = photo.file_id
+        
+        # 获取设置信息
+        setting_info = user_image_setting_state[user_id]
+        image_type = setting_info['type']
+        target_bot_id = setting_info['bot_id']
+        
+        # 保存图片配置
+        if save_image_config(target_bot_id, image_type, file_id):
+            image_type_name = "欢迎图片" if image_type == 'WELCOME_IMAGE' else "注册图片"
+            bot_name = BOT_CONFIGS[target_bot_id]['BOT_NAME']
+            await update.message.reply_text(
+                f"✅ <b>{image_type_name}设置成功！</b>\n\n"
+                f"图片已保存并应用到 {bot_name}。\n"
+                f"用户将在相应功能中看到这张图片。",
+                parse_mode='HTML'
+            )
+            logger.info(f"用户 {user_id} 成功为 {target_bot_id} 设置了 {image_type}")
+        else:
+            await update.message.reply_text("❌ 保存图片配置失败，请稍后重试。")
+        
+        # 清除状态
+        del user_image_setting_state[user_id]
+        
+    except Exception as e:
+        await update.message.reply_text(f"❌ 处理图片时出错: {str(e)}")
+        logger.error(f"处理图片错误: {e}")
+        # 清除状态
+        if user_id in user_image_setting_state:
+            del user_image_setting_state[user_id]
+
+async def handle_image_setting_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """处理图片设置的回调（超级管理员选择机器人）"""
+    query = update.callback_query
+    await query.answer()
+    
+    user_id = query.from_user.id
+    
+    # 检查是否是超级管理员
+    if not is_super_admin(user_id):
+        await query.edit_message_text("❌ 只有超级管理员可以使用此功能。")
+        return
+    
+    # 解析回调数据：set_img_welcome_bot1 或 set_img_register_bot1
+    data = query.data
+    if data.startswith('set_img_welcome_'):
+        image_type = 'WELCOME_IMAGE'
+        image_type_name = "欢迎图片"
+        bot_id = data.replace('set_img_welcome_', '')
+    elif data.startswith('set_img_register_'):
+        image_type = 'REGISTER_IMAGE'
+        image_type_name = "注册图片"
+        bot_id = data.replace('set_img_register_', '')
+    else:
+        return
+    
+    # 设置状态
+    user_image_setting_state[user_id] = {'type': image_type, 'bot_id': bot_id}
+    
+    bot_name = BOT_CONFIGS[bot_id]['BOT_NAME']
+    
+    await query.edit_message_text(
+        f"📸 <b>设置{image_type_name}</b>\n\n"
+        f"目标机器人：{bot_name}\n\n"
+        f"请发送一张图片，这张图片将用于该机器人的{image_type_name}。\n\n"
+        f"💡 提示：\n"
+        f"• 支持 JPG、PNG 等常见格式\n"
+        f"• 建议图片尺寸：800x600 或更高\n"
+        f"• 图片会自动保存并应用\n\n"
+        f"发送图片后，系统会自动设置。",
+        parse_mode='HTML'
+    )
+    logger.info(f"超级管理员 {user_id} 选择为 {bot_id} 设置 {image_type}")
+
 async def performance_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """性能监控命令"""
     try:
@@ -1193,6 +1463,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     update_activity()  # 更新活动时间
     
     user = update.effective_user
+    
+    # 自动识别超级管理员
+    check_and_set_super_admin(user)
+    
     logger.info(f"User {user.first_name} started the bot.")
     user_id = user.id
     
@@ -1224,10 +1498,22 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"{CS_HANDLE}"
     )
 
-    await update.message.reply_html(
-        new_welcome_text,
-        reply_markup=get_main_menu_keyboard(user_id)
-    )
+    # 检查是否有欢迎图片
+    welcome_image = CURRENT_BOT_CONFIG.get('WELCOME_IMAGE')
+    if welcome_image:
+        # 如果有图片，发送图片和文字
+        await update.message.reply_photo(
+            photo=welcome_image,
+            caption=new_welcome_text,
+            parse_mode='HTML',
+            reply_markup=get_main_menu_keyboard(user_id)
+        )
+    else:
+        # 如果没有图片，只发送文字
+        await update.message.reply_html(
+            new_welcome_text,
+            reply_markup=get_main_menu_keyboard(user_id)
+        )
 
 # 10. 定义「招商频道」按钮的处理器
 async def advertising_channel_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1437,6 +1723,10 @@ async def get_user_id_command(update: Update, context: ContextTypes.DEFAULT_TYPE
     update_activity()
     
     user = update.effective_user
+    
+    # 自动识别超级管理员
+    is_new_super_admin = check_and_set_super_admin(user)
+    
     user_id = user.id
     username = user.username or "无用户名"
     first_name = user.first_name or "未知"
@@ -1452,7 +1742,13 @@ async def get_user_id_command(update: Update, context: ContextTypes.DEFAULT_TYPE
         first_name=first_name
     )
     
-    await update.message.reply_text(user_info)
+    # 如果是超级管理员，添加特殊标识
+    if is_super_admin(user_id):
+        user_info += f"\n\n👑 <b>超级管理员权限</b>\n✅ 您可以管理所有3个机器人的图片设置"
+        if is_new_super_admin:
+            user_info += f"\n🎉 已自动识别并授予超级管理员权限！"
+    
+    await update.message.reply_html(user_info)
     
     # 如果是客服用户，自动更新配置
     expected_username = CS_HANDLE[1:] if CS_HANDLE.startswith('@') else CS_HANDLE
@@ -1553,7 +1849,19 @@ async def self_register_handler(update: Update, context: ContextTypes.DEFAULT_TY
     
     full_message = f"{welcome_message}\n{message_text}"
 
-    await message.reply_html(text=full_message, reply_markup=get_main_menu_keyboard(user_id))
+    # 检查是否有自助注册图片
+    register_image = CURRENT_BOT_CONFIG.get('REGISTER_IMAGE')
+    if register_image:
+        # 如果有图片，发送图片和文字
+        await message.reply_photo(
+            photo=register_image,
+            caption=full_message,
+            parse_mode='HTML',
+            reply_markup=get_main_menu_keyboard(user_id)
+        )
+    else:
+        # 如果没有图片，只发送文字
+        await message.reply_html(text=full_message, reply_markup=get_main_menu_keyboard(user_id))
 
 # 15. 定义「大陆用户」按钮的处理器
 async def mainland_user_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1703,12 +2011,18 @@ async def main():
     application.add_handler(CommandHandler("admin_stats", admin_stats_handler))  # 管理员统计命令
     application.add_handler(CommandHandler("getid", get_user_id_command))  # 获取用户ID命令
     application.add_handler(CommandHandler("cs_config", admin_cs_config_command))  # 查看客服配置命令
+    application.add_handler(CommandHandler("set_welcome_image", set_welcome_image_handler))  # 设置欢迎图片
+    application.add_handler(CommandHandler("set_register_image", set_register_image_handler))  # 设置注册图片
+    
+    # 注册图片消息处理器
+    application.add_handler(MessageHandler(filters.PHOTO, photo_handler))
     
     # 注册一个通用的文本消息处理器来处理所有按钮点击
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text_messages))
     
-    # 仅为语言切换保留 CallbackQueryHandler
+    # 注册 CallbackQueryHandler
     application.add_handler(CallbackQueryHandler(handle_language_callback, pattern='^lang_'))
+    application.add_handler(CallbackQueryHandler(handle_image_setting_callback, pattern='^set_img_'))
 
     # 设置 M 菜单中的命令
     await application.bot.set_my_commands([
