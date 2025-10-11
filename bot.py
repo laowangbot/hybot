@@ -134,6 +134,10 @@ message_mapping = {}
 # 图片设置状态管理
 user_image_setting_state = {}  # {user_id: {'type': 'WELCOME_IMAGE'/'REGISTER_IMAGE', 'bot_id': 'bot1/bot2/bot3'}}
 
+# 会话超时设置
+SESSION_TIMEOUT_SECONDS = 30  # 30秒无活动自动结束会话
+session_timeout_task = None  # 会话超时检查任务
+
 # 时区设置
 BEIJING_TZ = pytz.timezone('Asia/Shanghai')
 
@@ -317,6 +321,7 @@ LANGUAGES = {
         'menu_bidirectional_contact': f"{BUTTON_EMOJIS['menu_bidirectional_contact']}双向联系",
         'start_cs_session': "✅ 客服会话已启动\n\n现在您可以发送消息，我会转发给客服。\n发送 /endcs 结束会话。",
         'end_cs_session': "✅ 客服会话已结束",
+        'cs_session_timeout': "⏰ 客服会话已因超时自动结束（30秒无活动）。\n如需继续联系客服，请重新发起会话。",
         'cs_message_sent': "✅ 消息已转发给客服，请等待回复",
         'cs_reply_received': "💬 客服回复\n客服: {cs_handle}\n时间: {time}\n\n{message}",
         'new_cs_session_notification': "🆕 新的客服会话\n用户: {user_name} (ID: {user_id})\n时间: {time}",
@@ -409,6 +414,7 @@ LANGUAGES = {
          'menu_bidirectional_contact': f"{BUTTON_EMOJIS['menu_bidirectional_contact']}Bidirectional Contact",
          'start_cs_session': "✅ Customer service session started\n\nYou can now send messages, I will forward them to customer service.\nSend /endcs to end the session.",
          'end_cs_session': "✅ Customer service session ended",
+         'cs_session_timeout': "⏰ Customer service session automatically ended due to timeout (30 seconds of inactivity).\nPlease start a new session if you need to contact customer service again.",
          'cs_message_sent': "✅ Message forwarded to customer service, please wait for reply",
          'cs_reply_received': "💬 Customer Service Reply\nService: {cs_handle}\nTime: {time}\n\n{message}",
          'new_cs_session_notification': "🆕 New customer service session\nUser: {user_name} (ID: {user_id})\nTime: {time}",
@@ -501,6 +507,7 @@ LANGUAGES = {
          'menu_bidirectional_contact': f"{BUTTON_EMOJIS['menu_bidirectional_contact']}ติดต่อสองทาง",
          'start_cs_session': "✅ เซสชันบริการลูกค้าเริ่มแล้ว\n\nตอนนี้คุณสามารถส่งข้อความได้ ฉันจะส่งต่อให้กับบริการลูกค้า\nส่ง /endcs เพื่อจบเซสชัน",
          'end_cs_session': "✅ เซสชันบริการลูกค้าจบแล้ว",
+         'cs_session_timeout': "⏰ เซสชันบริการลูกค้าจบอัตโนมัติเนื่องจากหมดเวลา (30 วินาทีไม่มีกิจกรรม)\nกรุณาเริ่มเซสชันใหม่หากต้องการติดต่อบริการลูกค้าอีกครั้ง",
          'cs_message_sent': "✅ ส่งข้อความไปยังบริการลูกค้าแล้ว กรุณารอการตอบกลับ",
          'cs_reply_received': "💬 คำตอบจากบริการลูกค้า\nบริการ: {cs_handle}\nเวลา: {time}\n\n{message}",
          'new_cs_session_notification': "🆕 เซสชันบริการลูกค้าใหม่\nผู้ใช้: {user_name} (ID: {user_id})\nเวลา: {time}",
@@ -593,6 +600,7 @@ LANGUAGES = {
         'menu_bidirectional_contact': f"{BUTTON_EMOJIS['menu_bidirectional_contact']}Liên hệ hai chiều",
         'start_cs_session': "✅ Phiên dịch vụ khách hàng đã bắt đầu\n\nBây giờ bạn có thể gửi tin nhắn, tôi sẽ chuyển tiếp cho dịch vụ khách hàng.\nGửi /endcs để kết thúc phiên.",
         'end_cs_session': "✅ Phiên dịch vụ khách hàng đã kết thúc",
+        'cs_session_timeout': "⏰ Phiên dịch vụ khách hàng tự động kết thúc do hết thời gian (30 giây không hoạt động).\nVui lòng bắt đầu phiên mới nếu bạn cần liên hệ dịch vụ khách hàng lại.",
         'cs_message_sent': "✅ Tin nhắn đã được chuyển tiếp cho dịch vụ khách hàng, vui lòng chờ phản hồi",
         'cs_reply_received': "💬 Phản hồi từ dịch vụ khách hàng\nDịch vụ: {cs_handle}\nThời gian: {time}\n\n{message}",
         'new_cs_session_notification': "🆕 Phiên dịch vụ khách hàng mới\nNgười dùng: {user_name} (ID: {user_id})\nThời gian: {time}",
@@ -1029,6 +1037,68 @@ async def start_heartbeat(application: Application):
         print(f"{'='*60}\n")
         logger.error(f"心跳任务启动失败: {e}")
         is_heartbeat_active = False
+
+async def check_session_timeout(application: Application):
+    """定期检查客服会话超时并自动结束"""
+    logger.info("🕐 会话超时检查任务启动")
+    
+    while True:
+        try:
+            await asyncio.sleep(10)  # 每10秒检查一次
+            
+            current_time = get_beijing_time()
+            expired_sessions = []
+            
+            # 检查所有会话
+            for user_id, session_info in user_customer_service_sessions.items():
+                last_activity = session_info.get('last_activity')
+                if last_activity:
+                    time_since_activity = (current_time - last_activity).total_seconds()
+                    
+                    # 如果超过30秒无活动
+                    if time_since_activity > SESSION_TIMEOUT_SECONDS:
+                        expired_sessions.append(user_id)
+                        logger.info(f"🕐 会话超时: 用户 {user_id}, 无活动时间 {time_since_activity:.0f} 秒")
+            
+            # 结束过期会话
+            for user_id in expired_sessions:
+                try:
+                    # 获取用户信息
+                    session_info = user_customer_service_sessions.get(user_id)
+                    if session_info:
+                        # 删除会话
+                        del user_customer_service_sessions[user_id]
+                        
+                        # 通知用户会话已超时结束
+                        timeout_message = get_text(user_id, 'cs_session_timeout')
+                        if not timeout_message:
+                            timeout_message = "⏰ 客服会话已因超时自动结束（30秒无活动）。\n如需继续联系客服，请重新发起会话。"
+                        
+                        await application.bot.send_message(
+                            chat_id=user_id,
+                            text=timeout_message
+                        )
+                        
+                        # 通知客服
+                        end_notification = f"⏰ 会话超时结束\n用户ID: {user_id}\n时间: {current_time.strftime('%Y-%m-%d %H:%M:%S')}\n原因: 超过{SESSION_TIMEOUT_SECONDS}秒无活动"
+                        
+                        for cs_id in CUSTOMER_SERVICE_USERS:
+                            try:
+                                await application.bot.send_message(
+                                    chat_id=cs_id,
+                                    text=end_notification
+                                )
+                            except Exception as e:
+                                logger.error(f"通知客服会话超时失败: {e}")
+                        
+                        logger.info(f"✅ 已自动结束超时会话: 用户 {user_id}")
+                        
+                except Exception as e:
+                    logger.error(f"结束超时会话失败: {e}")
+                    
+        except Exception as e:
+            logger.error(f"会话超时检查任务错误: {e}")
+            await asyncio.sleep(10)
 
 async def heartbeat_monitor(application: Application):
     """心跳监控任务，检测心跳是否正常"""
@@ -2013,6 +2083,7 @@ async def main():
     application.add_handler(CommandHandler("cs_config", admin_cs_config_command))  # 查看客服配置命令
     application.add_handler(CommandHandler("set_welcome_image", set_welcome_image_handler))  # 设置欢迎图片
     application.add_handler(CommandHandler("set_register_image", set_register_image_handler))  # 设置注册图片
+    application.add_handler(CommandHandler("endcs", end_customer_service_session))  # 结束客服会话
     
     # 注册图片消息处理器
     application.add_handler(MessageHandler(filters.PHOTO, photo_handler))
@@ -2071,6 +2142,16 @@ async def main():
             print(f"❌ 心跳任务创建失败: {e}")
             logger.error(f"心跳任务创建失败: {e}")
         
+        # 启动会话超时检查任务
+        print("🕐 准备启动会话超时检查任务...")
+        try:
+            global session_timeout_task
+            session_timeout_task = asyncio.create_task(check_session_timeout(application))
+            print("✅ 会话超时检查任务已创建")
+        except Exception as e:
+            print(f"❌ 会话超时检查任务创建失败: {e}")
+            logger.error(f"会话超时检查任务创建失败: {e}")
+        
         # 启动web服务器
         await web._run_app(app, host='0.0.0.0', port=PORT)
     else:
@@ -2086,6 +2167,16 @@ async def main():
         except Exception as e:
             print(f"❌ 心跳任务创建失败: {e}")
             logger.error(f"心跳任务创建失败: {e}")
+        
+        # 启动会话超时检查任务
+        print("🕐 准备启动会话超时检查任务...")
+        try:
+            global session_timeout_task
+            session_timeout_task = asyncio.create_task(check_session_timeout(application))
+            print("✅ 会话超时检查任务已创建")
+        except Exception as e:
+            print(f"❌ 会话超时检查任务创建失败: {e}")
+            logger.error(f"会话超时检查任务创建失败: {e}")
         
         application.run_polling(allowed_updates=Update.ALL_TYPES)
 
