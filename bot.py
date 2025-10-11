@@ -1041,16 +1041,15 @@ async def start_heartbeat(application: Application):
 async def check_session_timeout(application: Application):
     """定期检查客服会话超时并自动结束"""
     logger.info("🕐 会话超时检查任务启动")
+    print("✅ 会话超时检查任务已启动，每10秒检查一次")
     
     while True:
         try:
-            await asyncio.sleep(10)  # 每10秒检查一次
-            
             current_time = get_beijing_time()
             expired_sessions = []
             
             # 检查所有会话
-            for user_id, session_info in user_customer_service_sessions.items():
+            for user_id, session_info in list(user_customer_service_sessions.items()):
                 last_activity = session_info.get('last_activity')
                 if last_activity:
                     time_since_activity = (current_time - last_activity).total_seconds()
@@ -1095,6 +1094,9 @@ async def check_session_timeout(application: Application):
                         
                 except Exception as e:
                     logger.error(f"结束超时会话失败: {e}")
+            
+            # 等待10秒后再次检查
+            await asyncio.sleep(10)
                     
         except Exception as e:
             logger.error(f"会话超时检查任务错误: {e}")
@@ -1767,6 +1769,10 @@ async def handle_customer_service_message(update: Update, context: ContextTypes.
                     text=reply_text
                 )
                 await message.reply_text("✅ 回复已发送给用户")
+                
+                # 更新会话活动时间
+                if target_user_id in user_customer_service_sessions:
+                    user_customer_service_sessions[target_user_id]['last_activity'] = get_beijing_time()
             except Exception as e:
                 logger.error(f"转发客服回复失败: {e}")
                 await message.reply_text("❌ 转发失败，用户可能已屏蔽机器人")
@@ -2008,6 +2014,7 @@ async def handle_text_messages(update: Update, context: ContextTypes.DEFAULT_TYP
         # 检查是否是结束会话命令
         if text == '/endcs':
             await end_customer_service_session(update, context)
+            return
         else:
             # 检查是否是菜单按钮，如果是则先结束会话再处理
             if text in [texts['menu_self_register'], texts['menu_mainland_user'], texts['menu_overseas_user'], 
