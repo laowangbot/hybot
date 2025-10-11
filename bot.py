@@ -2050,6 +2050,8 @@ async def handle_text_messages(update: Update, context: ContextTypes.DEFAULT_TYP
 # 19. 主函数：运行机器人
 async def main():
     """启动机器人"""
+    global session_timeout_task
+    
     print("🚀 机器人启动中...")
     print(f"📅 当前时间: {get_beijing_time().strftime('%Y-%m-%d %H:%M:%S')}")
     
@@ -2152,7 +2154,6 @@ async def main():
         # 启动会话超时检查任务
         print("🕐 准备启动会话超时检查任务...")
         try:
-            global session_timeout_task
             session_timeout_task = asyncio.create_task(check_session_timeout(application))
             print("✅ 会话超时检查任务已创建")
         except Exception as e:
@@ -2178,7 +2179,6 @@ async def main():
         # 启动会话超时检查任务
         print("🕐 准备启动会话超时检查任务...")
         try:
-            global session_timeout_task
             session_timeout_task = asyncio.create_task(check_session_timeout(application))
             print("✅ 会话超时检查任务已创建")
         except Exception as e:
