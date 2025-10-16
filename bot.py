@@ -1566,8 +1566,19 @@ async def show_broadcast_panel(user_id, context, message=None, edit=True):
         
         reply_markup = InlineKeyboardMarkup(keyboard)
         
+        # 尝试编辑消息，如果失败则发送新消息
         if edit and message:
-            await message.edit_text(panel_text, parse_mode='HTML', reply_markup=reply_markup)
+            try:
+                await message.edit_text(panel_text, parse_mode='HTML', reply_markup=reply_markup)
+            except Exception as edit_error:
+                # 如果编辑失败，发送新消息
+                logger.warning(f"编辑消息失败，发送新消息: {edit_error}")
+                await context.bot.send_message(
+                    chat_id=user_id,
+                    text=panel_text,
+                    parse_mode='HTML',
+                    reply_markup=reply_markup
+                )
         else:
             await context.bot.send_message(
                 chat_id=user_id,
@@ -1578,8 +1589,14 @@ async def show_broadcast_panel(user_id, context, message=None, edit=True):
             
     except Exception as e:
         logger.error(f"显示广播控制面板失败: {e}")
-        if message:
-            await message.reply_text(f"❌ 显示控制面板失败: {str(e)}")
+        # 发送简单的错误消息
+        try:
+            await context.bot.send_message(
+                chat_id=user_id,
+                text=f"❌ 显示控制面板失败: {str(e)}"
+            )
+        except Exception as send_error:
+            logger.error(f"发送错误消息也失败: {send_error}")
 
 async def admin_stats_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """处理管理员统计请求，显示访客统计信息（隐藏命令）"""
@@ -2309,11 +2326,20 @@ async def show_broadcast_preview(query, context):
         # 显示返回按钮
         keyboard = [[InlineKeyboardButton("🔙 返回控制面板", callback_data="bc_back")]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await query.edit_message_text(
-            "✅ 预览已发送\n\n"
-            "这就是用户将收到的广播内容。",
-            reply_markup=reply_markup
-        )
+        try:
+            await query.edit_message_text(
+                "✅ 预览已发送\n\n"
+                "这就是用户将收到的广播内容。",
+                reply_markup=reply_markup
+            )
+        except Exception as edit_error:
+            # 如果编辑失败，发送新消息
+            logger.warning(f"编辑预览消息失败，发送新消息: {edit_error}")
+            await context.bot.send_message(
+                chat_id=user_id,
+                text="✅ 预览已发送\n\n这就是用户将收到的广播内容。",
+                reply_markup=reply_markup
+            )
         
     except Exception as e:
         logger.error(f"发送广播预览失败: {e}")
@@ -2353,11 +2379,21 @@ async def show_send_confirmation(query, context):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await query.edit_message_text(
-        confirmation_text,
-        parse_mode='HTML',
-        reply_markup=reply_markup
-    )
+    try:
+        await query.edit_message_text(
+            confirmation_text,
+            parse_mode='HTML',
+            reply_markup=reply_markup
+        )
+    except Exception as edit_error:
+        # 如果编辑失败，发送新消息
+        logger.warning(f"编辑确认消息失败，发送新消息: {edit_error}")
+        await context.bot.send_message(
+            chat_id=user_id,
+            text=confirmation_text,
+            parse_mode='HTML',
+            reply_markup=reply_markup
+        )
 
 async def execute_broadcast_send(query, context):
     """执行广播发送"""
@@ -2455,6 +2491,14 @@ async def execute_broadcast_send(query, context):
                 last_update_time = current_time
             except Exception as e:
                 logger.error(f"更新进度消息失败: {e}")
+                # 如果编辑失败，尝试发送新消息
+                try:
+                    progress_message = await context.bot.send_message(
+                        chat_id=user_id,
+                        text=progress_text
+                    )
+                except Exception as send_error:
+                    logger.error(f"发送新进度消息也失败: {send_error}")
         
         # 避免发送过快
         await asyncio.sleep(0.1)
@@ -2481,6 +2525,15 @@ async def execute_broadcast_send(query, context):
         await progress_message.edit_text(final_text, parse_mode='HTML')
     except Exception as e:
         logger.error(f"更新最终结果失败: {e}")
+        # 如果编辑失败，发送新消息
+        try:
+            await context.bot.send_message(
+                chat_id=user_id,
+                text=final_text,
+                parse_mode='HTML'
+            )
+        except Exception as send_error:
+            logger.error(f"发送最终结果消息也失败: {send_error}")
     
     # 清除广播状态
     if user_id in broadcast_state:
