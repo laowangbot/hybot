@@ -174,7 +174,17 @@ def can_manage_images(user_id):
 
 def can_broadcast(user_id):
     """检查用户是否有权限发送广播"""
-    return is_super_admin(user_id) or user_id in CUSTOMER_SERVICE_USERS
+    is_admin = is_super_admin(user_id)
+    is_cs = user_id in CUSTOMER_SERVICE_USERS
+    has_permission = is_admin or is_cs
+    
+    # 添加详细日志
+    logger.info(f"🔐 广播权限检查: 用户 {user_id}")
+    logger.info(f"  - 超级管理员: {is_admin} (SUPER_ADMIN_ID={SUPER_ADMIN_ID})")
+    logger.info(f"  - 客服人员: {is_cs} (CUSTOMER_SERVICE_USERS={CUSTOMER_SERVICE_USERS})")
+    logger.info(f"  - 最终结果: {has_permission}")
+    
+    return has_permission
 
 # 图片配置文件路径
 IMAGE_CONFIG_FILE = 'bot_images_config.json'
@@ -835,6 +845,50 @@ async def get_all_user_ids():
     else:
         logger.warning("⚠️ Firebase不可用,无法恢复用户列表")
         return []
+
+async def force_recover_all_users():
+    """强制恢复所有历史用户数据"""
+    global all_users
+    
+    if not firebase_initialized or not firebase_db:
+        logger.warning("⚠️ Firebase不可用,无法恢复历史用户")
+        return
+    
+    try:
+        logger.info("🔄 强制恢复所有历史用户数据...")
+        
+        # 清空现有数据
+        all_users.clear()
+        
+        # 从Firebase获取所有日期的访客数据
+        all_firebase_users = set()
+        
+        # 获取最近365天的数据（更长时间范围）
+        for i in range(365):
+            date = (get_beijing_time() - timedelta(days=i)).strftime('%Y-%m-%d')
+            daily_ref = firebase_db.collection('bots').document(BOT_ID).collection('stats').document('daily_stats').collection('dates').document(date)
+            daily_doc = daily_ref.get()
+            
+            if daily_doc.exists:
+                daily_data = daily_doc.to_dict()
+                visitors_list = daily_data.get('visitors', [])
+                all_firebase_users.update(visitors_list)
+                logger.info(f"📅 恢复日期 {date}: {len(visitors_list)} 个用户")
+        
+        # 更新本地用户列表
+        all_users.update(all_firebase_users)
+        
+        logger.info(f"✅ 强制恢复完成: 总共 {len(all_users)} 个历史用户")
+        
+        # 同时更新visitor_stats中的unique_visitors
+        global visitor_stats
+        visitor_stats['unique_visitors'].update(all_firebase_users)
+        visitor_stats['total_visitors'] = len(visitor_stats['unique_visitors'])
+        
+        logger.info(f"✅ 更新访客统计: 总访客 {visitor_stats['total_visitors']} 人")
+        
+    except Exception as e:
+        logger.error(f"❌ 强制恢复历史用户失败: {e}")
 
 def get_visitor_stats():
     """获取访客统计信息（增强版）"""
@@ -1510,10 +1564,21 @@ async def broadcast_command_handler(update: Update, context: ContextTypes.DEFAUL
     user = update.effective_user
     user_id = user.id
     
+    logger.info(f"📢 用户 {user_id} ({user.username or user.first_name}) 请求使用广播功能")
+    
     # 检查权限
     if not can_broadcast(user_id):
-        await update.message.reply_text("❌ 抱歉，只有管理员和客服人员可以使用广播功能。")
+        error_msg = (
+            f"❌ 抱歉，只有管理员和客服人员可以使用广播功能。\n\n"
+            f"您的用户ID: {user_id}\n"
+            f"超级管理员ID: {SUPER_ADMIN_ID}\n"
+            f"客服用户列表: {CUSTOMER_SERVICE_USERS}"
+        )
+        await update.message.reply_text(error_msg)
+        logger.warning(f"⚠️ 用户 {user_id} 无权限使用广播功能")
         return
+    
+    logger.info(f"✅ 用户 {user_id} 权限验证通过，初始化广播状态")
     
     # 初始化广播状态
     broadcast_state[user_id] = {
@@ -1526,13 +1591,14 @@ async def broadcast_command_handler(update: Update, context: ContextTypes.DEFAUL
     # 显示广播控制面板
     await show_broadcast_panel(user_id, context, update.message)
     
-    logger.info(f"用户 {user_id} 开始使用广播功能")
+    logger.info(f"✅ 用户 {user_id} 成功进入广播功能")
 
 async def show_broadcast_panel(user_id, context, message=None, edit=True):
     """显示广播控制面板"""
     try:
         # 获取用户数量
-        user_count = len(await get_all_user_ids())
+        all_user_ids = await get_all_user_ids()
+        user_count = len(all_user_ids)
         
         # 获取当前广播状态
         current_state = broadcast_state.get(user_id, {})
@@ -2060,6 +2126,56 @@ async def admin_cs_config_command(update: Update, context: ContextTypes.DEFAULT_
     
     await update.message.reply_text(config_info)
 
+async def recover_users_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """强制恢复历史用户数据命令"""
+    update_activity()
+    
+    user = update.effective_user
+    user_id = user.id
+    
+    # 检查是否是管理员
+    if not is_super_admin(user_id):
+        await update.message.reply_text("❌ 抱歉，只有超级管理员可以使用此命令。")
+        return
+    
+    # 显示开始恢复消息
+    start_message = await update.message.reply_text("🔄 开始强制恢复所有历史用户数据...\n\n这可能需要几分钟时间，请耐心等待。")
+    
+    try:
+        # 执行恢复
+        await force_recover_all_users()
+        
+        # 获取恢复后的用户数量
+        all_user_ids = await get_all_user_ids()
+        user_count = len(all_user_ids)
+        
+        # 更新消息显示结果
+        result_text = (
+            f"✅ <b>历史用户数据恢复完成</b>\n\n"
+            f"📊 <b>恢复结果:</b>\n"
+            f"• 总用户数: {user_count} 人\n"
+            f"• 恢复时间: {get_beijing_time().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+            f"💡 <b>说明:</b>\n"
+            f"• 已恢复最近365天的所有用户数据\n"
+            f"• 现在广播功能可以发送给所有历史用户\n"
+            f"• 数据已同步到本地内存和Firebase"
+        )
+        
+        try:
+            await start_message.edit_text(result_text, parse_mode='HTML')
+        except Exception as edit_error:
+            await update.message.reply_text(result_text, parse_mode='HTML')
+            
+        logger.info(f"超级管理员 {user_id} 执行了历史用户数据恢复，恢复 {user_count} 个用户")
+        
+    except Exception as e:
+        error_text = f"❌ 恢复历史用户数据失败: {str(e)}"
+        try:
+            await start_message.edit_text(error_text)
+        except Exception:
+            await update.message.reply_text(error_text)
+        logger.error(f"恢复历史用户数据失败: {e}")
+
 # 13. 定义「切换语言」按钮的处理器
 async def change_language(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """当用户点击「切换语言」按钮时调用"""
@@ -2304,10 +2420,13 @@ async def show_broadcast_preview(query, context):
     preview_header = "👁️ <b>广播预览</b>\n\n"
     full_preview_text = preview_header + preview_text
     
+    preview_message = None
+    notification_message = None
+    
     try:
         if photo_file_id:
             # 发送带图片的预览
-            await context.bot.send_photo(
+            preview_message = await context.bot.send_photo(
                 chat_id=user_id,
                 photo=photo_file_id,
                 caption=full_preview_text,
@@ -2316,7 +2435,7 @@ async def show_broadcast_preview(query, context):
             )
         else:
             # 发送纯文本预览
-            await context.bot.send_message(
+            preview_message = await context.bot.send_message(
                 chat_id=user_id,
                 text=full_preview_text,
                 parse_mode='HTML',
@@ -2327,23 +2446,49 @@ async def show_broadcast_preview(query, context):
         keyboard = [[InlineKeyboardButton("🔙 返回控制面板", callback_data="bc_back")]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         try:
-            await query.edit_message_text(
+            notification_message = await query.edit_message_text(
                 "✅ 预览已发送\n\n"
-                "这就是用户将收到的广播内容。",
+                "这就是用户将收到的广播内容。\n"
+                "预览消息将在3秒后自动撤回。",
                 reply_markup=reply_markup
             )
         except Exception as edit_error:
             # 如果编辑失败，发送新消息
             logger.warning(f"编辑预览消息失败，发送新消息: {edit_error}")
-            await context.bot.send_message(
+            notification_message = await context.bot.send_message(
                 chat_id=user_id,
-                text="✅ 预览已发送\n\n这就是用户将收到的广播内容。",
+                text="✅ 预览已发送\n\n这就是用户将收到的广播内容。\n预览消息将在3秒后自动撤回。",
                 reply_markup=reply_markup
             )
         
+        # 3秒后自动撤回预览消息
+        await asyncio.sleep(3)
+        
+        # 删除预览消息
+        if preview_message:
+            try:
+                await preview_message.delete()
+                logger.info(f"预览消息已自动撤回: 用户 {user_id}")
+            except Exception as del_error:
+                logger.warning(f"删除预览消息失败: {del_error}")
+        
+        # 更新通知消息
+        if notification_message:
+            try:
+                await notification_message.edit_text(
+                    "✅ 预览已撤回\n\n"
+                    "如需再次预览，请点击预览按钮。",
+                    reply_markup=reply_markup
+                )
+            except Exception as update_error:
+                logger.warning(f"更新通知消息失败: {update_error}")
+        
     except Exception as e:
         logger.error(f"发送广播预览失败: {e}")
-        await query.edit_message_text(f"❌ 预览发送失败: {str(e)}")
+        try:
+            await query.edit_message_text(f"❌ 预览发送失败: {str(e)}")
+        except Exception:
+            await context.bot.send_message(chat_id=user_id, text=f"❌ 预览发送失败: {str(e)}")
 
 async def show_send_confirmation(query, context):
     """显示发送确认"""
@@ -2356,7 +2501,8 @@ async def show_send_confirmation(query, context):
         return
     
     # 获取用户数量
-    user_count = len(await get_all_user_ids())
+    all_user_ids = await get_all_user_ids()
+    user_count = len(all_user_ids)
     
     # 构建确认消息
     confirmation_text = (
@@ -2713,6 +2859,7 @@ async def main():
     application.add_handler(CommandHandler("set_welcome_image", set_welcome_image_handler))  # 设置欢迎图片
     application.add_handler(CommandHandler("set_register_image", set_register_image_handler))  # 设置注册图片
     application.add_handler(CommandHandler("endcs", end_customer_service_session))  # 结束客服会话
+    application.add_handler(CommandHandler("recover_users", recover_users_command))  # 恢复历史用户数据
     
     # 广播功能命令（隐藏）
     application.add_handler(CommandHandler("broadcast", broadcast_command_handler))  # 广播命令
