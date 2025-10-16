@@ -118,7 +118,7 @@ CUSTOMER_SERVICE_USERS = CURRENT_BOT_CONFIG['CUSTOMER_SERVICE_USERS']
 
 # 超级管理员配置（可以管理所有机器人）
 SUPER_ADMIN_USERNAME = "wzm1984"  # 超级管理员用户名（不带@）
-SUPER_ADMIN_ID = None  # 会在运行时自动识别并设置
+SUPER_ADMIN_ID = 994678447  # 超级管理员用户ID（直接设置）
 
 # 用户名到用户ID的映射
 USERNAME_TO_ID = {
