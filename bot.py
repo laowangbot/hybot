@@ -134,6 +134,12 @@ message_mapping = {}
 # 图片设置状态管理
 user_image_setting_state = {}  # {user_id: {'type': 'WELCOME_IMAGE'/'REGISTER_IMAGE', 'bot_id': 'bot1/bot2/bot3'}}
 
+# 广播状态管理
+broadcast_state = {}  # {user_id: {'step': 'idle'/'editing_text'/'editing_photo'/'editing_buttons', 'text': None, 'photo_file_id': None, 'buttons': []}}
+
+# 所有用户列表管理
+all_users = set()  # 存储所有与机器人交互过的用户ID
+
 # 会话超时设置
 SESSION_TIMEOUT_SECONDS = 30  # 30秒无活动自动结束会话
 session_timeout_task = None  # 会话超时检查任务
@@ -164,6 +170,10 @@ def is_super_admin(user_id):
 
 def can_manage_images(user_id):
     """检查用户是否有权限管理图片"""
+    return is_super_admin(user_id) or user_id in CUSTOMER_SERVICE_USERS
+
+def can_broadcast(user_id):
+    """检查用户是否有权限发送广播"""
     return is_super_admin(user_id) or user_id in CUSTOMER_SERVICE_USERS
 
 # 图片配置文件路径
@@ -695,7 +705,7 @@ def update_activity():
 
 def update_visitor_stats(user_id):
     """更新访客统计（增强日志版）"""
-    global visitor_stats
+    global visitor_stats, all_users
     
     today = get_beijing_time().strftime('%Y-%m-%d')
     
@@ -710,6 +720,9 @@ def update_visitor_stats(user_id):
         visitor_stats['total_visitors'] += 1
         logger.info(f"✅ 新增唯一访客: {user_id}, 总访客数: {visitor_stats['total_visitors']}")
         print(f"✅ 新增唯一访客: {user_id}, 总访客数: {visitor_stats['total_visitors']}")
+    
+    # 添加到所有用户列表
+    all_users.add(user_id)
     
     # 更新每日统计
     if today not in visitor_stats['daily_stats']:
@@ -781,6 +794,47 @@ async def _async_update_firebase(user_id, today):
         error_msg = f"❌ Firebase异步更新失败: 用户 {user_id}, 日期 {today}, 错误: {e}"
         logger.error(error_msg)
         print(error_msg)
+
+async def get_all_user_ids():
+    """获取所有用户ID列表"""
+    global all_users
+    
+    # 优先从内存获取
+    if all_users:
+        logger.info(f"📋 从内存获取用户列表: {len(all_users)} 个用户")
+        return list(all_users)
+    
+    # 如果内存为空,从Firebase恢复
+    if firebase_initialized and firebase_db:
+        try:
+            logger.info("🔄 内存用户列表为空,从Firebase恢复...")
+            
+            # 从Firebase获取所有日期的访客数据
+            all_firebase_users = set()
+            
+            # 获取最近90天的数据
+            for i in range(90):
+                date = (get_beijing_time() - timedelta(days=i)).strftime('%Y-%m-%d')
+                daily_ref = firebase_db.collection('bots').document(BOT_ID).collection('stats').document('daily_stats').collection('dates').document(date)
+                daily_doc = daily_ref.get()
+                
+                if daily_doc.exists:
+                    daily_data = daily_doc.to_dict()
+                    visitors_list = daily_data.get('visitors', [])
+                    all_firebase_users.update(visitors_list)
+            
+            # 更新本地用户列表
+            all_users.update(all_firebase_users)
+            
+            logger.info(f"✅ 从Firebase恢复用户列表: {len(all_users)} 个用户")
+            return list(all_users)
+            
+        except Exception as e:
+            logger.error(f"❌ 从Firebase恢复用户列表失败: {e}")
+            return []
+    else:
+        logger.warning("⚠️ Firebase不可用,无法恢复用户列表")
+        return []
 
 def get_visitor_stats():
     """获取访客统计信息（增强版）"""
@@ -1304,6 +1358,34 @@ async def photo_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     update_activity()
     user_id = update.effective_user.id
     
+    # 检查用户是否在广播编辑状态
+    if user_id in broadcast_state and broadcast_state[user_id]['step'] == 'editing_photo':
+        try:
+            # 获取图片 file_id（选择最大尺寸的图片）
+            photo = update.message.photo[-1]
+            file_id = photo.file_id
+            
+            # 保存图片到广播状态
+            broadcast_state[user_id]['photo_file_id'] = file_id
+            broadcast_state[user_id]['step'] = 'idle'
+            
+            await update.message.reply_text(
+                "✅ <b>广播图片设置成功！</b>\n\n"
+                "图片已保存，现在返回广播控制面板。",
+                parse_mode='HTML'
+            )
+            
+            # 返回广播控制面板
+            await show_broadcast_panel(user_id, context)
+            
+            logger.info(f"用户 {user_id} 设置了广播图片")
+            return
+            
+        except Exception as e:
+            await update.message.reply_text(f"❌ 处理广播图片时出错: {str(e)}")
+            logger.error(f"处理广播图片错误: {e}")
+            return
+    
     # 检查用户是否正在设置图片
     if user_id not in user_image_setting_state:
         return  # 如果不是在设置图片状态，忽略
@@ -1420,6 +1502,84 @@ async def performance_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
     except Exception as e:
         await update.message.reply_text(f"❌ 性能监控失败: {str(e)}")
         logger.error(f"性能监控错误: {e}")
+
+async def broadcast_command_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """广播命令处理器"""
+    update_activity()
+    
+    user = update.effective_user
+    user_id = user.id
+    
+    # 检查权限
+    if not can_broadcast(user_id):
+        await update.message.reply_text("❌ 抱歉，只有管理员和客服人员可以使用广播功能。")
+        return
+    
+    # 初始化广播状态
+    broadcast_state[user_id] = {
+        'step': 'idle',
+        'text': None,
+        'photo_file_id': None,
+        'buttons': []
+    }
+    
+    # 显示广播控制面板
+    await show_broadcast_panel(user_id, context, update.message)
+    
+    logger.info(f"用户 {user_id} 开始使用广播功能")
+
+async def show_broadcast_panel(user_id, context, message=None, edit=True):
+    """显示广播控制面板"""
+    try:
+        # 获取用户数量
+        user_count = len(await get_all_user_ids())
+        
+        # 获取当前广播状态
+        current_state = broadcast_state.get(user_id, {})
+        text_status = "✅已设置" if current_state.get('text') else "未设置"
+        photo_status = "✅已设置" if current_state.get('photo_file_id') else "未设置"
+        buttons_status = "✅已设置" if current_state.get('buttons') else "未设置"
+        
+        # 构建面板文本
+        panel_text = (
+            "📢 <b>广播控制面板</b>\n\n"
+            f"<b>当前状态:</b>\n"
+            f"📝 文本: {text_status}\n"
+            f"🖼️ 图片: {photo_status}\n"
+            f"🔘 按钮: {buttons_status}\n\n"
+            f"📊 <b>目标用户: {user_count} 人</b>"
+        )
+        
+        # 构建按钮
+        keyboard = [
+            [InlineKeyboardButton("📝 设置文本内容", callback_data="bc_set_text")],
+            [
+                InlineKeyboardButton(f"🖼️ 设置图片 [{photo_status}]", callback_data="bc_set_photo"),
+                InlineKeyboardButton(f"🔘 设置按钮 [{buttons_status}]", callback_data="bc_set_buttons")
+            ],
+            [InlineKeyboardButton("👁️ 预览广播", callback_data="bc_preview")],
+            [
+                InlineKeyboardButton("📤 发送广播", callback_data="bc_send_confirm") if current_state.get('text') else InlineKeyboardButton("📤 发送广播 [需先设置文本]", callback_data="bc_disabled"),
+                InlineKeyboardButton("❌ 取消", callback_data="bc_cancel")
+            ]
+        ]
+        
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        if edit and message:
+            await message.edit_text(panel_text, parse_mode='HTML', reply_markup=reply_markup)
+        else:
+            await context.bot.send_message(
+                chat_id=user_id,
+                text=panel_text,
+                parse_mode='HTML',
+                reply_markup=reply_markup
+            )
+            
+    except Exception as e:
+        logger.error(f"显示广播控制面板失败: {e}")
+        if message:
+            await message.reply_text(f"❌ 显示控制面板失败: {str(e)}")
 
 async def admin_stats_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """处理管理员统计请求，显示访客统计信息（隐藏命令）"""
@@ -1749,6 +1909,7 @@ async def handle_customer_service_message(update: Update, context: ContextTypes.
     
     message = update.message
     cs_id = message.from_user.id
+    text = message.text
     
     # 检查是否是回复消息
     if message.reply_to_message:
@@ -1779,6 +1940,19 @@ async def handle_customer_service_message(update: Update, context: ContextTypes.
         else:
             await message.reply_text("❌ 无法找到对应的用户消息")
     else:
+        # 检查是否是菜单功能按钮
+        user_id = cs_id
+        lang_code = user_data.get(user_id, 'zh-CN')
+        texts = LANGUAGES[lang_code]
+        
+        # 如果是菜单按钮，让handle_text_messages处理
+        if text in [texts['menu_self_register'], texts['menu_mainland_user'], texts['menu_overseas_user'], 
+                   texts['menu_recharge'], texts['menu_withdraw'], texts['menu_customer_service'], 
+                   texts['menu_bidirectional_contact'], texts['menu_change_lang']]:
+            # 让handle_text_messages处理菜单按钮
+            await handle_text_messages(update, context)
+            return
+        
         # 如果不是回复消息，直接转发给所有活跃会话的用户
         if user_customer_service_sessions:
             broadcast_text = f"📢 客服广播消息\n客服: {CS_HANDLE}\n时间: {get_beijing_time().strftime('%Y-%m-%d %H:%M:%S')}\n\n{message.text}"
@@ -1991,6 +2165,329 @@ async def handle_language_callback(update: Update, context: ContextTypes.DEFAULT
         reply_markup=get_main_menu_keyboard(user_id)
     )
 
+async def handle_broadcast_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """处理广播相关回调"""
+    update_activity()
+    
+    query = update.callback_query
+    await query.answer()
+    
+    user_id = query.from_user.id
+    
+    # 检查权限
+    if not can_broadcast(user_id):
+        await query.edit_message_text("❌ 抱歉，只有管理员和客服人员可以使用广播功能。")
+        return
+    
+    # 检查用户是否有广播状态
+    if user_id not in broadcast_state:
+        await query.edit_message_text("❌ 广播会话已过期，请重新使用 /broadcast 命令。")
+        return
+    
+    callback_data = query.data
+    
+    if callback_data == "bc_set_text":
+        # 设置文本
+        broadcast_state[user_id]['step'] = 'editing_text'
+        await query.edit_message_text(
+            "📝 <b>设置广播文本</b>\n\n"
+            "请发送您要广播的文本内容。\n"
+            "支持HTML格式，可以使用以下标签：\n"
+            "• <b>粗体</b>\n"
+            "• <i>斜体</i>\n"
+            "• <a href='链接'>链接文字</a>\n\n"
+            "发送文本后，系统会自动设置并返回控制面板。",
+            parse_mode='HTML'
+        )
+        
+    elif callback_data == "bc_set_photo":
+        # 设置图片
+        broadcast_state[user_id]['step'] = 'editing_photo'
+        await query.edit_message_text(
+            "🖼️ <b>设置广播图片</b>\n\n"
+            "请发送一张图片，这将作为广播的图片内容。\n"
+            "支持 JPG、PNG 等常见格式。\n\n"
+            "💡 提示：\n"
+            "• 如果不想要图片，可以稍后在控制面板中删除\n"
+            "• 发送图片后，系统会自动设置并返回控制面板",
+            parse_mode='HTML'
+        )
+        
+    elif callback_data == "bc_set_buttons":
+        # 设置按钮
+        broadcast_state[user_id]['step'] = 'editing_buttons'
+        await query.edit_message_text(
+            "🔘 <b>设置广播按钮</b>\n\n"
+            "请发送按钮配置，格式如下：\n"
+            "按钮文字1|链接1\n"
+            "按钮文字2|链接2\n\n"
+            "示例：\n"
+            "注册账号|https://example.com\n"
+            "联系我们|https://t.me/example\n\n"
+            "💡 提示：\n"
+            "• 每行一个按钮\n"
+            "• 按钮文字和链接用 | 分隔\n"
+            "• 如果不想要按钮，发送 '无' 或 'none'",
+            parse_mode='HTML'
+        )
+        
+    elif callback_data == "bc_preview":
+        # 预览广播
+        await show_broadcast_preview(query, context)
+        
+    elif callback_data == "bc_send_confirm":
+        # 发送确认
+        await show_send_confirmation(query, context)
+        
+    elif callback_data == "bc_send_execute":
+        # 执行发送
+        await execute_broadcast_send(query, context)
+        
+    elif callback_data == "bc_cancel":
+        # 取消广播
+        if user_id in broadcast_state:
+            del broadcast_state[user_id]
+        await query.edit_message_text(
+            "❌ 广播已取消\n\n"
+            "如需重新开始，请使用 /broadcast 命令。"
+        )
+        
+    elif callback_data == "bc_disabled":
+        # 禁用按钮点击
+        await query.answer("请先设置文本内容", show_alert=True)
+        
+    elif callback_data == "bc_back":
+        # 返回控制面板
+        await show_broadcast_panel(user_id, context, query.message)
+
+async def show_broadcast_preview(query, context):
+    """显示广播预览"""
+    user_id = query.from_user.id
+    current_state = broadcast_state.get(user_id, {})
+    
+    # 检查是否有文本内容
+    if not current_state.get('text'):
+        await query.edit_message_text("❌ 请先设置文本内容才能预览。")
+        return
+    
+    # 构建预览消息
+    preview_text = current_state['text']
+    photo_file_id = current_state.get('photo_file_id')
+    buttons = current_state.get('buttons', [])
+    
+    # 构建按钮
+    reply_markup = None
+    if buttons:
+        keyboard = []
+        for button in buttons:
+            keyboard.append([InlineKeyboardButton(button['text'], url=button['url'])])
+        reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    # 添加预览标识
+    preview_header = "👁️ <b>广播预览</b>\n\n"
+    full_preview_text = preview_header + preview_text
+    
+    try:
+        if photo_file_id:
+            # 发送带图片的预览
+            await context.bot.send_photo(
+                chat_id=user_id,
+                photo=photo_file_id,
+                caption=full_preview_text,
+                parse_mode='HTML',
+                reply_markup=reply_markup
+            )
+        else:
+            # 发送纯文本预览
+            await context.bot.send_message(
+                chat_id=user_id,
+                text=full_preview_text,
+                parse_mode='HTML',
+                reply_markup=reply_markup
+            )
+        
+        # 显示返回按钮
+        keyboard = [[InlineKeyboardButton("🔙 返回控制面板", callback_data="bc_back")]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.edit_message_text(
+            "✅ 预览已发送\n\n"
+            "这就是用户将收到的广播内容。",
+            reply_markup=reply_markup
+        )
+        
+    except Exception as e:
+        logger.error(f"发送广播预览失败: {e}")
+        await query.edit_message_text(f"❌ 预览发送失败: {str(e)}")
+
+async def show_send_confirmation(query, context):
+    """显示发送确认"""
+    user_id = query.from_user.id
+    current_state = broadcast_state.get(user_id, {})
+    
+    # 检查是否有文本内容
+    if not current_state.get('text'):
+        await query.edit_message_text("❌ 请先设置文本内容才能发送。")
+        return
+    
+    # 获取用户数量
+    user_count = len(await get_all_user_ids())
+    
+    # 构建确认消息
+    confirmation_text = (
+        f"📤 <b>确认发送广播</b>\n\n"
+        f"📊 <b>目标用户:</b> {user_count} 人\n\n"
+        f"📝 <b>内容预览:</b>\n"
+        f"文本: {'✅' if current_state.get('text') else '❌'}\n"
+        f"图片: {'✅' if current_state.get('photo_file_id') else '❌'}\n"
+        f"按钮: {'✅' if current_state.get('buttons') else '❌'}\n\n"
+        f"⚠️ <b>注意:</b> 广播发送后无法撤回，请确认无误后再发送。"
+    )
+    
+    # 构建确认按钮
+    keyboard = [
+        [
+            InlineKeyboardButton("✅ 确认发送", callback_data="bc_send_execute"),
+            InlineKeyboardButton("❌ 取消", callback_data="bc_cancel")
+        ],
+        [InlineKeyboardButton("🔙 返回控制面板", callback_data="bc_back")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await query.edit_message_text(
+        confirmation_text,
+        parse_mode='HTML',
+        reply_markup=reply_markup
+    )
+
+async def execute_broadcast_send(query, context):
+    """执行广播发送"""
+    user_id = query.from_user.id
+    current_state = broadcast_state.get(user_id, {})
+    
+    # 获取所有用户列表
+    all_user_ids = await get_all_user_ids()
+    total_users = len(all_user_ids)
+    
+    if total_users == 0:
+        await query.edit_message_text("❌ 没有找到可发送的用户。")
+        return
+    
+    # 构建广播消息内容
+    broadcast_text = current_state['text']
+    photo_file_id = current_state.get('photo_file_id')
+    buttons = current_state.get('buttons', [])
+    
+    # 构建按钮
+    reply_markup = None
+    if buttons:
+        keyboard = []
+        for button in buttons:
+            keyboard.append([InlineKeyboardButton(button['text'], url=button['url'])])
+        reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    # 显示开始发送消息
+    start_message = f"📤 开始发送广播...\n\n📊 目标用户: {total_users} 人"
+    progress_message = await query.edit_message_text(start_message)
+    
+    # 发送统计
+    success_count = 0
+    failed_count = 0
+    failed_users = []
+    
+    # 每5秒更新一次进度
+    last_update_time = get_beijing_time()
+    update_interval = 5  # 5秒
+    
+    for i, target_user_id in enumerate(all_user_ids):
+        try:
+            if photo_file_id:
+                # 发送带图片的广播
+                await context.bot.send_photo(
+                    chat_id=target_user_id,
+                    photo=photo_file_id,
+                    caption=broadcast_text,
+                    parse_mode='HTML',
+                    reply_markup=reply_markup
+                )
+            else:
+                # 发送纯文本广播
+                await context.bot.send_message(
+                    chat_id=target_user_id,
+                    text=broadcast_text,
+                    parse_mode='HTML',
+                    reply_markup=reply_markup
+                )
+            success_count += 1
+            
+        except Exception as e:
+            failed_count += 1
+            failed_users.append(target_user_id)
+            logger.error(f"发送广播到用户 {target_user_id} 失败: {e}")
+        
+        # 每5秒或发送完成时更新进度
+        current_time = get_beijing_time()
+        if (current_time - last_update_time).total_seconds() >= update_interval or i == total_users - 1:
+            progress = i + 1
+            percentage = (progress / total_users) * 100
+            
+            # 计算预计剩余时间
+            if progress > 0:
+                elapsed_time = (current_time - last_update_time).total_seconds()
+                avg_time_per_user = elapsed_time / progress
+                remaining_users = total_users - progress
+                estimated_remaining = remaining_users * avg_time_per_user
+                remaining_minutes = int(estimated_remaining / 60)
+                remaining_seconds = int(estimated_remaining % 60)
+                time_estimate = f"约{remaining_minutes}分{remaining_seconds}秒" if remaining_minutes > 0 else f"约{remaining_seconds}秒"
+            else:
+                time_estimate = "计算中..."
+            
+            progress_text = (
+                f"📤 广播发送中...\n\n"
+                f"📊 进度: {progress}/{total_users} ({percentage:.1f}%)\n"
+                f"✅ 成功: {success_count}\n"
+                f"❌ 失败: {failed_count}\n\n"
+                f"⏰ 预计剩余时间: {time_estimate}"
+            )
+            
+            try:
+                await progress_message.edit_text(progress_text)
+                last_update_time = current_time
+            except Exception as e:
+                logger.error(f"更新进度消息失败: {e}")
+        
+        # 避免发送过快
+        await asyncio.sleep(0.1)
+    
+    # 发送完成，显示最终结果
+    final_text = (
+        f"✅ <b>广播发送完成</b>\n\n"
+        f"📊 <b>发送结果:</b>\n"
+        f"• 总用户: {total_users} 人\n"
+        f"• 成功: {success_count} 人\n"
+        f"• 失败: {failed_count} 人\n\n"
+        f"⏰ 完成时间: {get_beijing_time().strftime('%Y-%m-%d %H:%M:%S')}"
+    )
+    
+    if failed_users:
+        final_text += f"\n\n❌ <b>失败用户ID:</b>\n"
+        # 只显示前10个失败用户ID
+        display_failed = failed_users[:10]
+        final_text += "\n".join([f"• {uid}" for uid in display_failed])
+        if len(failed_users) > 10:
+            final_text += f"\n• ... 还有 {len(failed_users) - 10} 个用户"
+    
+    try:
+        await progress_message.edit_text(final_text, parse_mode='HTML')
+    except Exception as e:
+        logger.error(f"更新最终结果失败: {e}")
+    
+    # 清除广播状态
+    if user_id in broadcast_state:
+        del broadcast_state[user_id]
+    
+    logger.info(f"广播发送完成: 用户 {user_id}, 成功 {success_count}, 失败 {failed_count}")
+
 # 18. 新增一个通用的文本消息处理器来处理所有主菜单按钮
 async def handle_text_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """一个通用的消息处理器，根据当前语言动态匹配按钮文本"""
@@ -1999,6 +2496,68 @@ async def handle_text_messages(update: Update, context: ContextTypes.DEFAULT_TYP
     message = update.message
     user_id = message.from_user.id
     text = message.text
+    
+    # 检查用户是否在广播编辑状态
+    if user_id in broadcast_state:
+        current_state = broadcast_state[user_id]
+        
+        if current_state['step'] == 'editing_text':
+            # 处理广播文本设置
+            broadcast_state[user_id]['text'] = text
+            broadcast_state[user_id]['step'] = 'idle'
+            
+            await message.reply_text(
+                "✅ <b>广播文本设置成功！</b>\n\n"
+                "文本已保存，现在返回广播控制面板。",
+                parse_mode='HTML'
+            )
+            
+            # 返回广播控制面板
+            await show_broadcast_panel(user_id, context)
+            return
+            
+        elif current_state['step'] == 'editing_buttons':
+            # 处理广播按钮设置
+            if text.lower() in ['无', 'none', '取消', 'cancel']:
+                broadcast_state[user_id]['buttons'] = []
+            else:
+                # 解析按钮配置
+                buttons = []
+                lines = text.strip().split('\n')
+                for line in lines:
+                    line = line.strip()
+                    if '|' in line:
+                        parts = line.split('|', 1)
+                        if len(parts) == 2:
+                            button_text = parts[0].strip()
+                            button_url = parts[1].strip()
+                            if button_text and button_url:
+                                buttons.append({
+                                    'text': button_text,
+                                    'url': button_url
+                                })
+                
+                broadcast_state[user_id]['buttons'] = buttons
+            
+            broadcast_state[user_id]['step'] = 'idle'
+            
+            button_count = len(broadcast_state[user_id]['buttons'])
+            if button_count > 0:
+                await message.reply_text(
+                    f"✅ <b>广播按钮设置成功！</b>\n\n"
+                    f"已设置 {button_count} 个按钮，现在返回广播控制面板。",
+                    parse_mode='HTML'
+                )
+            else:
+                await message.reply_text(
+                    "✅ <b>广播按钮已清除</b>\n\n"
+                    "现在返回广播控制面板。",
+                    parse_mode='HTML'
+                )
+            
+            # 返回广播控制面板
+            await show_broadcast_panel(user_id, context)
+            return
     
     # 检查是否是客服用户
     if user_id in CUSTOMER_SERVICE_USERS:
@@ -2094,6 +2653,9 @@ async def main():
     application.add_handler(CommandHandler("set_register_image", set_register_image_handler))  # 设置注册图片
     application.add_handler(CommandHandler("endcs", end_customer_service_session))  # 结束客服会话
     
+    # 广播功能命令（隐藏）
+    application.add_handler(CommandHandler("broadcast", broadcast_command_handler))  # 广播命令
+    
     # 注册图片消息处理器
     application.add_handler(MessageHandler(filters.PHOTO, photo_handler))
     
@@ -2103,6 +2665,7 @@ async def main():
     # 注册 CallbackQueryHandler
     application.add_handler(CallbackQueryHandler(handle_language_callback, pattern='^lang_'))
     application.add_handler(CallbackQueryHandler(handle_image_setting_callback, pattern='^set_img_'))
+    application.add_handler(CallbackQueryHandler(handle_broadcast_callback, pattern='^bc_'))
 
     # 设置 M 菜单中的命令
     await application.bot.set_my_commands([
