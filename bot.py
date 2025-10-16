@@ -2561,8 +2561,16 @@ async def handle_text_messages(update: Update, context: ContextTypes.DEFAULT_TYP
     
     # 检查是否是客服用户
     if user_id in CUSTOMER_SERVICE_USERS:
-        await handle_customer_service_message(update, context)
-        return
+        # 检查是否是菜单功能按钮
+        if text in [texts['menu_self_register'], texts['menu_mainland_user'], texts['menu_overseas_user'], 
+                   texts['menu_recharge'], texts['menu_withdraw'], texts['menu_customer_service'], 
+                   texts['menu_bidirectional_contact'], texts['menu_change_lang']]:
+            # 直接处理菜单按钮，不调用handle_customer_service_message避免递归
+            pass  # 继续执行下面的菜单处理逻辑
+        else:
+            # 非菜单消息，调用客服处理函数
+            await handle_customer_service_message(update, context)
+            return
     
     # 获取当前用户的语言代码
     lang_code = user_data.get(user_id, 'zh-CN')
