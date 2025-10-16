@@ -2497,6 +2497,10 @@ async def handle_text_messages(update: Update, context: ContextTypes.DEFAULT_TYP
     user_id = message.from_user.id
     text = message.text
     
+    # 获取当前用户的语言代码（需要在最前面获取）
+    lang_code = user_data.get(user_id, 'zh-CN')
+    texts = LANGUAGES[lang_code]
+    
     # 检查用户是否在广播编辑状态
     if user_id in broadcast_state:
         current_state = broadcast_state[user_id]
@@ -2571,10 +2575,6 @@ async def handle_text_messages(update: Update, context: ContextTypes.DEFAULT_TYP
             # 非菜单消息，调用客服处理函数
             await handle_customer_service_message(update, context)
             return
-    
-    # 获取当前用户的语言代码
-    lang_code = user_data.get(user_id, 'zh-CN')
-    texts = LANGUAGES[lang_code]
     
     # 检查是否在客服会话中
     if user_id in user_customer_service_sessions:
